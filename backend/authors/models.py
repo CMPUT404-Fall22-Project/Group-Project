@@ -26,5 +26,9 @@ class Follower(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="all_authors")
     follower = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="all_followers")
 
+    class Meta:
+        # prevent duplicate entries (still allows an entry of ('follower'),('author'))
+        unique_together = (('author', 'follower'))
+
     def __str__(self):
         return str(self.author)
