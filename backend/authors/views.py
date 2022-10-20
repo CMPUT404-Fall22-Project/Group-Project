@@ -61,7 +61,7 @@ class FollowerList(APIView):
             raise Http404
         
     def get(self, request, pk, fomat=None):
-        author = self.get_object(pk)
+        author = AuthorDetail.get_object(pk)
         followers = author.followers.all()
         serializer = AuthorSerializer(followers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -79,18 +79,18 @@ class FollowerList(APIView):
 
 
 # /authors/<pk> GET, POST
-class FollowerDetail(APIView):
+# class FollowerDetail(APIView):
 
-    def get_object(self, pk):
-        try:
-            return Author.objects.get(pk=pk)
-        except Author.DoesNotExist:
-            raise Http404
+#     def get_object(self, pk):
+#         try:
+#             return Author.objects.get(pk=pk)
+#         except Author.DoesNotExist:
+#             raise Http404
 
-    def get(self, request, pk, format=None):
-        author = self.get_object(pk)
-        serializer = AuthorSerializer(author)
-        serializer_data = serializer.data
-        serializer_data["id"] = author.get_full_path()
-        serializer_data["url"] = author.get_full_path()
-        return Response(serializer_data, status=status.HTTP_200_OK)
+#     def get(self, request, pk, format=None):
+#         author = self.get_object(pk)
+#         serializer = AuthorSerializer(author)
+#         serializer_data = serializer.data
+#         serializer_data["id"] = author.get_full_path()
+#         serializer_data["url"] = author.get_full_path()
+#         return Response(serializer_data, status=status.HTTP_200_OK)
