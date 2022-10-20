@@ -4,7 +4,7 @@ from django.http import Http404
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Author
-from .serializers import AuthorSerializer
+from .serializers import AuthorSerializer, FollowerSerializer
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 
