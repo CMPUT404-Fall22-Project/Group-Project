@@ -86,6 +86,9 @@ DATABASES = {
         'PASSWORD': 'password',
         'HOST': 'localhost',
         'PORT': 5432,
+        'TEST': {
+            'NAME': 'project_404_test',
+        }
 
     }
 
