@@ -3,42 +3,52 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Author, Follower
-from .serializers import AuthorSerializer
+from .models import Author
+from .serializers import AuthorSerializer, AuthorPostSerializer
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 
-# /authors/ GET, POST
+
 class AuthorList(APIView):
+    """/authors/ GET, POST"""
         
     def get(self, request, format=None):
+        """GET [local, remote]: retrieve all profiles on the server (paginated)
+        page: how many pages
+        size: how big is a page
+        Example query: GET ://service/authors?page=10&size=5
+        Gets the 5 authors, authors 45 to 49.
+        """
         authors = Author.objects.all()
         serializer_arr = []
         for author in authors:
             serializer = AuthorSerializer(author)
             serializer_data = serializer.data
+            # set id and url as in rubric specs
             serializer_data["id"] = author.get_full_path()
             serializer_data["url"] = author.get_full_path()
             serializer_arr.append(serializer_data)
+
         dict = {"type": "authors", "items": serializer_arr}
         return Response(dict, status=status.HTTP_200_OK)
 
     
+    # TODO: This method is not allowed in the rubric
     def post(self, request, format=None):
-        serializer = AuthorSerializer(data=request.data)
+        serializer = AuthorPostSerializer(data=request.data)
          # if valid user input
         if serializer.is_valid():
             serializer.save()
-            return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_201_CREATED)
         # else failed POST attempt
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# /authors/<id> GET, POST
 class AuthorDetail(APIView):
+    """/authors/<id> GET, POST"""
 
     def get(self, request, id, format=None):
-        
+        """GET [local, remote]: retrieve AUTHOR_ID’s profile"""
         author = get_object_or_404(Author, id=id)
         serializer = AuthorSerializer(author)
         serializer_data = serializer.data
@@ -46,8 +56,12 @@ class AuthorDetail(APIView):
         serializer_data["url"] = author.get_full_path()
         return Response(serializer_data, status=status.HTTP_200_OK)
     
+    # TODO: def post(self, request, id, format=None):
+    """POST [local]: update AUTHOR_ID’s profile"""
+    
 
 class FollowerList(APIView):
+    """/authors/<id>/followers/ GET"""
         
     def get(self, request, id, format=None):
         """Get all followers of a specified Author"""
@@ -57,24 +71,12 @@ class FollowerList(APIView):
         dict = {"type": "followers", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
 
-    
-    # def post(self, request, format=None):
 
-    #     serializer = FollowerSerializer(data=request.data)
-    #      # if valid user input
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(status=status.HTTP_200_OK)
-    #     # else failed POST attempt
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# /authors/<id> GET, POST
 class FollowerDetail(APIView):
+    """/authors/<author_id>/followers/<follower_id> GET, PUT, DELETE"""
 
     def get(self, request, author_id, follower_id, format=None):
         """Get a specific Author that is following another specific Author"""
-
         author = get_object_or_404(Author, id=author_id)
         followers = author.followers.all()
         follower = get_object_or_404(followers, id=follower_id)
