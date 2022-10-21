@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Author
-from .serializers import AuthorSerializer, AuthorPostSerializer
+from .serializers import AuthorSerializer
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 
@@ -33,13 +33,14 @@ class AuthorList(APIView):
         return Response(dict, status=status.HTTP_200_OK)
 
     
-    # TODO: This method is not allowed in the rubric
+    # TODO: This method is not specified in the rubric
     def post(self, request, format=None):
-        serializer = AuthorPostSerializer(data=request.data)
+        serializer = AuthorSerializer(data=request.data)
          # if valid user input
         if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
+            author: Author = serializer.save()
+            serializer_data = {"id":author.id}
+            return Response(serializer_data, status=status.HTTP_201_CREATED)
         # else failed POST attempt
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

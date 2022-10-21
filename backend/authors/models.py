@@ -1,17 +1,23 @@
 from django.db import models
+import string
+import random
 
+
+def generate_random_string():
+    n=32
+    # e.g. 'PV8dmraVJ5hlVlTPjAix0rmO2QmTOtJ2'
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
 
 class Author(models.Model):
-    
-    # use get_full_path to get the url and id variables
+    id = models.CharField(unique=True, primary_key=True, default=generate_random_string(), editable=False, max_length=255)
     type = models.CharField(max_length=255, default="author")
-    id = models.CharField(unique=True, primary_key=True, max_length=255) # e.g. '9de17f29c12e8f97bcbbd34cc908f1baba40658e'
     host = models.URLField(blank=False) # e.g. "http://127.0.0.1:5454/"
     displayName = models.CharField(max_length=255) # e.g. "Lara Croft"
     github = models.URLField() # e.g. "http://github.com/laracroft"
     profileImage = models.URLField() # e.g. "https://i.imgur.com/k7XVwpB.jpeg"
-    isAuthorized = models.BooleanField(default=False) # must be manually approved by admin
     followers = models.ManyToManyField('self', through="Follower", symmetrical=False)
+    isAuthorized = models.BooleanField(default=False) # must be manually approved by admin
+
 
     def __str__(self):
         return self.displayName
