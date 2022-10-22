@@ -6,9 +6,8 @@ from rest_framework.views import APIView
 from .models import Author
 from .serializers import AuthorSerializer
 
+
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
-
-
 class AuthorList(APIView):
     """/authors/ GET, POST"""
         
@@ -91,7 +90,7 @@ class FollowerDetail(APIView):
         """Add an Author as a follower of another Author"""
         author = get_object_or_404(Author, id=author_id)
         follower = get_object_or_404(Author, id=follower_id)
-        author.followers.add(follower)
+        author.add_follower(follower) # this adds the entry to the many-to-many table
         return Response(status=status.HTTP_200_OK)
     
     def delete(self, request, author_id, follower_id, format=None):
