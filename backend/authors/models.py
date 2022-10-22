@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from backend.utils.model_utils import generate_random_string
+from utils.model_utils import generate_random_string
 
 def get_scheme_and_netloc():
     """TODO: This needs to include scheme and netloc"""
