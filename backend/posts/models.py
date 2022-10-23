@@ -30,12 +30,17 @@ class Post(models.Model):
     # image/png;base64 # this is an embedded png -- images are POSTS. So you might have a user make 2 posts if a post includes an image!
     # image/jpeg;base64 # this is an embedded jpeg
     # for HTML you will want to strip tags before displaying
-    contentType = models.CharField(choices = ContentType.choices, null=False)
+    contentType = models.CharField(choices=ContentType.choices, null=False, max_length=255)
+    content = models.TextField(null=True)
     count = models.IntegerField(default=0)
     published = models.DateTimeField(default=timezone.now, blank=False)
 
+    def __str__(self):
+        return self.title
+
 
 class Category(models.Model):
+
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     category =  models.CharField(max_length=255) # TODO: Do we know what all of the potential categories are?
 
