@@ -163,7 +163,7 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         follower_obj = Follower.objects.all()[0]
         self.assertEqual(getattr(follower_obj, "author"), author1)
         self.assertEqual(getattr(follower_obj, "follower"), author2)
-        self.assertEqual(getattr(follower_obj, "isApproved"), False)
+        self.assertEqual(getattr(follower_obj, "isAccepted"), False)
 
 
     def test_set_author_as_follower_of_self(self):
