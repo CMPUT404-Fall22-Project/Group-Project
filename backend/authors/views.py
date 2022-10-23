@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from .models import Author
 from .serializers import AuthorSerializer
-
+from inboxes.views import create_new_inbox
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 class AuthorList(APIView):
@@ -38,6 +38,8 @@ class AuthorList(APIView):
          # if valid user input
         if serializer.is_valid():
             author: Author = serializer.save()
+            # create an inbox for the author after saving them
+            create_new_inbox(author.id)
             serializer_data = {"id":author.id}
             return Response(serializer_data, status=status.HTTP_201_CREATED)
         # else failed POST attempt
