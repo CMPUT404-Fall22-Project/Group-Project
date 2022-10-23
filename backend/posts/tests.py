@@ -1,10 +1,6 @@
 from django.urls import include, path, reverse
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.test import APITestCase, URLPatternsTestCase
-from .models import Post, Author
-from django.core.exceptions import ValidationError
-
 
 
 class PostTests(APITestCase, URLPatternsTestCase):
@@ -16,6 +12,14 @@ class PostTests(APITestCase, URLPatternsTestCase):
         "contentType":"text/plain",
         "content":"Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge",
         "published":"2015-03-09T13:07:04Z"}
+    
+    test_post2_data = {"title": "new",
+        "source": "http://newsite.com/posts/yyyyy",
+        "origin":"http://newsite.com/posts/zzzzz",
+        "description":"new description",
+        "contentType":"text/plain",
+        "content":"new content",
+        "published":"2020-03-09T13:07:04Z"} # new published date
     
     test_categories = ["web","tutorial"]
 
@@ -149,90 +153,23 @@ class PostTests(APITestCase, URLPatternsTestCase):
         # ensure the proper 404 response code is now given
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_put_a_post(self):
+        """Ensure that a post can be edited"""
+        # post an author and get the generated id
+        author_id, post_id = self.post_a_post(self.test_post1_data)
+        # ensure we can edit the post
+        response = self.client.put(self.get_post_detail_url(author_id,post_id), self.test_post2_data, format='json') # send test_post2_data
+        #ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # get the post to ensure it was properly edited
+        response = self.client.get(self.get_post_detail_url(author_id,post_id), format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure that the 'putted' post now matches the data we used to edit with
+        post = response.data
+        for key in self.test_post2_data.keys():
+            self.assertEqual(post[key], self.test_post2_data[key])
 
 
 
 
-    
-
-    # def test_add_follower_for_author(self):
-    #     """Test that an author is being properly added as follower of another author"""
-
-    #     # ensure that Follower is initally empty
-    #     self.assertEqual(len(Follower.objects.all()),0)
-    #     # post an author and get there id
-    #     author1_id = self.post_author(self.test_author1_data)
-    #     # post another author and get there id
-    #     author2_id = self.post_author(self.test_author2_data)
-    #     # ensure author has no followers to start
-    #     author1 = get_object_or_404(Author, id=author1_id)
-    #     followers = author1.followers.all()
-    #     self.assertEqual(len(followers),0)
-
-    #     # try to PUT author2 as a follower of author1
-    #     url = self.get_follower_detail_url(author1_id, author2_id)
-    #     response = self.client.put(url, format='json')
-    #     # ensure the proper response code is given
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     # ensure author1 now has a follower
-    #     followers = author1.followers.all()
-    #     self.assertEqual(len(followers),1)
-    #     # ensure that author2 is the follower
-    #     author2 = get_object_or_404(Author, id=author2_id)
-    #     self.assertEqual(followers[0], author2)
-    #     # ensure that author1 is not a follower of author2
-    #     followers = author2.followers.all()
-    #     self.assertEqual(len(followers),0)
-
-    #     # ensure that Follower now has an entry
-    #     self.assertEqual(len(Follower.objects.all()),1)
-    #     # ensure the follower object has the right data
-    #     follower_obj = Follower.objects.all()[0]
-    #     self.assertEqual(getattr(follower_obj, "author"), author1)
-    #     self.assertEqual(getattr(follower_obj, "follower"), author2)
-    #     self.assertEqual(getattr(follower_obj, "isApproved"), False)
-
-
-    # def test_set_author_as_follower_of_self(self):
-    #     """Ensure that an author cannot follow themself"""
-    #     # post an author and get there id
-    #     author1_id = self.post_author(self.test_author1_data)
-    #     # try to set author as follower of themself
-    #     url = self.get_follower_detail_url(author1_id, author1_id)
-    #     # Should raise validation error
-    #     with self.assertRaises(ValidationError):
-    #         self.client.put(url, format='json')
-
-    # def test_delete_an_existing_follower(self):
-    #     # Start by adding one author as a follower of another
-    #     # post an author and get there id
-    #     author1_id = self.post_author(self.test_author1_data)
-    #     # post another author and get there id
-    #     author2_id = self.post_author(self.test_author2_data)
-    #     # ensure author has no followers to start
-    #     author1 = get_object_or_404(Author, id=author1_id)
-    #     followers = author1.followers.all()
-    #     self.assertEqual(len(followers),0)
-    #     # try to PUT author2 as a follower of author1
-    #     url = self.get_follower_detail_url(author1_id, author2_id)
-    #     response = self.client.put(url, format='json')
-    #     # ensure the proper response code is given
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     # ensure author1 now has a follower
-    #     followers = author1.followers.all()
-    #     self.assertEqual(len(followers),1)
-    #     # assert the Follower table now has 1 entry
-    #     self.assertEqual(len(Follower.objects.all()),1)
-    #     # ensure that author2 is the follower
-    #     author2 = get_object_or_404(Author, id=author2_id)
-    #     self.assertEqual(followers[0], author2)
-    #     # delete author2 as a follower of author1
-    #     response = self.client.delete(url, format='json')
-    #     # ensure the proper response code is given
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     # ensure that author1 once again has no followers
-    #     followers = author1.followers.all()
-    #     self.assertEqual(len(followers),0)
-    #     # ensure the Follower table is now empty
-    #     self.assertEqual(len(Follower.objects.all()),0)
-        

@@ -48,12 +48,16 @@ class PostDetail(APIView):
         serializer = PostSerializer(post)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def put(self, request, author_id, follower_id, format=None):
+    def put(self, request, author_id, post_id, format=None):
         """PUT [local] create a post where its id is POST_ID"""
-        post = get_object_or_404(Post, id=author_id)
-        follower = get_object_or_404(Post, id=follower_id)
-        post.add_follower(follower) # this adds the entry to the many-to-many table
-        return Response(status=status.HTTP_200_OK)
+        post = get_object_or_404(Post, id=post_id, author=author_id)
+        request.data["author"] = author_id
+        serializer = PostSerializer(post,data=request.data) # overwrite post with request.data
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, author_id, post_id, format=None):
         """DELETE [local] remove the post whose id is POST_ID"""
