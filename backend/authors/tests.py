@@ -208,32 +208,4 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(len(followers),0)
         # ensure the Follower table is now empty
         self.assertEqual(len(Follower.objects.all()),0)
-
-
         
-        
-
-
-
-
-
-
-    #     serialized_author = response.data["items"][0]
-    #     data = dict(serialized_author)
-
-    #     # ensure all of our keys and values in our post request are contained in the returned author data
-    #     for k in self.test_author1_data.keys():
-    #         self.assertEqual(data[k], self.test_author1_data[k])
-
-    #     # ensure that all of the proper default values are in the returned author object
-    #     self.assertEqual(data["followers"],[])
-    #     self.assertEqual(data["type"],"author")
-    #     self.assertEqual(data["isAuthorized"],False)
-    #     # ensure id and url are identical
-    #     self.assertEqual(data["id"], data["url"])
-    #     # ensure that the returned id and url follow the get_full_path() structure
-    #     correct_id = self.get_full_path_for_test(id)
-    #     self.assertEqual(correct_id, data["id"])
-    #     self.assertEqual(correct_id, data["url"])
-    #     # ensure that there are no extra keys
-    #     self.assertEqual(len(data.keys()), len(self.test_author1_data.keys()) + 5) # 5 keys: "followers", "type", "isAuthorized", "id", "url"
