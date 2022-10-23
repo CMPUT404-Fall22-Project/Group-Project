@@ -1,5 +1,5 @@
 from django.db import models
-from backend.utils.model_utils import generate_random_string
+from utils.model_utils import generate_random_string
 
 # Create your models here.
 class Post(models.Model):
