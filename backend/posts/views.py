@@ -2,9 +2,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from authors.models import Author
 from .models import Post
 from .serializers import PostSerializer
-from authors.views import validate_author
 
 
 # Be aware that Posts can be images that need base64 decoding.
@@ -17,7 +17,10 @@ class PostList(APIView):
         
     def get(self, request, id, format=None):
         """GET [local, remote] get the recent posts from post AUTHOR_ID (paginated)"""
-        validate_author(id)
+        # ensure author exists and is authorized
+        author = get_object_or_404(Author, id=id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         posts = Post.objects.all().filter(author=id)
         serializer = PostSerializer(posts,many=True)
         dict = {"type": "posts", "items": serializer.data}
@@ -26,7 +29,11 @@ class PostList(APIView):
     
     def post(self, request, id, format=None):
         """POST [local] create a new post but generate a new id"""
-        validate_author(id)
+        # ensure author exists and is authorized
+        author = get_object_or_404(Author, id=id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
         request.data["author"] = id
         serializer = PostSerializer(data=request.data)
 
@@ -44,12 +51,21 @@ class PostDetail(APIView):
 
     def get(self, request, author_id, post_id, format=None):
         """GET [local, remote] get the public post whose id is POST_ID"""
+        # ensure author exists and is authorized
+        author = get_object_or_404(Author, id=author_id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         post = get_object_or_404(Post, id=post_id) # id is unique (don't need author_id)
         serializer = PostSerializer(post)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def put(self, request, author_id, post_id, format=None):
         """PUT [local] create a post where its id is POST_ID"""
+        # ensure author exists and is authorized
+        author = get_object_or_404(Author, id=author_id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
         post = get_object_or_404(Post, id=post_id, author=author_id)
         request.data["author"] = author_id
         serializer = PostSerializer(post,data=request.data) # overwrite post with request.data
@@ -61,6 +77,11 @@ class PostDetail(APIView):
     
     def delete(self, request, author_id, post_id, format=None):
         """DELETE [local] remove the post whose id is POST_ID"""
+        # ensure author exists and is authorized
+        author = get_object_or_404(Author, id=author_id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
         post = get_object_or_404(Post, id=post_id)
         post.delete()
         return Response(status=status.HTTP_200_OK)
