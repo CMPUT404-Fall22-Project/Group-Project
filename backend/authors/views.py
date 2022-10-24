@@ -18,7 +18,7 @@ class AuthorList(APIView):
         Example query: GET ://service/authors?page=10&size=5
         Gets the 5 authors, authors 45 to 49.
         """
-        authors = Author.objects.all()
+        authors = Author.objects.filter(isAuthorized=True) # only get authorized authors
         serializer_arr = []
         for author in authors:
             serializer = AuthorSerializer(author)
@@ -38,8 +38,7 @@ class AuthorList(APIView):
          # if valid user input
         if serializer.is_valid():
             author: Author = serializer.save()
-            # create an inbox for the author after saving them
-            create_new_inbox(author.id)
+            create_new_inbox(author) # create an inbox for the new author
             serializer_data = {"id":author.id}
             return Response(serializer_data, status=status.HTTP_201_CREATED)
         # else failed POST attempt
@@ -51,7 +50,11 @@ class AuthorDetail(APIView):
 
     def get(self, request, id, format=None):
         """GET [local, remote]: retrieve AUTHOR_ID’s profile"""
+        
+        # ensure author exists and is authorized
         author = get_object_or_404(Author, id=id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = AuthorSerializer(author)
         serializer_data = serializer.data
         serializer_data["id"] = author.get_full_path()
@@ -68,6 +71,8 @@ class FollowerList(APIView):
     def get(self, request, id, format=None):
         """Get all followers of a specified Author"""
         author = get_object_or_404(Author, id=id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         followers = author.followers.all()
         serializer = AuthorSerializer(followers, many=True)
         dict = {"type": "followers", "items": serializer.data}
@@ -79,9 +84,15 @@ class FollowerDetail(APIView):
 
     def get(self, request, author_id, follower_id, format=None):
         """Get a specific Author that is following another specific Author"""
+        # ensure author exists
         author = get_object_or_404(Author, id=author_id)
         followers = author.followers.all()
-        follower = get_object_or_404(followers, id=follower_id)
+        # ensure follower is actually a follower of author
+        follower: Author = get_object_or_404(followers, id=follower_id)
+        # ensure both are authorized
+        for a in [author,follower]:
+            if not a.isAuthorized:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = AuthorSerializer(follower)
         serializer_data = serializer.data
         serializer_data["id"] = author.get_full_path()
@@ -90,9 +101,16 @@ class FollowerDetail(APIView):
     
     def put(self, request, author_id, follower_id, format=None):
         """Add an Author as a follower of another Author"""
+        # ensure author and follower exist and are both authorized
         author = get_object_or_404(Author, id=author_id)
         follower = get_object_or_404(Author, id=follower_id)
-        author.add_follower(follower) # this adds the entry to the many-to-many table
+        for a in [author,follower]:
+            if not a.isAuthorized:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+        # prevent author from adding self as follower
+        if author_id == follower_id:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        author.followers.add(follower)  # this adds the entry to the Follower table
         return Response(status=status.HTTP_200_OK)
     
     def delete(self, request, author_id, follower_id, format=None):
