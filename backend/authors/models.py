@@ -36,7 +36,13 @@ class Author(models.Model):
     def check_authorization(self):
         """Raises a ValidationError if author is not authorized"""
         if not self.isAuthorized:
-            raise ValidationError(f"{self} is not an authorized user")
+            raise ValidationError(f"{self} is not an authorized author")
+    
+    def authorize(self):
+        """Authorizes an author by setting isAuthorized=True and then saving to db"""
+        self.isAuthorized = True
+        self.save()
+
         
 
 class Follower(models.Model):
