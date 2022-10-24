@@ -33,11 +33,6 @@ class Author(models.Model):
         """Returns str(self.host) + "authors/" + str(self.id) """
         return str(self.host) + "authors/" + str(self.id)
     
-    def check_authorization(self):
-        """Raises a ValidationError if author is not authorized"""
-        if not self.isAuthorized:
-            raise ValidationError(f"{self} is not an authorized author")
-    
     def authorize(self):
         """Authorizes an author by setting isAuthorized=True and then saving to db"""
         self.isAuthorized = True

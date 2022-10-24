@@ -17,9 +17,8 @@ from .serializers import InboxSerializer
 # if the type is “comment” then add that comment to AUTHOR_ID’s inbox
 # DELETE [local]: clear the inbox
 
-def create_new_inbox(author_id) -> None:
+def create_new_inbox(author) -> None:
     """Creates a new inbox for an author"""
-    author = get_object_or_404(Author,id=author_id)
     inbox = Inbox(author=author)
     inbox.save()
 
