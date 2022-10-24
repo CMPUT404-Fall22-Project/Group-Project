@@ -14,6 +14,7 @@ import Typography from "@mui/material/Typography";
 import { makeStyles } from "@mui/styles";
 import { useState } from "react";
 import axios from 'axios';
+import background from "../static/back.webp";
 
 const MadeWithLove = () => (
 	<Typography variant="body2" color="textSecondary" align="center">
@@ -30,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 		height: "100vh",
 	},
 	image: {
-		backgroundImage: "url(https://source.unsplash.com/random)",
+		backgroundImage: `url(${background})`,
 		backgroundRepeat: "no-repeat",
 		backgroundSize: "cover",
 		backgroundPosition: "center",
