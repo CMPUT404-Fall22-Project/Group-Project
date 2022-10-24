@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from .models import Author
 from .serializers import AuthorSerializer
-from inboxes.views import create_new_inbox
+from inbox.views import create_new_inbox
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 class AuthorList(APIView):
