@@ -13,6 +13,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { makeStyles } from "@mui/styles";
 import { useState } from "react";
+import axios from 'axios';
 
 const MadeWithLove = () => (
 	<Typography variant="body2" color="textSecondary" align="center">
@@ -60,13 +61,15 @@ const SignInSide = () => {
 
 	const handleLogin = (e) => {
 		e.preventDefault();
-		const userLogin = { displayName, password };
+		const authorLogin = { displayName, password };
 
-		fetch("http://localhost:3000", {
-			// TODO: fix hardcoding url
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(userLogin),
+		// TODO: change endpoint for post
+		axios.post('/authors', authorLogin)
+		.then(function (response) {
+		  console.log(response);
+		})
+		.catch(function (error) {
+		  console.log(error);
 		});
 	};
 

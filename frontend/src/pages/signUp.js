@@ -11,6 +11,7 @@ import Typography from "@mui/material/Typography";
 import { makeStyles } from "@mui/styles";
 import Container from "@mui/material/Container";
 import { useState } from "react";
+import axios from 'axios';
 
 function MadeWithLove() {
 	return (
@@ -58,16 +59,18 @@ export default function SignUp() {
 
 	const handleSignUp = (e) => {
 		e.preventDefault();
-		const newUser = { displayName, githubURL, password };
+		const newAuthor = { displayName, githubURL, password };
 
-		console.log(newUser);
+		console.log(newAuthor);
 
-		fetch("http://localhost:3000", {
-			// TODO: fix hardcoding url
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(newUser),
-		});
+		// TODO: change endpoint for post
+		axios.post('/authors', newAuthor)
+		  .then(function (response) {
+			console.log(response);
+		  })
+		  .catch(function (error) {
+			console.log(error);
+		  });
 	};
 
 	return (
