@@ -39,5 +39,7 @@ urlpatterns = [
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('', include("authors.urls"), name = 'authors'),
     path('', include("posts.urls"), name = 'posts'),
+    path('', include("inbox.urls"), name = 'inbox')
+
 
 ]
