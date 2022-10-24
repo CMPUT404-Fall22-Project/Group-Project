@@ -32,6 +32,11 @@ class Author(models.Model):
     def get_full_path(self):
         """Returns str(self.host) + "authors/" + str(self.id) """
         return str(self.host) + "authors/" + str(self.id)
+    
+    def check_authorization(self):
+        """Raises a ValidationError if author is not authorized"""
+        if not self.isAuthorized:
+            raise ValidationError(f"{self} is not an authorized user")
         
 
 class Follower(models.Model):
