@@ -4,7 +4,7 @@ from utils.model_utils import generate_random_string
 from authors.models import Author
 
 
-# Create your models here.
+# TODO: add a Like model
 class Post(models.Model):
 
     class ContentType(models.TextChoices):
