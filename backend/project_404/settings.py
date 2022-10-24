@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'authors.apps.AuthorsConfig',
     'posts.apps.PostsConfig',
-    'inboxes.apps.InboxesConfig'
+    'inbox.apps.InboxConfig'
 ]
 
 MIDDLEWARE = [
