@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Post
 from .serializers import PostSerializer
+from authors.views import validate_author
 
 
 # Be aware that Posts can be images that need base64 decoding.
@@ -16,7 +17,7 @@ class PostList(APIView):
         
     def get(self, request, id, format=None):
         """GET [local, remote] get the recent posts from post AUTHOR_ID (paginated)"""
-        # author = get_object_or_404(Author, id=id) TODO: ensure author exists?
+        validate_author(id)
         posts = Post.objects.all().filter(author=id)
         serializer = PostSerializer(posts,many=True)
         dict = {"type": "posts", "items": serializer.data}
@@ -25,7 +26,7 @@ class PostList(APIView):
     
     def post(self, request, id, format=None):
         """POST [local] create a new post but generate a new id"""
-
+        validate_author(id)
         request.data["author"] = id
         serializer = PostSerializer(data=request.data)
 
