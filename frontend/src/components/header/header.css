@@ -1,0 +1,112 @@
+/* Add a black background color to the top navigation bar */
+.topnav {
+	background-color: #275d38 !important;
+	background-size: cover;
+	text-align: left;
+	z-index: 1030;
+	font-family: Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans",
+		sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.5;
+	color: #3a3a3a;
+	text-align: left;
+	box-sizing: border-box;
+	display: flex;
+	padding: 1rem 1rem 1rem 1rem;
+	flex-flow: row nowrap;
+	overflow: hidden;
+	width: 100%;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 auto;
+	position: sticky;
+	top: 0;
+}
+
+.logo {
+	margin-top: 5px;
+	background-color: Transparent;
+	background-repeat: no-repeat;
+	border: none;
+	cursor: pointer;
+	overflow: hidden;
+	outline: none;
+	height: auto;
+	width: 150px;
+	float: left;
+}
+
+.logo img {
+	padding: 0px;
+	height: 100%;
+	width: 100%;
+}
+
+/* Style the links inside the navigation bar */
+.topnav .active {
+	float: right;
+	display: block;
+	color: black;
+	text-align: center;
+	padding: 6px;
+	margin: 14px 16px;
+	text-decoration: none;
+	font-size: 17px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	box-shadow: 1px 1px 1px rgb(85, 85, 85);
+}
+
+.topnav .logout-button-container {
+	margin: 0 0 0 10px;
+	text-decoration: none !important;
+}
+
+/* Change the color of links on hover */
+/* .topnav a:hover {
+    background-color: #ddd;
+    color: black;
+} */
+
+/* Style the "active" element to highlight the current page */
+.topnav a.active {
+	background-color: #eaf6fe;
+	color: black;
+	font-weight: 100 !important;
+}
+
+.topnav .title-container {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	min-width: 350px;
+	width: 350px;
+}
+
+.topnav .title-container .title {
+	padding-left: 15px;
+	font-size: 1.25em;
+	color: white;
+}
+
+.topnav-toolbar-container {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	min-width: 350px;
+	width: 350px;
+}
+
+.topnav .search-bar {
+	float: left;
+	flex-grow: 1;
+	font-size: 17px;
+	margin: 5px 40px 5px 60px;
+	border: 0px;
+}
+
+.topnav .search-input {
+	background-color: white;
+	border-radius: 5px;
+}
