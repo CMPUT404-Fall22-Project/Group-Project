@@ -6,7 +6,8 @@ import { APPLICATION_NAME } from "../constants";
 import background from "../static/back.webp";
 import { useState } from "react";
 import cn from "classnames";
-import { ReactComponent as Hand } from "./hand.svg";
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+//import { ReactComponent as Hand } from "./hand.svg";
 //import "./styles.scss";
 
 export const LikeButton = () => {
@@ -26,7 +27,7 @@ export const LikeButton = () => {
         })}
       >
         <div className="like-button">
-            <Hand />
+            <ThumbUpIcon />
             <span>Like</span>
             <span className={cn("suffix", { liked })}>d</span>
         </div>
