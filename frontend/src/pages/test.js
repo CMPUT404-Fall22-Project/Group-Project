@@ -7,8 +7,6 @@ import background from "../static/back.webp";
 import { useState } from "react";
 import cn from "classnames";
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-//import { ReactComponent as Hand } from "./hand.svg";
-//import "./styles.scss";
 
 export const LikeButton = () => {
     const [liked, setLiked] = useState(null);
