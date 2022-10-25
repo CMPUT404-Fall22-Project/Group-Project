@@ -2,9 +2,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Inbox
+from posts.models import Post
+from posts.serializers import PostSerializer
 from authors.models import Author
-from .serializers import InboxSerializer
+
 
 # Inbox
 # The inbox is all the new posts from who you follow
@@ -17,36 +18,48 @@ from .serializers import InboxSerializer
 # if the type is “comment” then add that comment to AUTHOR_ID’s inbox
 # DELETE [local]: clear the inbox
 
-def create_new_inbox(author) -> None:
-    """Creates a new inbox for an author"""
-    inbox = Inbox(author=author)
-    inbox.save()
-
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 class InboxList(APIView):
-    """Creation URL ://service/authors/{AUTHOR_ID}/posts/"""
+    """ URL: ://service/authors/{AUTHOR_ID}/inbox """
         
     def get(self, request, id, format=None):
-        """# GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)"""
-        author = get_object_or_404(Author, id=id) #TODO: Authentication handling
-        author.check_authorization()
-        inbox = get_object_or_404(Inbox, author_id=author)
-        posts = inbox.get_data(Inbox.DataType.POST) # get a list of posts sent to AUTHOR_ID (rubric specifies posts?)
-        serializer = InboxSerializer(posts,many=True) #TODO: handle getting other data from inbox as well
-        dict = {"type": "inbox", "author": author.id, "items": serializer.data}
-        return Response(dict, status=status.HTTP_200_OK)
+        """GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)"""
+        # ensure author exists and is authorized
+        author = get_object_or_404(Author, id=id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        # get all of the posts for this author
+        posts = Post.objects.all().filter(author=author)
+        serializer = PostSerializer(posts,many=True)
+        dictionary = {"type":"inbox", "author":id,"items":serializer.data}
+
+        return Response(dictionary, status=status.HTTP_200_OK)
+
+        # q = self.request.GET.get('q', '')
+        # if q:
+        #     data_type = Inbox.DataType.get_enum(q)
+        #     queryset = queryset.filter(state__key=data_type)
+
+        # serializer = InboxSerializer(data,many=True)
+        # dict = {"type": "inbox", "author": author.id, "items": serializer.data}
+        # return Response(dict, status=status.HTTP_200_OK)
 
     
-    def post(self, request, id, format=None):
-        """# POST [local, remote]: send a post to the author"""
+    # def post(self, request, id, format=None):
+    #     """# POST [local, remote]: send a post to the author"""
+    #     print(request.data,"I am the data to be saved to the inbox")
 
-        request.data["author"] = id
-        serializer = InboxSerializer(data=request.data)
+    #     # ensure author exists and is authorized
+    #     author = get_object_or_404(Author, id=id)
+    #     if not author.isAuthorized:
+    #         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-        if serializer.is_valid():
-            post: Inbox = serializer.save()
-            serializer_data = {"id":post.id}
-            return Response(serializer_data, status=status.HTTP_201_CREATED)
+    #     serializer = InboxSerializer(data=request.data)
+
+    #     if serializer.is_valid():
+    #         post: Inbox = serializer.save()
+    #         id = {"id":post.id}
+    #         return Response(id, status=status.HTTP_201_CREATED)
         
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
