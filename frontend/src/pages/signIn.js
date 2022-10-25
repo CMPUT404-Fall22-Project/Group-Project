@@ -63,8 +63,11 @@ const SignInSide = () => {
 		const authorLogin = { displayName, password };
 
 		// TODO: change endpoint for post
-		axios.post('/authors', authorLogin)
-		.then(function (response) {
+		axios({
+			method: 'post',
+			url: '/authors',
+			data: authorLogin
+		}).then(function (response) {
 		  console.log(response);
 		})
 		.catch(function (error) {

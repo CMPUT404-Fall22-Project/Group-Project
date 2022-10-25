@@ -61,16 +61,17 @@ export default function SignUp() {
 		e.preventDefault();
 		const newAuthor = { displayName, githubURL, password };
 
-		console.log(newAuthor);
-
 		// TODO: change endpoint for post
-		axios.post('/authors', newAuthor)
-		  .then(function (response) {
+		axios({
+			method: 'post',
+			url: '/authors',
+			data: newAuthor
+		}).then(function (response) {
 			console.log(response);
-		  })
-		  .catch(function (error) {
-			console.log(error);
-		  });
+		})
+		.catch(function (error) {
+			console.log(error);	
+		});
 	};
 
 	return (
