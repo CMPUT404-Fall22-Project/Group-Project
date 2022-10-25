@@ -5,6 +5,7 @@ import React, { Component } from "react";
 import LoginComponent from "./pages/login";
 import "./App.css";
 import history from "./history";
+import NotificationBar from "./global/centralNotificationBar";
 
 class App extends Component {
 	static _ERROR_DATA = [];
@@ -27,6 +28,7 @@ class App extends Component {
 		return (
 			<div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
 				<Router history={history}>
+					<NotificationBar />
 					<Switch>
 						{this.state.hasError > 0 ? (
 							<Route render={(props) => <ApplicationError {...props} error={App._ERROR_DATA} />} />
