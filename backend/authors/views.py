@@ -5,7 +5,6 @@ from rest_framework.views import APIView
 
 from .models import Author
 from .serializers import AuthorSerializer
-from inbox.views import create_new_inbox
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 class AuthorList(APIView):
@@ -32,13 +31,11 @@ class AuthorList(APIView):
         return Response(dict, status=status.HTTP_200_OK)
 
     
-    # TODO: This method is not specified in the rubric
     def post(self, request, format=None):
         serializer = AuthorSerializer(data=request.data)
          # if valid user input
         if serializer.is_valid():
             author: Author = serializer.save()
-            create_new_inbox(author) # create an inbox for the new author
             serializer_data = {"id":author.id}
             return Response(serializer_data, status=status.HTTP_201_CREATED)
         # else failed POST attempt
