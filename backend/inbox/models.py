@@ -21,7 +21,7 @@ class Inbox(models.Model):
     CHOICES = [(POST,POST),(FOLLOW,FOLLOW),(LIKE,LIKE),(COMMENT,COMMENT)]
 
     type = models.CharField(max_length=5, default="inbox", editable=False)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE,related_name="inboxes")
     dataType = models.CharField(choices=CHOICES, max_length=7)
     data = models.JSONField() # https://www.youtube.com/watch?v=LbdUpY1I1zg&t=789s&ab_channel=PrettyPrinted
 
