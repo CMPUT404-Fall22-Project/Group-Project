@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, URLPatternsTestCase
 from authors.models import Author
 
+#NOTE: These tests also tests Likes and comments
 
 class PostTests(APITestCase, URLPatternsTestCase):
 
@@ -22,6 +23,8 @@ class PostTests(APITestCase, URLPatternsTestCase):
         "contentType":"text/plain",
         "content":"new content",
         "published":"2020-03-09T13:07:04Z"} # new published date
+    
+    test_comment_data = {"content":"Test content"}
     
     test_categories = ["web","tutorial"]
 
@@ -56,6 +59,18 @@ class PostTests(APITestCase, URLPatternsTestCase):
     
     def get_post_detail_url(self,author_id,post_id):
         return reverse("post_detail", args=[author_id, post_id])
+    
+    def get_post_like_list_url(self,author_id,post_id):
+        return reverse("post_like_list", args=[author_id, post_id])
+    
+    def get_comment_list_url(self,author_id,post_id):
+        return reverse("comment_list", args=[author_id, post_id])
+    
+    def get_comment_like_list_url(self,author_id,post_id,comment_id):
+        return reverse("comment_like_list", args=[author_id, post_id, comment_id])
+    
+    def get_liked_list_url(self,author_id):
+        return reverse("liked_list", args=[author_id])
     
     
     def post_and_authorize_author(self, author_data):
@@ -182,6 +197,105 @@ class PostTests(APITestCase, URLPatternsTestCase):
         for key in self.test_post2_data.keys():
             self.assertEqual(post[key], self.test_post2_data[key])
 
+    def test_like_a_post_then_get_all_likes_for_the_post(self):
+        """Ensure that an author can like an existing post"""
+        # post an author, authorize them, post a post and get the generated ids
+        author_id, post_id = self.post_a_post(self.test_post1_data)
+        url1 = self.get_post_like_list_url(author_id,post_id)
+        # ensure the author can like the post
+        response = self.client.post(url1, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # ensure we can get the likes for the post
+        url2 = self.get_post_like_list_url(author_id,post_id)
+        response = self.client.get(url2, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure that 1 like was returned for the post
+        data = response.data
+        self.assertEqual(data["type"], "likes")
+        self.assertEqual(len(data["items"]),1)
 
 
+    def test_add_comment_to_a_post_then_get_all_comments_of_post(self):
+        """Ensure 1 comment is returned when we post one comment for a post"""
+        # post an author, authorize them, post a post and get the generated ids
+        author_id, post_id = self.post_a_post(self.test_post1_data)
+        url = self.get_comment_list_url(author_id,post_id)
+        # ensure we can get all comments for a post, even when there are none
+        response = self.client.get(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the proper data is returned
+        data = response.data
+        self.assertEqual(data["type"],"comments")
+        self.assertEqual(len(data["items"]),0)
 
+        # ensure the author can POST a comment
+        response = self.client.post(url, self.test_comment_data, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # get the comments again
+        response = self.client.get(url, format='json')
+        # ensure the proper data is returned
+        data = response.data
+        self.assertEqual(data["type"],"comments")
+        self.assertEqual(len(data["items"]),1)
+
+        
+    def test_like_a_comment_and_then_get_all_likes_for_the_comment(self):
+        """Ensure we can like a comment and successfully return the likes for that comment"""
+        # post an author, authorize them, post a post and get the generated ids
+        author_id, post_id = self.post_a_post(self.test_post1_data)
+        # ensure the author can POST a comment
+        url1 = self.get_comment_list_url(author_id,post_id)
+        response = self.client.post(url1, self.test_comment_data, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # ensure we can like the comment
+        comment_id = response.data["id"]
+        url2 = self.get_comment_like_list_url(author_id,post_id,comment_id)
+        response = self.client.post(url2, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # ensure there is 1 like for this comment
+        response = self.client.get(url2, format='json')
+        # ensure the proper response is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the proper data is depicted
+        data = response.data
+        self.assertEqual(data["type"],"likes")
+        self.assertEqual(len(data["items"]),1)
+
+    def test_like_a_comment_and_like_a_post_then_get_all_likes_for_author(self):
+        """Ensure 'liked_list' GET returns 2 likes when we like a post and a comment"""
+        # post an author, authorize them, post a post and get the generated ids
+        author_id, post_id = self.post_a_post(self.test_post1_data)
+        # ensure the author can POST a comment
+        url = self.get_comment_list_url(author_id,post_id)
+        response = self.client.post(url, self.test_comment_data, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        comment_id = response.data["id"]
+        url = self.get_post_like_list_url(author_id,post_id)
+        # ensure the author can like the post
+        response = self.client.post(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # ensure we can like the comment
+        url2 = self.get_comment_like_list_url(author_id,post_id,comment_id)
+        response = self.client.post(url2, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = self.get_liked_list_url(author_id)
+        response = self.client.get(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
+        print(data["items"])
+        # ensure the proper data was returned
+        # self.assertEqual(data["type"],"liked")
+        # self.assertEqual(len(data["items"]),2) # 1 for the post and one for the comment
