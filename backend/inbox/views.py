@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from posts.models import Post
 from posts.serializers import PostSerializer
 from authors.models import Author
+from .models import Inbox
 
 
 # Inbox
@@ -17,6 +18,14 @@ from authors.models import Author
 # if the type is “like” then add that like to AUTHOR_ID’s inbox
 # if the type is “comment” then add that comment to AUTHOR_ID’s inbox
 # DELETE [local]: clear the inbox
+
+def create_inbox(author, data):
+    """Creates and saves a new inbox.
+    params: author - The author of the inbox
+            data - A Post, Follow, Like, or Comment
+    """
+    inbox = Inbox(author=author,data=data,dataType=data.type)
+    inbox.save()
 
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
