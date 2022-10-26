@@ -4,8 +4,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from authors.models import Author
 from .models import Post
+from inbox.models import Inbox
 from .serializers import PostSerializer
-
+from inbox.views import create_inbox
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
@@ -38,7 +39,10 @@ class PostList(APIView):
         serializer = PostSerializer(data=request.data)
 
         if serializer.is_valid():
-            post: Post = serializer.save()
+            post: Post = serializer.save()   
+            # add the post to the inbox of each of the author's followers
+            for follower in author.followers.all():
+                create_inbox(follower, post)
             serializer_data = {"id":post.id}
             return Response(serializer_data, status=status.HTTP_201_CREATED)
         
