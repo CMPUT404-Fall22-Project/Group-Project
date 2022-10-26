@@ -295,7 +295,6 @@ class PostTests(APITestCase, URLPatternsTestCase):
         # ensure the proper response code is given
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data
-        print(data["items"])
         # ensure the proper data was returned
-        # self.assertEqual(data["type"],"liked")
-        # self.assertEqual(len(data["items"]),2) # 1 for the post and one for the comment
+        self.assertEqual(data["type"],"liked")
+        self.assertEqual(len(data["items"]),2) # 1 for the post and one for the comment
