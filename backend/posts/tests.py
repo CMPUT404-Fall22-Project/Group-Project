@@ -12,7 +12,7 @@ class PostTests(APITestCase, URLPatternsTestCase):
         "origin":"http://whereitcamefrom.com/posts/zzzzz",
         "description":"This post discusses stuff -- brief",
         "contentType":"text/plain",
-        "content":"Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge",
+        "content":"abc conent 123",
         "published":"2015-03-09T13:07:04Z"}
     
     test_post2_data = {"title": "new",
