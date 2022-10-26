@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'drf_yasg',
-    'authors.apps.AuthorsConfig'
+    'authors.apps.AuthorsConfig',
+    'authentication.apps.AuthConfig'
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'project_404.middleware.auth_middleware.AuthMiddleware',
 ]
 
 ROOT_URLCONF = 'project_404.urls'
