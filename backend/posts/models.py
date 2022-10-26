@@ -4,16 +4,16 @@ from utils.model_utils import generate_random_string
 from authors.models import Author
 
 
-# TODO: add a Like model
-class Post(models.Model):
+class ContentType(models.TextChoices):
+    # for HTML you will want to strip tags before displaying
+    TEXT_MARKDOWN = "text/markdown" # common mark
+    TEXT_PLAIN = "text/plain" # UTF-8
+    APPLICATION = "application/base64"
+    PNG = "image/png;base64" # this is an embedded png -- images are POSTS. So you might have a user make 2 posts if a post includes an image!
+    JPEG = "image/jpeg;base64" # this is an embedded jpeg
 
-    class ContentType(models.TextChoices):
-        # for HTML you will want to strip tags before displaying
-        TEXT_MARKDOWN = "text/markdown" # common mark
-        TEXT_PLAIN = "text/plain" # UTF-8
-        APPLICATION = "application/base64"
-        PNG = "image/png;base64" # this is an embedded png -- images are POSTS. So you might have a user make 2 posts if a post includes an image!
-        JPEG = "image/jpeg;base64" # this is an embedded jpeg
+
+class Post(models.Model):
 
     type = models.CharField(max_length=255, default="post", editable=False)
     id = models.CharField(primary_key=True, editable=False, max_length=255, default=generate_random_string)
@@ -47,3 +47,25 @@ class Category(models.Model):
     class Meta:
         # eliminate duplicate categories for a post
         unique_together = (('post', 'category'))
+
+
+class Comment(models.Model):
+
+    type = models.CharField(max_length=7, default="comment", editable=False)
+    # the author that commented
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    # the Post that was commented on
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    contentType = models.CharField(choices=ContentType.choices, null=False, max_length=255)
+    content = models.TextField()
+    published = models.DateTimeField(default=timezone.now, blank=False)
+
+    
+
+class Like(models.Model):
+
+    type = models.CharField(max_length=4, default="like", editable=False)
+    # the author that clicked 'like'
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    # the Post that was liked
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
