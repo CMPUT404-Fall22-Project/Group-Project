@@ -19,13 +19,14 @@ from .models import Inbox
 # if the type is “comment” then add that comment to AUTHOR_ID’s inbox
 # DELETE [local]: clear the inbox
 
-def create_inbox(author, data):
-    """Creates and saves a new inbox.
-    params: author - The author of the inbox
+def add_data_to_inboxes_of_followers(author: Author, data):
+    """
+    Saves data to the inboxes of all followers of an author
+    @params: author - The Author whose followers will receive the data to their inboxes
             data - A Post, Follow, Like, or Comment
     """
-    inbox = Inbox(author=author,data=data,dataType=data.type)
-    inbox.save()
+    for author in author.followers.all():
+        author.inboxes.create(data=data,dataType=data.type)
 
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
