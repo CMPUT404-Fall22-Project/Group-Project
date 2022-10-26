@@ -1,3 +1,4 @@
+from random import choices
 from django.db import models
 from authors.models import Author
 from enum import Enum
@@ -10,38 +11,31 @@ from django.shortcuts import get_object_or_404
 # if the type is “like” then add that like to AUTHOR_ID’s inbox
 # if the type is “comment” then add that comment to AUTHOR_ID’s inbox
 
+
 class Inbox(models.Model):
 
-    class DataType(str, Enum):
-        POST = "post"
-        FOLLOW = "follow"
-        LIKE = "like"
-        COMMENT = "comment"
+    POST = "post"
+    FOLLOW = "follow"
+    LIKE = "like"
+    COMMENT = "comment"
+    CHOICES = [(POST,POST),(FOLLOW,FOLLOW),(LIKE,LIKE),(COMMENT,COMMENT)]
 
-        def get_enum(self, datatype: str):
-            for datatype in self:
-                if (self.value == datatype.strip()):
-                    return datatype
-            else:
-                raise ValueError("Invalid datatype: " + datatype)
-
-            
-    type = models.CharField(max_length=255, default="inbox", editable=False)
+    type = models.CharField(max_length=5, default="inbox", editable=False)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    data = models.JSONField(default=dict) # https://www.youtube.com/watch?v=LbdUpY1I1zg&t=789s&ab_channel=PrettyPrinted
+    dataType = models.CharField(choices=CHOICES, max_length=7)
+    data = models.JSONField() # https://www.youtube.com/watch?v=LbdUpY1I1zg&t=789s&ab_channel=PrettyPrinted
 
     
     def __str__(self):
         """Returns the displayName of the inbox's Author"""
         return self.author.displayName
-    
-    def get_data(self, data_type: DataType = None):
+
+        
+    def set_data_and_dataType(self,data):
         """
-        Returns all of the posts from the inbox by self.DataType.data_type.
-        If data_type argument is not included, then all data is returned.
+        Sets self.dataType=data.type, self.data=data, and then saves
+        @params - data: a Post, Follow, Like, or Comment
         """
-        if data_type:
-            if not data_type in self.data.keys():
-                return
-            return self.data[data_type]
-        return self.data
+        self.dataType = data.type
+        self.data = data
+        self.save()
