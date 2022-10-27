@@ -2,10 +2,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLikeSerializer
 from posts.models import Post
 from posts.serializers import PostSerializer
 from authors.models import Author
 from .models import Inbox
+from .serializers import InboxSerializer
 
 
 # Inbox
@@ -25,11 +27,21 @@ def add_data_to_inboxes_of_author_and_followers(author: Author, data):
     @params: author - The Author whose followers will receive the data to their inboxes
             data - A Post, Follow, Like, or Comment
     """
+    if data.type == "post":
+        serializer = PostSerializer(data)
+    elif data.type == "comment":
+        serializer = CommentSerializer(data)
+    else:
+        if hasattr(data, "comment"):
+            serializer = CommentLikeSerializer(data)
+        else:
+            serializer = PostLikeSerializer(data)
+
     # add to the author's inbox
-    author.inboxes.create(data=data,datatype=data.type)
-    # add to all other author's inboxes
+    author.inboxes.create(data=serializer.data,dataType=data.type)
+    # add to inbox of all of the author's followers
     for author in author.followers.all():
-        author.inboxes.create(data=data,dataType=data.type)
+        author.inboxes.create(data=serializer.data,dataType=data.type)
 
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
@@ -42,10 +54,11 @@ class InboxList(APIView):
         author = get_object_or_404(Author, id=id)
         if not author.isAuthorized:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        # get all of the posts for this author
-        posts = Post.objects.all().filter(author=author)
-        serializer = PostSerializer(posts,many=True)
-        dictionary = {"type":"inbox", "author":id,"items":serializer.data}
+        # get all of the inbox items for this author
+        inbox = Inbox.objects.filter(author=author)
+        # print(inbox,"I am the inbox")
+        serializer = InboxSerializer(inbox,many=True)
+        dictionary = {"type":"inbox", "author":author.id,"items":serializer.data}
 
         return Response(dictionary, status=status.HTTP_200_OK)
 
