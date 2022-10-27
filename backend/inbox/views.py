@@ -8,6 +8,7 @@ from posts.serializers import PostSerializer
 from authors.models import Author
 from .models import Inbox
 from .serializers import InboxSerializer
+from authors.serializers import AuthorSerializer
 
 
 # Inbox
@@ -27,6 +28,7 @@ def add_data_to_inboxes_of_author_and_followers(author: Author, data):
     @params: author - The Author whose followers will receive the data to their inboxes
             data - A Post, Follow, Like, or Comment
     """
+    # get the correct serializer
     if data.type == "post":
         serializer = PostSerializer(data)
     elif data.type == "comment":
@@ -36,7 +38,6 @@ def add_data_to_inboxes_of_author_and_followers(author: Author, data):
             serializer = CommentLikeSerializer(data)
         else:
             serializer = PostLikeSerializer(data)
-
     # add to the author's inbox
     author.inboxes.create(data=serializer.data,dataType=data.type)
     # add to inbox of all of the author's followers
@@ -72,20 +73,28 @@ class InboxList(APIView):
         # return Response(dict, status=status.HTTP_200_OK)
 
     
-    # def post(self, request, id, format=None):
-    #     """# POST [local, remote]: send a post to the author"""
-    #     print(request.data,"I am the data to be saved to the inbox")
+    def post(self, request, id, format=None):
+        """# POST [local, remote]: send a post to the author"""
+        # NOTE: think this will currently only handle follow requests
 
-    #     # ensure author exists and is authorized
-    #     author = get_object_or_404(Author, id=id)
-    #     if not author.isAuthorized:
-    #         return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-    #     serializer = InboxSerializer(data=request.data)
-
-    #     if serializer.is_valid():
-    #         post: Inbox = serializer.save()
-    #         id = {"id":post.id}
-    #         return Response(id, status=status.HTTP_201_CREATED)
+        # ensure the author exists and is authorized
+        author = get_object_or_404(Author, id=id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # ensure the follower exists and is authorized
+        follower_id = request.data["id"] # TODO: get the pending follower
+        follower = get_object_or_404(Author, id=follower_id)
+        if not follower.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
+        author_serializer = AuthorSerializer(author)
+        follower_serializer = AuthorSerializer(follower)
+        data = {}
+        data["type"] = "Follow"
+        data["summary"] = str(follower.displayName) + " wants to follow " + author.displayName
+        data["actor"] = follower_serializer.data
+        data["object"] = author_serializer.data
+
+        inbox = author.inboxes.create(data=data,dataType=data["type"])
+        return Response({"id":inbox.id}, status=status.HTTP_201_CREATED)
