@@ -119,10 +119,32 @@ class InboxTests(APITestCase, URLPatternsTestCase):
                 self.assertEqual(inbox_items[0][key], self.test_author1_data[key])
     
 
-    # def test_send_a_post_and_get_from_inbox(self):
-    #     """Test sending a post to an author's inbox then check the inbox contents"""
-    #     # create an author and get them to post a post
-    #     author_id, post_id = self.post_a_post(self.test_post1_data)
+    def test_send_a_follow_request_and_get_from_inbox(self):
+        """Test sending a post to an author's inbox then check the inbox contents"""
+        # post an author
+        author1_id = self.post_and_authorize_an_author(self.test_author1_data)
+        # post another author
+        author2_id = self.post_and_authorize_an_author(self.test_author2_data)
+        # send a follow request from author2 to author1
+        url = self.get_inbox_list_url(author1_id)
+        response = self.client.post(url, {"id":author2_id}, format='json')
+        # ensure the proper response code is returned
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # get posts from inbox
+        response = self.client.get(self.get_inbox_list_url(author1_id), format='json')
+        # ensure the proper response code is returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the proper author id is returned
+        self.assertEqual(response.data["author"],author1_id)
+        # ensure there is 1 item in items
+        items = response.data["items"]
+        self.assertEqual(len(items),1)
+
+
+
+
+
+        # id = response.data["id"]
         # get the post from the author's inbox
         # response = self.client.get(self.get_inbox_list_url(author_id), self.test_post1_data, format="json")
         # # ensure the proper response is given

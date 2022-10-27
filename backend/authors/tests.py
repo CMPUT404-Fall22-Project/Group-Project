@@ -14,8 +14,7 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
                         "profileImage":"https://i.imgur.com/k7XVwpB.jpeg"}
     
     test_author2_data = {"displayName":"Spongebob Squarepants",
-                        "github":"http://github.com/spongebro",
-                        "profileImage":"https://i.imgur.com/k7XVwpB.jpeg"}
+                        "github":"http://github.com/spongebro"}
     
     urlpatterns = [
         path('', include('authors.urls')),
