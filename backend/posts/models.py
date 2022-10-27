@@ -27,14 +27,6 @@ class Post(models.Model):
     source = models.URLField()
     origin = models.URLField()
     description = models.CharField(max_length=255)
-    # The content type of the post
-    # assume either
-    # text/markdown -- common mark
-    # text/plain -- UTF-8
-    # application/base64
-    # image/png;base64 # this is an embedded png -- images are POSTS. So you might have a user make 2 posts if a post includes an image!
-    # image/jpeg;base64 # this is an embedded jpeg
-    # for HTML you will want to strip tags before displaying
     contentType = models.CharField(choices=ContentType.choices, null=False, max_length=255,default=ContentType.TEXT_PLAIN)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     content = models.TextField(null=True)
