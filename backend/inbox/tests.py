@@ -23,8 +23,7 @@ class InboxTests(APITestCase, URLPatternsTestCase):
         "origin":"http://whereitcamefrom.com/posts/zzzzz",
         "description":"This post discusses stuff -- brief",
         "contentType":"text/plain",
-        "content":"Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge",
-        "published":"2015-03-09T13:07:04Z"}
+        "content":"test_content"}
     
     urlpatterns = [
         path('', include('authors.urls')),
@@ -100,7 +99,7 @@ class InboxTests(APITestCase, URLPatternsTestCase):
             assert(key in list(response.data.keys()))
         self.assertEqual(response.data['type'],"inbox")
         self.assertEqual(response.data['author'],author_id)
-        self.assertEqual(response.data['items'],[])
+        self.assertEqual(len(response.data['items']),0)
 
         
     def test_post_a_post_and_get_post_from_inbox(self):
@@ -113,7 +112,6 @@ class InboxTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         inbox_items = response.data['items']
         # ensure there is one inbox_item
-        # ensure there is one post in the inbox
         self.assertEqual(len(inbox_items), 1)
         # ensure the inbox post matches the posted post
         for key in self.test_author1_data.keys():
