@@ -6,7 +6,7 @@ from authors.models import Author
 from .models import Post, Comment, PostLike, CommentLike
 from .serializers import PostSerializer, CommentSerializer, PostLikeSerializer, CommentLikeSerializer
 from authors.serializers import AuthorSerializer
-from inbox.views import add_data_to_inboxes_of_followers
+from inbox.views import add_data_to_inboxes_of_author_and_followers
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
@@ -41,7 +41,7 @@ class PostList(APIView):
         if serializer.is_valid():
             post = serializer.save() 
             # add the post to the inbox of each of the author's followers
-            add_data_to_inboxes_of_followers(author, post)
+            add_data_to_inboxes_of_author_and_followers(author, post)
             return Response({"id":post.id}, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -124,7 +124,7 @@ class CommentList(APIView):
         if not author.isAuthorized:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         # ensure the post exists
-        get_object_or_404(Post, id=post_id)
+        post = get_object_or_404(Post, id=post_id)
 
         # add ids to request.data for serializer
         request.data["author"] = author_id
@@ -133,12 +133,13 @@ class CommentList(APIView):
 
         if serializer.is_valid():
             comment = serializer.save()
-            # add the comment to the inbox of each of the author's followers
-            add_data_to_inboxes_of_followers(author, comment)
+            # add the comment to the inbox of the post author and all of their followers
+            add_data_to_inboxes_of_author_and_followers(post.author, comment)
             return Response({"id":comment.id}, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
 #########
 # LIKED #  
 ######### 
@@ -189,6 +190,7 @@ class PostLikeList(APIView):
     
 
     def post(self, request, author_id, post_id, format=None):
+        "POST a like for a particular post"
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=author_id)
         if not author.isAuthorized:
@@ -196,7 +198,9 @@ class PostLikeList(APIView):
         # ensure the post and comment exist
         post = get_object_or_404(Post, id=post_id)
         # save a new like for this post
-        post.likes.create(author=post.author)
+        like = post.likes.create(author=post.author)
+        # add the like to the inbox of the post's author and all of their followers
+        add_data_to_inboxes_of_author_and_followers(post.author,like)
         return Response(status=status.HTTP_201_CREATED)
 
     
@@ -227,10 +231,10 @@ class CommentLikeList(APIView):
         if not author.isAuthorized:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         # ensure the post and comment exist
-        get_object_or_404(Post, id=post_id)
+        post = get_object_or_404(Post, id=post_id)
         comment = get_object_or_404(Comment, id=comment_id)
         # save a new like for this comment
         like = comment.likes.create(author=author)
-        # add the like to the inboxes of all followers of this author
-        add_data_to_inboxes_of_followers(author,like)
+        # add the like to the inbox of the post author and all of their followers
+        add_data_to_inboxes_of_author_and_followers(post.author,like)
         return Response({"id": like.id}, status=status.HTTP_201_CREATED)
