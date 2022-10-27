@@ -1,16 +1,10 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-import random
-import string
+from utils.model_utils import generate_random_string
 
 def get_scheme_and_netloc():
     """TODO: This needs to include scheme and netloc"""
     return 'http://127.0.0.1:8000/'
-
-def generate_random_string():
-    # e.g. 'PV8dmraVJ5hlVlTPjAix0rmO2QmTOtJ2'
-    n=32
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
 
 
 class Author(models.Model):
@@ -38,6 +32,12 @@ class Author(models.Model):
     def get_full_path(self):
         """Returns str(self.host) + "authors/" + str(self.id) """
         return str(self.host) + "authors/" + str(self.id)
+    
+    def authorize(self):
+        """Authorizes an author by setting isAuthorized=True and then saving to db"""
+        self.isAuthorized = True
+        self.save()
+
         
 
 class Follower(models.Model):

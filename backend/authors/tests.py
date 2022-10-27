@@ -39,15 +39,14 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         return str("http://127.0.0.1:8000/") + "authors/" + str(id)
     
 
-    def post_author(self, author_data):
+    def post_and_authorize_author(self, author_data):
         """POST author will be tested, but this method prevents redundant code."""
         # post the author
         response = self.client.post(self.get_author_list_url(), author_data, format='json')
-        # ensure the proper response code is returned
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        # ensure the id for the posted author was returned
-        assert("id" in response.data.keys())
-        return response.data["id"]
+        id = response.data["id"]
+        author = get_object_or_404(Author,id=id)
+        author.authorize()
+        return id
 
 
 
@@ -62,7 +61,7 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(type(response.data["items"]), list)
         self.assertEqual(len(response.data["items"]), 0)
 
-        
+    
     def test_post_new_author(self):
         """Ensure an author object is properly added to the db"""
         # post the author
@@ -73,28 +72,39 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         assert("id" in response.data.keys())
         # ensure id is correct type
         self.assertEqual(type(response.data["id"]), str)
+
+    def test_post_new_author_and_get_all_authors_without_authorizing(self):
+        """Ensure a posted author isn't returned after getting all authors"""
+        # post the author (but don't authorize them)
+        response = self.client.post(self.get_author_list_url(), self.test_author1_data, format='json')
         # get all authors from db
         response = self.client.get(self.get_author_list_url(), format='json')
         # ensure the proper response code is given
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # ensure there is now one author in the db
+        # ensure no authors were returned
+        self.assertEqual(len(response.data["items"]), 0)
+
+    def test_post_new_author_and_get_all_authors_after_authorizing(self):
+        """Ensure a posted and authorized author is returned after getting all authors"""
+        # post and authorize an author and get there id
+        id = self.post_and_authorize_author(self.test_author1_data)
+        # get all authors from db
+        response = self.client.get(self.get_author_list_url(), format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure 1 author was returned
         self.assertEqual(len(response.data["items"]), 1)
 
   
-    def test_get_posted_author_by_id(self):
-        # post the author
-        response = self.client.post(self.get_author_list_url(), self.test_author1_data, format='json')
-        # ensure the proper response code is returned
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        # ensure the id for the posted author was returned
-        assert("id" in response.data.keys())
-        id = response.data["id"]
+    def test_get_posted_and_authorized_author_by_id(self):
+        """Test getting an authorized author by id"""
+        # post and authorize an author and get there id
+        id = self.post_and_authorize_author(self.test_author1_data)
         url = self.get_author_detail_url(id)
         # try to get the author with specified id
         response = self.client.get(url, format='json')
         # ensure the proper response code is given
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.data
         # ensure the data properly corresponds with self.test_author1_data
         for k in self.test_author1_data.keys():
             self.assertEqual(self.test_author1_data[k], response.data[k])
@@ -103,20 +113,30 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(correct_id, response.data["id"])
         # ensure url is same as id
         self.assertEqual(response.data["url"], response.data["id"])
-
-        # assert the object with id==id now exists
-        assert((type(get_object_or_404(Author, id=id)) == Author))
-        # get the existing object
-        author = get_object_or_404(Author, id=id)
-        # ensure the attributes match those of self.test_author1_data
+        # ensure the author attributes match those of self.test_author1_data
+        author = get_object_or_404(Author,id=id)
         for k in self.test_author1_data.keys():
             self.assertEqual(self.test_author1_data[k], getattr(author,k))
+
+    def test_get_uauthorized_author_by_id(self):
+        """Test getting an unauthorized author by id"""
+        # post the author (but don't authorize them)
+        response = self.client.post(self.get_author_list_url(), self.test_author1_data, format='json')
+        id = response.data["id"]
+        url = self.get_author_detail_url(id)
+        # try to get the author with specified id
+        response = self.client.get(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
     def test_get_followers_for_author_with_no_followers(self):
         """Ensure {"type": "followers", "items": []} is returned for author with no followers."""
         # post an author and get there id
-        author_id = self.post_author(self.test_author1_data)
+        author_id = self.post_and_authorize_author(self.test_author1_data)
+        # authorize the author
+        author = get_object_or_404(Author, id=author_id)
+        author.authorize()
         # get url to enable to get all of this authors followers
         url = self.get_follower_list_url(author_id)
         response = self.client.get(url, format='json')
@@ -128,22 +148,72 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         # assert followers size is 0
         self.assertEqual(len(response.data["items"]), 0)
 
-    def test_add_follower_for_author(self):
-        """Test that an author is being properly added as follower of another author"""
+        
+    def test_get_followers_for_unauthorized_author(self):
+        """Test getting followers for an unauthorized author"""
+        # post the author (but don't authorize them)
+        response = self.client.post(self.get_author_list_url(), self.test_author1_data, format='json')
+        author=get_object_or_404(Author,id=response.data["id"])
+        # get url to enable to get all of this authors followers
+        url = self.get_follower_list_url(response.data["id"])
+        response = self.client.get(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-        # ensure that Follower is initally empty
-        self.assertEqual(len(Follower.objects.all()),0)
-        # post an author and get there id
-        author1_id = self.post_author(self.test_author1_data)
+
+
+
+        
+    def test_add_follower_for_author(self):
+        """
+        Test that an author is being properly added as follower of another author
+        Tested on all four authorization scenarios
+        (i.e. both unauthorized, follower unauthorized and author authorized,
+        follower authorized and author unauthorized, and both authorized)
+        """
+        # post the author (but don't authorize them)
+        response1 = self.client.post(self.get_author_list_url(), self.test_author1_data, format='json')
+        id1 = response1.data["id"]
         # post another author and get there id
-        author2_id = self.post_author(self.test_author2_data)
+        response2 = self.client.post(self.get_author_list_url(), self.test_author1_data, format='json')
+        id2 = response2.data["id"]
+
         # ensure author has no followers to start
-        author1 = get_object_or_404(Author, id=author1_id)
+        author1 = get_object_or_404(Author, id=id1)
+        author2 = get_object_or_404(Author, id=id2)
         followers = author1.followers.all()
         self.assertEqual(len(followers),0)
 
-        # try to PUT author2 as a follower of author1
-        url = self.get_follower_detail_url(author1_id, author2_id)
+        # try to PUT author2 as a follower of author1 (author1=unauthorized, author2=unauthorized)
+        url = self.get_follower_detail_url(id1, id2)
+        response = self.client.put(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # try to PUT author2 as a follower of author1 (author1=authorized, author2=unauthorized)
+        author1.isAuthorized=True
+        author1.save()
+        url = self.get_follower_detail_url(id1, id2)
+        response = self.client.put(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # try to PUT author2 as a follower of author1 (author1=unauthorized, author2=authorized)
+        author1.isAuthorized=False
+        author1.save()
+        author2.isAuthorized=True
+        author2.save()
+        url = self.get_follower_detail_url(id1, id2)
+        response = self.client.put(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+         # try to PUT author2 as a follower of author1 (author1=authorized, author2=authorized)
+        author1.isAuthorized=True
+        author1.save()
+        author2.isAuthorized=True
+        author2.save()
+        url = self.get_follower_detail_url(id1, id2)
         response = self.client.put(url, format='json')
         # ensure the proper response code is given
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -151,7 +221,7 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         followers = author1.followers.all()
         self.assertEqual(len(followers),1)
         # ensure that author2 is the follower
-        author2 = get_object_or_404(Author, id=author2_id)
+        author2 = get_object_or_404(Author, id=id2)
         self.assertEqual(followers[0], author2)
         # ensure that author1 is not a follower of author2
         followers = author2.followers.all()
@@ -163,25 +233,25 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         follower_obj = Follower.objects.all()[0]
         self.assertEqual(getattr(follower_obj, "author"), author1)
         self.assertEqual(getattr(follower_obj, "follower"), author2)
-        self.assertEqual(getattr(follower_obj, "isApproved"), False)
+        self.assertEqual(getattr(follower_obj, "isAccepted"), False)
 
 
     def test_set_author_as_follower_of_self(self):
         """Ensure that an author cannot follow themself"""
         # post an author and get there id
-        author1_id = self.post_author(self.test_author1_data)
+        author_id = self.post_and_authorize_author(self.test_author1_data)
         # try to set author as follower of themself
-        url = self.get_follower_detail_url(author1_id, author1_id)
-        # Should raise validation error
-        with self.assertRaises(ValidationError):
-            self.client.put(url, format='json')
+        url = self.get_follower_detail_url(author_id, author_id)
+        response = self.client.put(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_delete_an_existing_follower(self):
         # Start by adding one author as a follower of another
         # post an author and get there id
-        author1_id = self.post_author(self.test_author1_data)
-        # post another author and get there id
-        author2_id = self.post_author(self.test_author2_data)
+        author1_id = self.post_and_authorize_author(self.test_author1_data)
+        # post an author and get there id
+        author2_id = self.post_and_authorize_author(self.test_author1_data)
         # ensure author has no followers to start
         author1 = get_object_or_404(Author, id=author1_id)
         followers = author1.followers.all()
@@ -208,32 +278,4 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(len(followers),0)
         # ensure the Follower table is now empty
         self.assertEqual(len(Follower.objects.all()),0)
-
-
         
-        
-
-
-
-
-
-
-    #     serialized_author = response.data["items"][0]
-    #     data = dict(serialized_author)
-
-    #     # ensure all of our keys and values in our post request are contained in the returned author data
-    #     for k in self.test_author1_data.keys():
-    #         self.assertEqual(data[k], self.test_author1_data[k])
-
-    #     # ensure that all of the proper default values are in the returned author object
-    #     self.assertEqual(data["followers"],[])
-    #     self.assertEqual(data["type"],"author")
-    #     self.assertEqual(data["isAuthorized"],False)
-    #     # ensure id and url are identical
-    #     self.assertEqual(data["id"], data["url"])
-    #     # ensure that the returned id and url follow the get_full_path() structure
-    #     correct_id = self.get_full_path_for_test(id)
-    #     self.assertEqual(correct_id, data["id"])
-    #     self.assertEqual(correct_id, data["url"])
-    #     # ensure that there are no extra keys
-    #     self.assertEqual(len(data.keys()), len(self.test_author1_data.keys()) + 5) # 5 keys: "followers", "type", "isAuthorized", "id", "url"
