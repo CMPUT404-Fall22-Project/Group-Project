@@ -19,12 +19,15 @@ from .models import Inbox
 # if the type is “comment” then add that comment to AUTHOR_ID’s inbox
 # DELETE [local]: clear the inbox
 
-def add_data_to_inboxes_of_followers(author: Author, data):
+def add_data_to_inboxes_of_author_and_followers(author: Author, data):
     """
     Saves data to the inboxes of all followers of an author
     @params: author - The Author whose followers will receive the data to their inboxes
             data - A Post, Follow, Like, or Comment
     """
+    # add to the author's inbox
+    author.inboxes.create(data=data,datatype=data.type)
+    # add to all other author's inboxes
     for author in author.followers.all():
         author.inboxes.create(data=data,dataType=data.type)
 
