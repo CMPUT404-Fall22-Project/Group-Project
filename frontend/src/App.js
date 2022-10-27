@@ -7,6 +7,8 @@ import "./App.css";
 import history from "./history";
 import NotificationBar from "./global/centralNotificationBar";
 import { AppHeader } from "./components/header/header";
+import SignUpSide from "./pages/signUp";
+import SignInSide from "./pages/signIn";
 
 class App extends Component {
 	static _ERROR_DATA = [];
@@ -35,6 +37,12 @@ class App extends Component {
 						{this.state.hasError > 0 ? (
 							<Route render={(props) => <ApplicationError {...props} error={App._ERROR_DATA} />} />
 						) : null}
+						<Route exact path="/signup">
+							<SignUpSide />
+						</Route>
+						<Route exact path="/signin">
+							<SignInSide />
+						</Route>
 						<Route exact path="/" render={(props) => <LoginComponent {...props} />} />
 						<Route component={HTML404}></Route>
 					</Switch>
