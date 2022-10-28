@@ -7,6 +7,22 @@ import background from "../static/back.webp";
 import { useState } from "react";
 import cn from "classnames";
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import Box from '@mui/material/Box';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import List from "@mui/material/List";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import Avatar from "@mui/material/Avatar";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Stack from '@mui/material/Stack';
+import { styled } from "@mui/material/styles";
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+
 
 export const LikeButton = () => {
     const [liked, setLiked] = useState(null);
@@ -33,6 +49,7 @@ export const LikeButton = () => {
     );
   };
 
+
 const LoginButton = withStyles((theme) => ({
 	root: {
 		color: "#575757",
@@ -47,6 +64,90 @@ const LoginButton = withStyles((theme) => ({
 	},
 }))(Button);
 
+function generate(element: React.ReactElement) {
+    return [0, 1, 2, 3,4,5,6,7,8,9,10,11,12].map((value) =>
+      React.cloneElement(element, {
+        key: value
+      })
+    );
+  }
+  
+  const Demo = styled("div")(({ theme }) => ({
+    backgroundColor: theme.palette.background.paper
+  }));
+
+  export function TopAppBar() {
+    return (
+      <div style={{ width: "50%", height: "100%", position: "absolute" }}>
+        <Box sx={{ flexGrow: 1,maxWidth: 1000 }}>
+          <AppBar position="static">
+            <Toolbar>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+                sx={{ mr: 2 }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                Follow Requests
+              </Typography>
+            </Toolbar>
+          </AppBar>
+          <div style={{ width: "100%", height: "100%", position: "absolute", overflow: "auto" }}>
+            <InteractiveList>
+            </InteractiveList>
+          </div>
+        </Box>
+      </div>
+    );
+  }
+
+  export function InteractiveList() {
+    const [dense] = React.useState(false);
+    const username = "username"
+    const name = "Firstname Lastname";
+  
+    return (
+      <Box sx={{ flexGrow: 1}}>
+        <Grid container spacing={0}>
+        </Grid>
+        <Grid container spacing={5}>
+          <Grid item xs={12} md={0}>
+            <Demo>
+              <List dense={dense}>
+                {generate(
+                  <ListItem
+                    secondaryAction={
+                      <Stack spacing={0.5} direction="row">
+                        <Button variant="outlined">Accept</Button>
+                        <Button variant="outlined">Reject</Button>
+                      </Stack>
+                    }
+                  >
+                    
+                    <ListItemAvatar>
+                      <Avatar>
+                        <DeleteIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={username}
+                      secondary={name}
+                    />
+                  </ListItem>
+                )}
+              </List>
+            </Demo>
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  }
+  
+
 class LoginComponent extends Component {
 	constructor(props) {
 		super(props);
@@ -58,6 +159,7 @@ class LoginComponent extends Component {
 	login() {}
 
 	render() {
+
 		return (
 			<div
 				className="Fade-In"
@@ -73,23 +175,17 @@ class LoginComponent extends Component {
 				}}
 			>
 				<div style={{ height: "50%", minHeight: "1250px", position: "relative" }}>
+        <LikeButton className="like-button-wrapper">
+          Like
+          </LikeButton>
 					<div className="outer-login-box">
-						<div className="login-box">
-							<div className="login-page-container">
-								<div className="login-instructions">{APPLICATION_NAME}</div>
-
-								<div style={{ padding: "1em" }}></div>
-								<LoginButton variant="contained" onClick={this.login.bind(this, !this.props.check)}>
-									Login
-								</LoginButton>
-							</div>
-                            <LikeButton className="like-button-wrapper">
-                                Like
-                            </LikeButton>
-						</div>
+              <div classname="follower-requests">
+                <TopAppBar classname="top-app-bar">
+                </TopAppBar>
+              </div>
+            </div>
 					</div>
 				</div>
-			</div>
 		);
 	}
 }

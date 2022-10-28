@@ -49,9 +49,19 @@ h1 {
 	transition: all 0.25s ease;
 	transform: translateY(calc(35vh - 25%));
 	color: #484848;
+    text-align: center;
+}
+
+.top-app-bar {
+    width: 500px;
+    border: 1px solid red;
+    padding: 1rem 1rem;
+    margin-left: 50%;
 }
 
 .login-box {
+    display: inline-block;
+    margin-left: 50%;
 	position: relative;
 	background-color: #ffffff;
 	text-align: center;
