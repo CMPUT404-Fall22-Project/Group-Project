@@ -8,6 +8,7 @@ import { APPLICATION_NAME } from "../../constants";
 import Authentication from "../../global/authentication";
 import history from "../../history";
 import NotificationBar from "../../global/centralNotificationBar";
+import axios from "axios";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {

@@ -5,7 +5,7 @@ import PaginatedProvider, { GenericElementProvider } from "../data/paginatedProv
 import Authentication from "../global/authentication";
 import NotificationBar from "../global/centralNotificationBar";
 import NewPost, { NewPostButton } from "./posts/newPost";
-import PostViewComponent from "./posts/post";
+import PostViewComponent, { EditablePostContainer } from "./posts/post";
 
 export default class MyFeed extends Component {
 	constructor(props) {
@@ -44,7 +44,7 @@ export default class MyFeed extends Component {
 			<div>
 				<NewPostButton></NewPostButton>
 				{this.state.posts.map((x, idx) => (
-					<PostViewComponent data={x} key={"Post#" + String(idx)}></PostViewComponent>
+					<EditablePostContainer data={x} key={"Post#" + String(idx)}></EditablePostContainer>
 				))}
 			</div>
 		);

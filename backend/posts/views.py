@@ -27,6 +27,13 @@ class PostList(APIView):
         if not author.isAuthorized:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         posts = Post.objects.all().filter(author=id)
+
+        print(request.app_session)
+
+        if not request.app_session or request.app_session.author != author:
+            posts = posts.filter(unlisted=False)
+
+        posts = posts.order_by("-published")
         posts = paginate(request, posts)
         serializer = PostSerializer(posts, many=True)
 
@@ -40,10 +47,11 @@ class PostList(APIView):
 
     def fill_optional_values(self, data, authorId):
         postId = generate_random_string()
-        if not "id" in data:
-            data["id"] = postId
-        else:
+        if "id" in data:
             postId = data["id"]
+        else:
+            data["id"] = postId
+
         if not "source" in data:
             data["source"] = get_scheme_and_netloc() + "authors/" + authorId + "/posts/" + postId
         if not "origin" in data:

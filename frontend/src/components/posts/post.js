@@ -1,9 +1,15 @@
-import { Divider, Paper, Typography } from "@mui/material";
+import { Divider, IconButton, Paper, Typography } from "@mui/material";
 import React, { Component } from "react";
 import { POST_TYPE_JPG, POST_TYPE_MARKDOWN, POST_TYPE_PNG, POST_TYPE_TEXT } from "../../global/postConstants";
 import AuthorCardComponenet from "../author";
 import ReactMarkdown from "react-markdown";
 import { MD_COMPONENETS_POST } from "../../utils/reactMarkdownComponents";
+import PostEditor from "./newPost";
+import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import Authentication from "../../global/authentication";
+import ModalTemplates from "../modals/genericModalTemplates";
+import axios from "axios";
 
 export default class PostViewComponent extends Component {
 	constructor(props) {
@@ -40,6 +46,7 @@ export default class PostViewComponent extends Component {
 			<div
 				style={{
 					marginTop: "1em",
+					opacity: this.props.data.getBaseData().unlisted ? 0.5 : 1,
 				}}
 			>
 				<Paper
@@ -65,6 +72,60 @@ export default class PostViewComponent extends Component {
 					{this.renderDate(this.props.data.getBaseData().published)}
 				</Paper>
 			</div>
+		);
+	}
+}
+
+export class EditablePostContainer extends Component {
+	constructor(props) {
+		super(props);
+		this.state = { editMode: false };
+	}
+
+	isEditable() {
+		if (this.props.isEditableFunc) {
+			return this.props.isEditableFunc(this.props.data);
+		}
+		const id = Authentication.getInstance().getUser().getId();
+		const data = this.props.data.getBaseData();
+		return data.author.getId() === id;
+	}
+
+	tryDeletePost() {
+		ModalTemplates.confirm("Delete Post?", "Are you sure you want to delete this post?").then(() => {
+			axios({
+				method: "delete",
+				url: this.props.data.getBaseData().origin,
+			});
+		});
+	}
+
+	render() {
+		var comp = null;
+		if (this.state.editMode) {
+			comp = <PostEditor prefillData={this.props.data.getBaseData()} overrideName="Edit Post..."></PostEditor>;
+		} else {
+			comp = <PostViewComponent data={this.props.data}></PostViewComponent>;
+		}
+
+		if (!this.isEditable()) {
+			return comp;
+		}
+
+		return (
+			<React.Fragment>
+				{comp}
+				<IconButton
+					aria-label="Follow"
+					title="Edit above post"
+					onClick={() => this.setState({ editMode: !this.state.editMode })}
+				>
+					<ModeEditOutlineOutlinedIcon />
+				</IconButton>
+				<IconButton aria-label="Follow" title="Delete above post" onClick={this.tryDeletePost.bind(this)}>
+					<DeleteOutlineOutlinedIcon />
+				</IconButton>
+			</React.Fragment>
 		);
 	}
 }

@@ -15,6 +15,7 @@ import SignInPage from "./pages/signIn";
 import Authentication from "./global/authentication";
 import MainFeed from "./pages/feeds";
 import EditProfile from "./components/editProfile";
+import ModalSystem from "./global/modalSystem";
 
 class App extends Component {
 	static _ERROR_DATA = [];
@@ -42,6 +43,7 @@ class App extends Component {
 		return (
 			<div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
 				<Router history={history}>
+					<ModalSystem></ModalSystem>
 					<AppHeader />
 					<NotificationBar />
 					<Switch>

@@ -1,5 +1,4 @@
 import {
-	Backdrop,
 	Button,
 	Checkbox,
 	Divider,
@@ -25,21 +24,24 @@ import { MD_COMPONENETS_POST } from "../../utils/reactMarkdownComponents";
 export default class NewPost extends Component {
 	constructor(props) {
 		super(props);
+		const d = this.props.prefillData || {};
+		console.log(d);
 		this.state = {
-			type: POST_CONSTANTS.POST_TYPE_TEXT,
+			type: d.contentType || POST_CONSTANTS.POST_TYPE_TEXT,
 			preview: false,
 			imageData: null,
 			imageTypeStore: null,
 			isPosting: false,
 			post: {
-				title: "New Post",
-				description: "",
-				content: "",
-				contentType: POST_CONSTANTS.POST_TYPE_TEXT,
-				author: Authentication.getInstance().getUser().copy(),
-				categories: [],
-				visibility: POST_CONSTANTS.POST_VISIBILITY_PUBLIC,
-				unlisted: false,
+				id: d.id || undefined,
+				title: d.title || "New Post",
+				description: d.description || "",
+				content: d.content || "",
+				contentType: d.contentType || POST_CONSTANTS.POST_TYPE_TEXT,
+				categories: d.categories || [],
+				visibility: d.visibility || POST_CONSTANTS.POST_VISIBILITY_PUBLIC,
+				unlisted: d.unlisted || false,
+				author: d.author || Authentication.getInstance().getUser().copy(),
 			},
 		};
 	}
@@ -168,16 +170,23 @@ export default class NewPost extends Component {
 		});
 	}
 
+	getUrl(id) {
+		if (!id) {
+			return Authentication.getInstance().getUser().getUrl() + "/posts/";
+		}
+		return Authentication.getInstance().getUser().getUrl() + "/posts/" + id;
+	}
+
 	handleImagePost(data) {
 		this.setState({ isPosting: true });
-		const url = Authentication.getInstance().getUser().getUrl() + "/posts/";
+		const url = this.getUrl(data.id);
 		data.content = data.content.split(",")[1];
 		this.sendPostRequest(data, url).then(this.handleComplete.bind(this));
 	}
 
 	handleTextPost(data) {
 		this.setState({ isPosting: true });
-		const url = Authentication.getInstance().getUser().getUrl() + "/posts/";
+		const url = this.getUrl(data.id);
 		if (this.state.imageData) {
 			const data2 = {
 				content: this.state.imageData.split(",")[1],
@@ -241,7 +250,7 @@ export default class NewPost extends Component {
 					</ContainedBackdrop>
 
 					<Typography variant="h5">
-						<i>Create a new post...</i>
+						<i>{this.props.overrideName || "Create a new post..."}</i>
 					</Typography>
 					<Divider></Divider>
 					<div
