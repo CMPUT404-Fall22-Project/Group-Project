@@ -4,11 +4,13 @@ from utils.requests import paginate
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.http import HttpResponse
 from authors.models import Author
 from .models import ContentType, Post, Comment, PostLike, CommentLike
 from .serializers import PostSerializer, CommentSerializer, PostLikeSerializer, CommentLikeSerializer
 from authors.serializers import AuthorSerializer
 from inbox.views import add_data_to_inboxes_of_author_and_followers
+import base64
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
@@ -31,15 +33,17 @@ class PostList(APIView):
         return Response(dict, status=status.HTTP_200_OK)
 
     def fill_optional_values(self, data, authorId):
-        randId = generate_random_string()
-        if not data["id"]:
-            data["id"] = randId
-        if not data["source"]:
-            data["source"] = get_scheme_and_netloc() + authorId + "/posts/" + randId
-        if not data["origin"]:
-            data["origin"] = get_scheme_and_netloc() + authorId + "/posts/" + randId
-        if not data["comments"]:
-            data["comments"] = get_scheme_and_netloc() + authorId + "/posts/" + randId + "/comments/"
+        postId = generate_random_string()
+        if not "id" in data:
+            data["id"] = postId
+        else:
+            postId = data["id"]
+        if not "source" in data:
+            data["source"] = get_scheme_and_netloc() + "authors/" + authorId + "/posts/" + postId
+        if not "origin" in data:
+            data["origin"] = get_scheme_and_netloc() + "authors/" + authorId + "/posts/" + postId
+        if not "comments" in data:
+            data["comments"] = get_scheme_and_netloc() + "authors/" + authorId + "/posts/" + postId + "/comments/"
 
     def post(self, request, id, format=None):
         """POST [local] create a new post but generate a new id"""
@@ -54,7 +58,7 @@ class PostList(APIView):
         serializer = PostSerializer(data=d)
 
         if serializer.is_valid():
-            post = serializer.save()
+            post = serializer.save(id=d["id"])
             # add the post to the inbox of each of the author's followers
             add_data_to_inboxes_of_author_and_followers(author, post)
             return Response({"id": post.id}, status=status.HTTP_201_CREATED)
@@ -63,7 +67,7 @@ class PostList(APIView):
 
 
 class PostImage(APIView):
-    """Creation URL ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/image/"""
+    """Creation URL ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/image"""
 
     def get(self, request, author_id, post_id):
         """GET [local, remote] get the image contents of a post, or return a 404 if the post is not an image"""
@@ -71,10 +75,12 @@ class PostImage(APIView):
         author = get_object_or_404(Author, id=author_id)
         if not author.isAuthorized:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        post = get_object_or_404(Post.objects.all().filter(author=id), id=post_id)
+        post = get_object_or_404(Post.objects.all().filter(author=author_id), id=post_id)
         if not post.contentType in [ContentType.JPEG, ContentType.PNG]:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        return Response(bytes(post.content).decode('base64'), content_type=post.contentType)
+
+        return HttpResponse(base64.b64decode(post.content),
+                            content_type=post.contentType.split(";")[0])
 
 
 class PostDetail(APIView):

@@ -5,7 +5,7 @@ from .views import PostDetail, PostImage, PostList, CommentList, LikedList, Post
 urlpatterns = [
     # posts
     path("authors/<id>/posts/", PostList.as_view(), name="post_list"),
-    path("authors/<author_id>/posts/<post_id>/image/", PostImage.as_view(), name="post_list"),
+    path("authors/<author_id>/posts/<post_id>/image", PostImage.as_view(), name="post_list"),
     path("authors/<author_id>/posts/<post_id>", PostDetail.as_view(), name="post_detail"),
     # comments
     path("authors/<author_id>/posts/<post_id>/comments", CommentList.as_view(), name="comment_list"),
