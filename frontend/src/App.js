@@ -7,6 +7,7 @@ import TestPageComponent from "./pages/testPage";
 import "./App.css";
 import history from "./history";
 import FollowRequest from "./components/followRequest";
+import EditProfile from "./components/editProfile";
 
 class App extends Component {
 	static _ERROR_DATA = [];
@@ -35,6 +36,7 @@ class App extends Component {
 						) : null}
 						<Route exact path="/" render={(props) => <LoginComponent {...props} />} />
 						<Route exact path="/temp-follow-request" render={(props) => <FollowRequest {...props} />} />
+						<Route exact path="/zaza" render={(props) => <EditProfile {...props} />} />
 						<Route component={HTML404}></Route>
 					</Switch>
 				</Router>
