@@ -23,7 +23,9 @@ export default class Authentication {
 		this._userData = cookies.get(Authentication.ID_COOKIE_AUTHOR) || null;
 		if (this._userData) {
 			this._userData = Author.parseDatabase(this._userData);
+			this._isLoggedIn = this._sessionToken !== null;
 		}
+
 		this._authListeners = [];
 	}
 
@@ -84,7 +86,10 @@ export default class Authentication {
 		}
 
 		if (this._sessionExists()) {
-			return new Promise((resolve, reject) => resolve());
+			return new Promise((resolve, reject) => {
+				this._notifyAuthChangedListeners(true); // nothing changed, but notify anyway
+				resolve();
+			});
 		}
 
 		return new Promise((resolve, reject) => {
@@ -107,6 +112,7 @@ export default class Authentication {
 					this._isLoggedIn = true;
 					cookies.set(Authentication.ID_COOKIE_AUTHOR, data.author);
 					this._userData = Author.parseDatabase(data.author);
+					this._notifyAuthChangedListeners(true);
 					resolve();
 				})
 				.catch((request) => {
@@ -132,6 +138,7 @@ export default class Authentication {
 		this._userData = null;
 		cookies.remove(Authentication.ID_COOKIE_TOKEN);
 		cookies.remove(Authentication.ID_COOKIE_AUTHOR);
+		this._notifyAuthChangedListeners(false);
 	}
 
 	getSessionToken() {

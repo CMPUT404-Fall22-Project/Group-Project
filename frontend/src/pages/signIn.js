@@ -59,22 +59,8 @@ const SignInPage = () => {
 
 		Authentication.getInstance()
 			.authenticate(username, password)
-			.then(() => {
-				console.log("Logged in!");
-			})
 			.catch((request) => {
-				console.log(request);
-				if (request.response.status === 403) {
-					NotificationBar.getInstance().addNotification(
-						<div>
-							{request.response.data} However, you can still <a href="/feed">browse as a guest.</a>
-						</div>,
-						NotificationBar.NT_ERROR,
-						15_000
-					);
-				} else {
-					NotificationBar.getInstance().addNotification(request.response.data, NotificationBar.NT_ERROR, 15_000);
-				}
+				NotificationBar.getInstance().addNotification(request.response.data, NotificationBar.NT_ERROR, 15_000);
 			});
 	};
 
@@ -87,6 +73,16 @@ const SignInPage = () => {
 		}
 	};
 
+	var text = "Sign in";
+	if (window.location.pathname !== "/") {
+		text = (
+			<span>
+				Sign in to continue to
+				<br /> <i style={{ color: "#afafaf" }}>{window.location.pathname}</i>
+			</span>
+		);
+	}
+
 	return (
 		<Grid container component="main" className={classes.root}>
 			<CssBaseline />
@@ -96,8 +92,8 @@ const SignInPage = () => {
 					<Avatar className={classes.avatar}>
 						<LockOutlinedIcon />
 					</Avatar>
-					<Typography component="h1" variant="h5">
-						Sign in
+					<Typography component="h1" variant="h5" align="center" style={{ maxWidth: "100%" }}>
+						{text}
 					</Typography>
 					<form className={classes.form} noValidate onSubmit={handleLogin}>
 						<TextField

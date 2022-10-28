@@ -6,6 +6,8 @@ import "./header.css";
 import { Avatar, MenuItem, Menu } from "@mui/material";
 import { APPLICATION_NAME } from "../../constants";
 import Authentication from "../../global/authentication";
+import history from "../../history";
+import NotificationBar from "../../global/centralNotificationBar";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {
@@ -75,7 +77,15 @@ export class AppHeader extends Component {
 		this.setState({ maxHeight: height });
 	}
 
-	logout() {}
+	logout() {
+		Authentication.getInstance()
+			.logout()
+			.then(() => {
+				history.push("/");
+				NotificationBar.getInstance().addNotification("Successfully logged out", NotificationBar.NT_SUCCESS);
+				this.handleProfileClose();
+			});
+	}
 
 	render() {
 		const auth = Authentication.getInstance();
@@ -92,7 +102,7 @@ export class AppHeader extends Component {
 					{/* Return users back to home page on logo click*/}
 
 					<div className="title-container">
-						<Link to="/feed" style={{ textDecoration: "none" }}>
+						<Link to="/" style={{ textDecoration: "none" }}>
 							<span style={{ whiteSpace: "nowrap" }} className="title">
 								{APPLICATION_NAME}
 							</span>

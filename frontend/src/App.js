@@ -29,7 +29,11 @@ class App extends Component {
 		return { hasError: true };
 	}
 
-	componentDidMount() {}
+	componentDidMount() {
+		Authentication.getInstance().addAuthChangedListener(() => {
+			this.setState({});
+		});
+	}
 
 	render() {
 		// don't touch the div it stops working if you put it in the CSS file for some reason.
@@ -43,18 +47,10 @@ class App extends Component {
 						{this.state.hasError > 0 ? (
 							<Route render={(props) => <ApplicationError {...props} error={App._ERROR_DATA} />} />
 						) : null}
+						<Route exact path="/signup" render={(props) => <SignUpPage {...props} />} />
+						{!auth.isLoggedIn() ? <Route render={(props) => <SignInPage {...props} />} /> : null}
+						<Route exact path="/" render={(props) => <MainFeed {...props} />} />
 						<Route exact path="/amrit" render={(props) => <Test {...props} />} />
-						{!auth.isLoggedIn() ? (
-							<Route exact path="/" render={(props) => <SignInPage {...props} />} />
-						) : (
-							<Route exact path="/" render={(props) => <MainFeed {...props} />} />
-						)}
-						<Route exact path="/signup">
-							<SignUpPage />
-						</Route>
-						<Route exact path="/signin">
-							<SignInPage />
-						</Route>
 						<Route exact path="/temp-follow-request" render={(props) => <FollowRequest {...props} />} />
 
 						<Route component={HTML404}></Route>

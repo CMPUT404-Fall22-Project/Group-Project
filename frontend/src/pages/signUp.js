@@ -147,8 +147,8 @@ export default function SignUpPage() {
 					</Typography>
 					<Typography component="h1" variant="h6" style={{ maxWidth: "50%", textAlign: "center", color: "#919191" }}>
 						<i>
-							Before you can use your account, you will need to be authorized by an administrator. Until then, you can
-							still <a href="/feed">browse as a guest.</a>
+							Before you can use your account, you will need to be authorized by an administrator. Please be patient as
+							the manual review process may take some time.
 						</i>
 					</Typography>
 				</div>
