@@ -36,19 +36,23 @@ def authenticate_user(request):
     password = get_parameter_or_default(request, "password", None, use_post=True)
 
     if not username or not password:
-        return JsonResponse({"error": "Missing username or password"}, status=400, safe=False)
+        return HttpResponse("Missing username or password", status=400)
 
     try:
         user = User.objects.get(pk=username)
     except User.DoesNotExist:
-        return JsonResponse({"error": invalid_credentials_string}, status=401, safe=False)
+        return HttpResponse(invalid_credentials_string, status=401)
 
     salt = user.salt
 
     hashed = hash_passwd(password, salt)
 
     if hashed != user.passwordHash:
-        return JsonResponse({"error": invalid_credentials_string}, status=401, safe=False)
+        return HttpResponse(invalid_credentials_string, status=401)
+
+    # check if the user is authorized or not. if not, send back a 403 forbidden
+    if not user.author.isAuthorized:
+        return HttpResponse("Account not yet authorized by server admin.", status=403)
 
     # looks good, give them a session back
     session_token = secrets.token_urlsafe(32)

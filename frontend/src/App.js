@@ -10,8 +10,10 @@ import history from "./history";
 import FollowRequest from "./components/followRequest";
 import NotificationBar from "./global/centralNotificationBar";
 import { AppHeader } from "./components/header/header";
-import SignUpSide from "./pages/signUp";
-import SignInSide from "./pages/signIn";
+import SignUpPage from "./pages/signUp";
+import SignInPage from "./pages/signIn";
+import Authentication from "./global/authentication";
+import MainFeed from "./pages/feeds";
 
 class App extends Component {
 	static _ERROR_DATA = [];
@@ -31,6 +33,7 @@ class App extends Component {
 
 	render() {
 		// don't touch the div it stops working if you put it in the CSS file for some reason.
+		const auth = Authentication.getInstance();
 		return (
 			<div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
 				<Router history={history}>
@@ -41,14 +44,19 @@ class App extends Component {
 							<Route render={(props) => <ApplicationError {...props} error={App._ERROR_DATA} />} />
 						) : null}
 						<Route exact path="/amrit" render={(props) => <Test {...props} />} />
+						{!auth.isLoggedIn() ? (
+							<Route exact path="/" render={(props) => <SignInPage {...props} />} />
+						) : (
+							<Route exact path="/" render={(props) => <MainFeed {...props} />} />
+						)}
 						<Route exact path="/signup">
-							<SignUpSide />
+							<SignUpPage />
 						</Route>
 						<Route exact path="/signin">
-							<SignInSide />
+							<SignInPage />
 						</Route>
-						<Route exact path="/" render={(props) => <LoginComponent {...props} />} />
 						<Route exact path="/temp-follow-request" render={(props) => <FollowRequest {...props} />} />
+
 						<Route component={HTML404}></Route>
 					</Switch>
 				</Router>

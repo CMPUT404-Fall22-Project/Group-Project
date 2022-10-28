@@ -5,24 +5,14 @@ import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { makeStyles } from "@mui/styles";
 import { useState } from "react";
-import axios from 'axios';
 import background from "../static/back.webp";
-
-const MadeWithLove = () => (
-	<Typography variant="body2" color="textSecondary" align="center">
-		{"Built with love by the "}
-		<Link color="inherit" href="https://material-ui.com/">
-			Material-UI
-		</Link>
-		{" team."}
-	</Typography>
-);
+import Authentication from "../global/authentication";
+import NotificationBar from "../global/centralNotificationBar";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -53,26 +43,48 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const SignInSide = () => {
+const SignInPage = () => {
 	const classes = useStyles();
-	const [displayName, setUsername] = useState("");
+	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
+	const [error, setError] = useState("");
 
 	const handleLogin = (e) => {
 		e.preventDefault();
-		const authorLogin = { displayName, password };
 
-		// TODO: change endpoint for post
-		axios({
-			method: 'post',
-			url: '/authors',
-			data: authorLogin
-		}).then(function (response) {
-		  console.log(response);
-		})
-		.catch(function (error) {
-		  console.log(error);
-		});
+		if (!username || !password) {
+			setError(1);
+			return;
+		}
+
+		Authentication.getInstance()
+			.authenticate(username, password)
+			.then(() => {
+				console.log("Logged in!");
+			})
+			.catch((request) => {
+				console.log(request);
+				if (request.response.status === 403) {
+					NotificationBar.getInstance().addNotification(
+						<div>
+							{request.response.data} However, you can still <a href="/feed">browse as a guest.</a>
+						</div>,
+						NotificationBar.NT_ERROR,
+						15_000
+					);
+				} else {
+					NotificationBar.getInstance().addNotification(request.response.data, NotificationBar.NT_ERROR, 15_000);
+				}
+			});
+	};
+
+	const checkError = (data) => {
+		if (!error) {
+			return {};
+		}
+		if (!data) {
+			return { error: true, helperText: "This field cannot be empty" };
+		}
 	};
 
 	return (
@@ -93,11 +105,12 @@ const SignInSide = () => {
 							margin="normal"
 							required
 							fullWidth
-							id="displayName"
-							label="Display Name"
-							name="displayName"
-							autoComplete="displayName"
+							id="username"
+							label="Username"
+							name="username"
+							autoComplete="username"
 							onChange={(e) => setUsername(e.target.value)}
+							{...checkError(username)}
 							autoFocus
 						/>
 						<TextField
@@ -110,6 +123,7 @@ const SignInSide = () => {
 							type="password"
 							id="password"
 							autoComplete="current-password"
+							{...checkError(password)}
 							onChange={(e) => setPassword(e.target.value)}
 						/>
 						<Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
@@ -123,9 +137,6 @@ const SignInSide = () => {
 								</Link>
 							</Grid>
 						</Grid>
-						<Box mt={5}>
-							<MadeWithLove />
-						</Box>
 					</form>
 				</div>
 			</Grid>
@@ -133,4 +144,4 @@ const SignInSide = () => {
 	);
 };
 
-export default SignInSide;
+export default SignInPage;

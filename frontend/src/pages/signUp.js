@@ -5,25 +5,15 @@ import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import Typography from "@mui/material/Typography";
 import { makeStyles } from "@mui/styles";
 import Container from "@mui/material/Container";
 import { useState } from "react";
-import axios from 'axios';
-
-function MadeWithLove() {
-	return (
-		<Typography variant="body2" color="textSecondary" align="center">
-			{"Built with love by the "}
-			<Link color="inherit" href="https://material-ui.com/">
-				Material-UI
-			</Link>
-			{" team."}
-		</Typography>
-	);
-}
+import axios from "axios";
+import NotificationBar from "../global/centralNotificationBar";
+import preProcessAxios from "../data/serverResponse";
 
 const useStyles = makeStyles((theme) => ({
 	"@global": {
@@ -50,29 +40,121 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default function SignUp() {
+export default function SignUpPage() {
 	const classes = useStyles();
 
-	const [displayName, username] = useState("");
-	const [githubURL, url] = useState("");
-	const [password, pass] = useState("");
+	const [username, setUsername] = useState("");
+	const [displayName, setDisplayName] = useState("");
+	const [githubURL, setUrl] = useState("");
+	const [password, setPassword] = useState("");
+	const [passwordConfirm, setPasswordConfirm] = useState("");
+	const [error, setError] = useState("");
+	const [posted, setPosted] = useState("");
+	const [success, setSuccess] = useState("");
+
+	const postUser = () => {
+		const data = {
+			author_data: {
+				displayName: displayName,
+				github: githubURL,
+				profileImage:
+					"https://user-images.githubusercontent.com/71047780/198223700-cf5b87b1-6318-4419-b1cf-4ceee56281eb.png",
+			},
+			user_data: {
+				username: username,
+				password: password,
+			},
+		};
+		preProcessAxios(
+			axios({
+				method: "post",
+				url: process.env.REACT_APP_HOST + `users/signup/`,
+				data: data,
+			})
+		)
+			.then((resp) => {
+				setSuccess(1);
+			})
+			.catch((error) => {
+				setPosted(0);
+			});
+	};
 
 	const handleSignUp = (e) => {
 		e.preventDefault();
-		const newAuthor = { displayName, githubURL, password };
 
-		// TODO: change endpoint for post
+		if (!username || !displayName || !githubURL || !password || !passwordConfirm || password !== passwordConfirm) {
+			setError(1);
+			return;
+		}
+
+		if (posted) {
+			return;
+		}
+
+		setPosted(1);
+
+		// first, check if the name is taken
 		axios({
-			method: 'post',
-			url: '/authors',
-			data: newAuthor
-		}).then(function (response) {
-			console.log(response);
+			method: "get",
+			url: process.env.REACT_APP_HOST + `users/check/${username}/`,
 		})
-		.catch(function (error) {
-			console.log(error);	
-		});
+			.then((resp) => {
+				if (resp.value) {
+					NotificationBar.getInstance().addNotification(
+						`User with name ${username} already exists.`,
+						NotificationBar.NT_ERROR,
+						10_000
+					);
+					setPosted(0);
+					return;
+				} else {
+					postUser();
+				}
+			})
+			.catch((error) => {
+				NotificationBar.getInstance().addNotification(
+					"Unknown error: " + String(error),
+					NotificationBar.NT_ERROR,
+					1e10
+				);
+				setPosted(0);
+			});
 	};
+
+	const checkError = (data, isPassword) => {
+		if (!error) {
+			return {};
+		}
+		if (!data) {
+			return { error: true, helperText: "This field cannot be empty" };
+		}
+		if (isPassword) {
+			return { error: true, helperText: "Passwords do not match" };
+		}
+	};
+
+	if (success) {
+		return (
+			<Container component="main">
+				<CssBaseline />
+				<div className={classes.paper}>
+					<Avatar className={classes.avatar}>
+						<CheckCircleOutlinedIcon />
+					</Avatar>
+					<Typography component="h1" variant="h4" style={{ maxWidth: "100%", margin: "1em" }}>
+						Account sucessfully created!
+					</Typography>
+					<Typography component="h1" variant="h6" style={{ maxWidth: "50%", textAlign: "center", color: "#919191" }}>
+						<i>
+							Before you can use your account, you will need to be authorized by an administrator. Until then, you can
+							still <a href="/feed">browse as a guest.</a>
+						</i>
+					</Typography>
+				</div>
+			</Container>
+		);
+	}
 
 	return (
 		<Container component="main" maxWidth="xs">
@@ -88,6 +170,20 @@ export default function SignUp() {
 					<Grid container spacing={2}>
 						<Grid item xs={12}>
 							<TextField
+								autoComplete="username"
+								name="username"
+								variant="outlined"
+								required
+								fullWidth
+								id="username"
+								label="Username"
+								onChange={(e) => setUsername(e.target.value)}
+								autoFocus
+								{...checkError(username, false)}
+							/>
+						</Grid>
+						<Grid item xs={12}>
+							<TextField
 								autoComplete="displayName"
 								name="displayName"
 								variant="outlined"
@@ -95,8 +191,8 @@ export default function SignUp() {
 								fullWidth
 								id="displayName"
 								label="Display Name"
-								onChange={(e) => username(e.target.value)}
-								autoFocus
+								onChange={(e) => setDisplayName(e.target.value)}
+								{...checkError(displayName, false)}
 							/>
 						</Grid>
 						<Grid item xs={12}>
@@ -107,7 +203,8 @@ export default function SignUp() {
 								id="githubURL"
 								label="Github URL"
 								name="githubURL"
-								onChange={(e) => url(e.target.value)}
+								onChange={(e) => setUrl(e.target.value)}
+								{...checkError(githubURL, false)}
 							/>
 						</Grid>
 						<Grid item xs={12}>
@@ -120,7 +217,22 @@ export default function SignUp() {
 								type="password"
 								id="password"
 								autoComplete="current-password"
-								onChange={(e) => pass(e.target.value)}
+								onChange={(e) => setPassword(e.target.value)}
+								{...checkError(password, true)}
+							/>
+						</Grid>
+						<Grid item xs={12}>
+							<TextField
+								variant="outlined"
+								required
+								fullWidth
+								name="passwordConfirm"
+								label="Confirm Password"
+								type="password"
+								id="passwordConfirm"
+								autoComplete="current-password"
+								onChange={(e) => setPasswordConfirm(e.target.value)}
+								{...checkError(passwordConfirm, true)}
 							/>
 						</Grid>
 					</Grid>
@@ -129,16 +241,13 @@ export default function SignUp() {
 					</Button>
 					<Grid container justify="flex-end">
 						<Grid item>
-							<Link href="/signin" variant="body2">
+							<Link href="/" variant="body2">
 								Already have an account? Sign in
 							</Link>
 						</Grid>
 					</Grid>
 				</form>
 			</div>
-			<Box mt={5}>
-				<MadeWithLove />
-			</Box>
 		</Container>
 	);
 }

@@ -5,6 +5,7 @@ import "./header.css";
 
 import { Avatar, MenuItem, Menu } from "@mui/material";
 import { APPLICATION_NAME } from "../../constants";
+import Authentication from "../../global/authentication";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {
@@ -15,13 +16,20 @@ export class AppHeader extends Component {
 
 		this.state = {
 			renderChild: null,
-			username: "Guest",
-			iconURL: null,
-			loggedIn: false,
 			height: DEFAULT_HEIGHT,
+			userData: Authentication.getInstance().getUserSafe(),
 		};
+		Authentication.getInstance().addAuthChangedListener((loggedIn) => {
+			this.reloadAuth();
+		});
 		/** @type {AppHeader} */
 		AppHeader._instance = this;
+	}
+
+	reloadAuth() {
+		this.setState({
+			userData: Authentication.getInstance().getUserSafe(),
+		});
 	}
 
 	static getInstance() {
@@ -70,6 +78,7 @@ export class AppHeader extends Component {
 	logout() {}
 
 	render() {
+		const auth = Authentication.getInstance();
 		return (
 			<div
 				className="topnav"
@@ -92,12 +101,14 @@ export class AppHeader extends Component {
 				</div>
 				{this.state.renderChild ? this.state.renderChild() : null}
 				<div className="topnav-toolbar-container">
-					<span style={{ whiteSpace: "nowrap", fontWeight: "600", color: "#ffffff" }}>{this.state.username}</span>
+					<span style={{ whiteSpace: "nowrap", fontWeight: "600", color: "#ffffff" }}>
+						{this.state.userData.getUsername()}
+					</span>
 					<Avatar
 						onClick={this.handleProfileClick.bind(this)}
 						style={{ marginLeft: "0.5em", cursor: "pointer" }}
-						src={this.state.iconURL}
-						alt={this.state.username}
+						src={this.state.userData.getProfileImageUrl()}
+						alt={this.state.userData.getUsername()}
 					></Avatar>
 					<Menu
 						anchorOrigin={{
@@ -113,7 +124,7 @@ export class AppHeader extends Component {
 						open={Boolean(this.state.profileMenuAnchor)}
 						onClose={this.handleProfileClose.bind(this)}
 					>
-						<MenuItem disabled={!this.state.loggedIn} variant="outlined" onClick={this.logout.bind(this)}>
+						<MenuItem disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
 							Logout
 						</MenuItem>
 					</Menu>

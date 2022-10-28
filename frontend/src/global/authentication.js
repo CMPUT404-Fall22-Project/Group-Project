@@ -74,7 +74,7 @@ export default class Authentication {
 	}
 
 	_sessionExists() {
-		return this._sessionToken !== null && !this.isSessionExpired();
+		return this._sessionToken !== null;
 	}
 
 	authenticate(username, password) {
@@ -84,29 +84,34 @@ export default class Authentication {
 		}
 
 		if (this._sessionExists()) {
-			return;
+			return new Promise((resolve, reject) => resolve());
 		}
 
 		return new Promise((resolve, reject) => {
 			axios({
 				method: "post",
 				url: process.env.REACT_APP_HOST + "sessions/new/",
+				withCredentials: true,
 				// https://stackoverflow.com/a/37707074
-				headers: {
-					Authorization: "basic " + btoa(username) + ":" + btoa(password),
+				// headers: {
+				// 	Authorization: "basic " + btoa(username) + ":" + btoa(password),
+				// }, // django is being pain right now.
+				data: {
+					username: username,
+					password: password,
 				},
-			}).then((resp) => {
-				const data = resp.data;
-				if (data.error) {
-					reject(data.error);
-					return;
-				}
-				this._sessionToken = data.token;
-				this._isLoggedIn = true;
-				cookies.set(Authentication.ID_COOKIE_AUTHOR, data.author);
-				this._userData = Author.parseDatabase(data.author);
-				resolve();
-			});
+			})
+				.then((resp) => {
+					const data = resp.data;
+					this._sessionToken = data.token;
+					this._isLoggedIn = true;
+					cookies.set(Authentication.ID_COOKIE_AUTHOR, data.author);
+					this._userData = Author.parseDatabase(data.author);
+					resolve();
+				})
+				.catch((request) => {
+					reject(request);
+				});
 		});
 	}
 
