@@ -6,6 +6,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Button from "@mui/material/Button";
+import Authentication from "../global/authentication";
 
 // Enables an Author to submit a Follow Request to another Author
 // Select component is auto-filled with the names of all authorized authors
@@ -13,12 +14,13 @@ import Button from "@mui/material/Button";
 // Clicking the "Submit Follow Request" sends a POST request to the inbox of the selected Author
 
 export default function FollowRequest() {
-	const [author, setAuthor] = useState("");
+	const [authorId, setAuthorId] = useState("");
 	const [authors, setAuthors] = useState([]);
+	const userId = Authentication.getInstance().getUser().getId();
 
 	useEffect(() => {
 		axios
-			.get(`http://127.0.0.1:8000/authors/`)
+			.get(process.env.REACT_APP_HOST + `authors/`)
 			.then((res) => {
 				console.log(res);
 				handleAuthors(res.data.items);
@@ -31,25 +33,30 @@ export default function FollowRequest() {
 		// <MenuItem value={a.id}>{a.displayName}</MenuItem>
 		const arr = [];
 		for (let a of authors) {
-			arr.push(
-				<MenuItem key={a.id} value={a.id}>
-					{a.displayName}
-				</MenuItem>
-			);
+			// prevents author from sending follow request to self
+			if (a.id !== userId) {
+				arr.push(
+					<MenuItem key={a.id} value={a.id}>
+						{a.displayName}
+					</MenuItem>
+				);
+			}
+			setAuthors(arr);
 		}
-		setAuthors(arr);
 	};
 
 	const handleSelectChange = (event) => {
-		setAuthor(event.target.value);
+		setAuthorId(event.target.value);
 	};
 
 	const handleButtonClick = (event) => {
-		// Send a follow Request to the selected author
-		const id = "WRYvjKiZj8Ar4V6REbTQRZWhwOlYuoVb";
+		// Send a follow Request to the selected authorId's inbox
 		axios
-			.post(`http://127.0.0.1:8000/authors/${id}/inbox/`, { id: "WRYvjKiZj8Ar4V6REbTQRZWhwOlYuoVb" })
-			.then((res) => console.log(res))
+			.post(`http://127.0.0.1:8000/authors/${authorId}/inbox/`, { id: userId })
+			.then((res) => {
+				console.log(res);
+				alert("Follow request sent successfully!");
+			})
 			.catch((err) => console.log(err));
 	};
 
@@ -60,7 +67,7 @@ export default function FollowRequest() {
 				<Select
 					labelId="demo-simple-select-label"
 					id="demo-simple-select"
-					value={author}
+					value={authorId}
 					label="Author"
 					onChange={handleSelectChange}
 				>
@@ -68,7 +75,7 @@ export default function FollowRequest() {
 				</Select>
 				<Button
 					variant="contained"
-					disabled={!author}
+					disabled={!authorId}
 					onClick={() => {
 						handleButtonClick();
 					}}
