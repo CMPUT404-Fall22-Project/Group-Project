@@ -26,11 +26,14 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
     def get_author_detail_url(self,id):
         return reverse("author_detail", args=[id])
     
-    def get_follower_list_url(self, author_id):
-        return reverse("follower_list", args=[author_id])
+    def get_follower_list_url(self, id):
+        return reverse("follower_list", args=[id])
     
     def get_follower_detail_url(self,author_id,follower_id):
         return reverse("follower_detail", args=[author_id,follower_id])
+    
+    def get_following_list_url(self,id):
+        return reverse("following_list", args=[id])
     
 
     def get_full_path_for_test(self, id):
@@ -279,4 +282,50 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(len(followers),0)
         # ensure the Follower table is now empty
         self.assertEqual(len(Follower.objects.all()),0)
+
+    def test_get_all_following_for_author(self):
+        """Ensure that the /authors/id/follows/ url returns correct data"""
+        # post an author and get there id
+        author_id = self.post_and_authorize_author(self.test_author1_data)
+        # get all following for this author
+        url = self.get_following_list_url(author_id)
+        response = self.client.get(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the proper data is returned
+        data = response.data
+        self.assertEqual(data["type"],"following")
+        self.assertEqual(len(data["items"]),0)
+        # post another author and get there id
+        follower_id = self.post_and_authorize_author(self.test_author2_data)
+        # again get all following for author 1
+        response = self.client.get(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the proper data is returned
+        data = response.data
+        self.assertEqual(data["type"],"following")
+        self.assertEqual(len(data["items"]),0)
+        # set author2 as a follower of author1
+        url = self.get_follower_detail_url(author_id, follower_id)
+        response = self.client.put(url, format='json')
+        # get following for follower
+        url = self.get_following_list_url(follower_id)
+        response = self.client.get(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the proper data is returned
+        data = response.data
+        self.assertEqual(data["type"],"following")
+        self.assertEqual(len(data["items"]),1)
+        # get following for the author
+        url = self.get_following_list_url(author_id)
+        response = self.client.get(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the proper data is returned
+        data = response.data
+        self.assertEqual(data["type"],"following")
+        self.assertEqual(len(data["items"]),0)
+
         
