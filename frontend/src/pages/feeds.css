@@ -1,0 +1,16 @@
+.feeds-body {
+	font-size: 1.5em;
+	text-align: center;
+	font-family: Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans",
+		sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	color: #484848;
+	display: flex;
+	justify-content: center;
+	width: 100vw;
+	height: 100%;
+}
+
+.feeds-center {
+	background: linear-gradient(0deg, rgba(50, 112, 42, 0.2) 0%, rgba(156, 204, 125, 0.2) 100%);
+	width: 30em;
+}
