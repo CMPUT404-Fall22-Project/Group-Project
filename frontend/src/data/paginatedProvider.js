@@ -43,9 +43,9 @@ export default class PaginatedProvider {
 			})
 			.then(this._saveResult.bind(this))
 			.then(this._notify.bind(this, true))
-			.catch(() => {
+			.catch((err) => {
 				this._pending = false;
-				this._notify(false, null);
+				this._notify(false, err);
 			});
 
 		return promise;

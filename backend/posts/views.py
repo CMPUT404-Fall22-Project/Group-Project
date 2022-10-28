@@ -29,7 +29,13 @@ class PostList(APIView):
         posts = Post.objects.all().filter(author=id)
         posts = paginate(request, posts)
         serializer = PostSerializer(posts, many=True)
-        dict = {"type": "posts", "items": serializer.data}
+
+        authorData = AuthorSerializer(author).data
+        serializedPosts = serializer.data
+
+        for p in serializedPosts:
+            p["author"] = authorData
+        dict = {"type": "posts", "items": serializedPosts}
         return Response(dict, status=status.HTTP_200_OK)
 
     def fill_optional_values(self, data, authorId):

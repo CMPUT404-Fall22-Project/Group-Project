@@ -1,4 +1,5 @@
 import {
+	Backdrop,
 	Button,
 	Checkbox,
 	Divider,
@@ -17,6 +18,9 @@ import DropZone from "react-dropzone";
 import NotificationBar from "../../global/centralNotificationBar";
 import TagInput from "../tagInput";
 import axios from "axios";
+import Loader from "../loader";
+import ContainedBackdrop from "../../utils/containedBackdrop";
+import { MD_COMPONENETS_POST } from "../../utils/reactMarkdownComponents";
 
 export default class NewPost extends Component {
 	constructor(props) {
@@ -26,6 +30,7 @@ export default class NewPost extends Component {
 			preview: false,
 			imageData: null,
 			imageTypeStore: null,
+			isPosting: false,
 			post: {
 				title: "New Post",
 				description: "",
@@ -78,6 +83,12 @@ export default class NewPost extends Component {
 		reader.readAsDataURL(file);
 	}
 
+	handleComplete() {
+		if (this.props.onClose) {
+			this.props.onClose();
+		}
+	}
+
 	renderContent() {
 		const imgComponent = (
 			<DropZone
@@ -99,7 +110,7 @@ export default class NewPost extends Component {
 		if (this.state.preview) {
 			return (
 				<React.Fragment>
-					<ReactMarkdown>{this.state.post.content || "(No content)"}</ReactMarkdown>
+					<ReactMarkdown components={MD_COMPONENETS_POST}>{this.state.post.content || "(No content)"}</ReactMarkdown>
 					{imgComponent}
 				</React.Fragment>
 			);
@@ -158,12 +169,14 @@ export default class NewPost extends Component {
 	}
 
 	handleImagePost(data) {
+		this.setState({ isPosting: true });
 		const url = Authentication.getInstance().getUser().getUrl() + "/posts/";
 		data.content = data.content.split(",")[1];
-		this.sendPostRequest(data, url);
+		this.sendPostRequest(data, url).then(this.handleComplete.bind(this));
 	}
 
 	handleTextPost(data) {
+		this.setState({ isPosting: true });
 		const url = Authentication.getInstance().getUser().getUrl() + "/posts/";
 		if (this.state.imageData) {
 			const data2 = {
@@ -179,10 +192,10 @@ export default class NewPost extends Component {
 			};
 			this.sendPostRequest(data2, url).then((id) => {
 				data.content += `\n![](${url}${id}/image)`;
-				this.sendPostRequest(data, url);
+				this.sendPostRequest(data, url).then(this.handleComplete.bind(this));
 			});
 		} else {
-			this.sendPostRequest(data, url);
+			this.sendPostRequest(data, url).then(this.handleComplete.bind(this));
 		}
 	}
 
@@ -220,8 +233,13 @@ export default class NewPost extends Component {
 						display: "flex",
 						flexDirection: "column",
 						padding: "0.5em",
+						position: "relative",
 					}}
 				>
+					<ContainedBackdrop open={this.state.isPosting}>
+						<Loader></Loader>
+					</ContainedBackdrop>
+
 					<Typography variant="h5">
 						<i>Create a new post...</i>
 					</Typography>
@@ -343,5 +361,28 @@ export default class NewPost extends Component {
 				</Paper>
 			</div>
 		);
+	}
+}
+
+export class NewPostButton extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			isOpen: false,
+		};
+	}
+
+	render() {
+		if (this.state.isOpen) {
+			return (
+				<NewPost
+					onClose={() => {
+						this.setState({ isOpen: false });
+					}}
+				></NewPost>
+			);
+		} else {
+			return <Button onClick={() => this.setState({ isOpen: true })}>Create new post</Button>;
+		}
 	}
 }
