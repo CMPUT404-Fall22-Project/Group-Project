@@ -56,7 +56,7 @@ export default function FollowRequest() {
 	const handleButtonClick = (event) => {
 		// Send a follow Request to the selected authorId's inbox
 		axios
-			.post(process.env.REACT_APP_HOST`authors/${authorId}/inbox/`, { id: userId })
+			.post(process.env.REACT_APP_HOST + `authors/${authorId}/inbox/`, { id: userId })
 			.then((res) => {
 				NotificationBar.getInstance().addNotification("Follow request sent successfully!", NotificationBar.NT_SUCCESS);
 			})

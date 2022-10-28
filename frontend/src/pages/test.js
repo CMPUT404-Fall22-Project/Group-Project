@@ -85,7 +85,7 @@ export function FollowRequests() {
 
 	async function handleAcceptButton(followRequest) {
 		// PUT the Author with id === followerId as a follower of Author with id === userId
-		const followerId = followRequest.followerId;
+		const followerId = followRequest.actor.id;
 		const firstName = followRequest.summary.split(" ")[0];
 		axios
 			.put(process.env.REACT_APP_HOST + `authors/${userId}/followers/${followerId}`)
