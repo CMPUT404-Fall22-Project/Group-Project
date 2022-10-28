@@ -8,6 +8,10 @@ import TestPageComponent from "./pages/testPage";
 import "./App.css";
 import history from "./history";
 import FollowRequest from "./components/followRequest";
+import NotificationBar from "./global/centralNotificationBar";
+import { AppHeader } from "./components/header/header";
+import SignUpSide from "./pages/signUp";
+import SignInSide from "./pages/signIn";
 
 class App extends Component {
 	static _ERROR_DATA = [];
@@ -30,11 +34,19 @@ class App extends Component {
 		return (
 			<div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
 				<Router history={history}>
+					<AppHeader />
+					<NotificationBar />
 					<Switch>
 						{this.state.hasError > 0 ? (
 							<Route render={(props) => <ApplicationError {...props} error={App._ERROR_DATA} />} />
 						) : null}
 						<Route exact path="/amrit" render={(props) => <Test {...props} />} />
+						<Route exact path="/signup">
+							<SignUpSide />
+						</Route>
+						<Route exact path="/signin">
+							<SignInSide />
+						</Route>
 						<Route exact path="/" render={(props) => <LoginComponent {...props} />} />
 						<Route exact path="/temp-follow-request" render={(props) => <FollowRequest {...props} />} />
 						<Route component={HTML404}></Route>
