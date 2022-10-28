@@ -1,5 +1,6 @@
 
 from authentication.models import Session
+import datetime
 
 
 class AuthMiddleware:
@@ -23,6 +24,7 @@ class AuthMiddleware:
 
         resp = self.get_response(request)
         if request.app_session:
-            resp.set_cookie("user_session", request.app_session.token, expiry=request.app_session.expiresAt)
+            resp.set_cookie("user_session", request.app_session.token,
+                            expires=datetime.datetime.fromtimestamp(request.app_session.expiresAt))
 
         return resp
