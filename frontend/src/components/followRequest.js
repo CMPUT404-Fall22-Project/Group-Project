@@ -4,9 +4,9 @@ import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
 import Button from "@mui/material/Button";
 import Authentication from "../global/authentication";
+import { Autocomplete, TextField } from "@mui/material";
 
 // Enables an Author to submit a Follow Request to another Author
 // Select component is auto-filled with the names of all authorized authors
@@ -19,34 +19,37 @@ export default function FollowRequest() {
 	const userId = Authentication.getInstance().getUser().getId();
 
 	useEffect(() => {
-		axios
-			.get(process.env.REACT_APP_HOST + `authors/`)
-			.then((res) => {
-				console.log(res);
-				handleAuthors(res.data.items);
-			})
-			.catch((err) => console.log(err));
+		handleAuthors();
 	}, []);
 
-	const handleAuthors = (authors) => {
-		// Push the authors into an array of MenuItems
-		// <MenuItem value={a.id}>{a.displayName}</MenuItem>
+	const handleAuthors = async () => {
+		// gets all of the authors
+		// gets all of the users the author is following
+		// generates a list of all authors - the logged in author - authors the author is already following
+
+		// Get all of the authors
+		var response = await axios.get(process.env.REACT_APP_HOST + `authors/`);
+		console.log(response);
+		const authors = response.data.items;
+
+		// get all authors that the logged in user is following
+		response = await axios.get(process.env.REACT_APP_HOST + `authors/${userId}/following/`);
+		console.log(response);
+		const following = response.data.items;
+		const followingIds = [];
+		for (let f of following) {
+			followingIds.push(f.id);
+		}
+
 		const arr = [];
 		for (let a of authors) {
-			// prevents author from sending follow request to self
-			if (a.id !== userId) {
-				arr.push(
-					<MenuItem key={a.id} value={a.id}>
-						{a.displayName}
-					</MenuItem>
-				);
+			// only fill arr with authors that the author is not currently following
+			if (a.id !== userId && !followingIds.includes(a.id)) {
+				arr.push({ label: a.displayName, id: a.id });
 			}
 			setAuthors(arr);
+			console.log("final arr", arr);
 		}
-	};
-
-	const handleSelectChange = (event) => {
-		setAuthorId(event.target.value);
 	};
 
 	const handleButtonClick = (event) => {
@@ -63,16 +66,25 @@ export default function FollowRequest() {
 	return (
 		<Box sx={{ minWidth: 120 }}>
 			<FormControl fullWidth>
-				<InputLabel id="demo-simple-select-label">Select an Author</InputLabel>
-				<Select
-					labelId="demo-simple-select-label"
-					id="demo-simple-select"
-					value={authorId}
-					label="Author"
-					onChange={handleSelectChange}
-				>
-					{authors}
-				</Select>
+				<Autocomplete
+					onChange={(event, author) => {
+						setAuthorId(author.id);
+					}}
+					freeSolo
+					id="free-solo-2-demo"
+					disableClearable
+					options={authors}
+					renderInput={(params) => (
+						<TextField
+							{...params}
+							label="Search Input"
+							InputProps={{
+								...params.InputProps,
+								type: "search",
+							}}
+						/>
+					)}
+				/>
 				<Button
 					variant="contained"
 					disabled={!authorId}
