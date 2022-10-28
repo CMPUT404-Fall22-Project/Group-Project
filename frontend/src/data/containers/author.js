@@ -81,7 +81,7 @@ export default class Author extends DataContainer {
 			data.id,
 			data.host,
 			data.displayName,
-			data.host + "/authors/" + data.id, // TODO: remove hard coded
+			data.host + "authors/" + data.id, // TODO: remove hard coded
 			data.github,
 			data.profileImage
 		);
