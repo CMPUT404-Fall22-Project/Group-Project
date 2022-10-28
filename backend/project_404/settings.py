@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'authors.apps.AuthorsConfig',
     'posts.apps.PostsConfig',
-    'inbox.apps.InboxConfig'
+    'inbox.apps.InboxConfig',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -52,7 +53,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+    ]
 
 ROOT_URLCONF = 'project_404.urls'
 
