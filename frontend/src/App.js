@@ -3,8 +3,11 @@ import ApplicationError from "./pages/applicationError";
 import HTML404 from "./components/errors/404";
 import React, { Component } from "react";
 import Test from "./pages/test";
+import LoginComponent from "./pages/login";
+import TestPageComponent from "./pages/testPage";
 import "./App.css";
 import history from "./history";
+import FollowRequest from "./components/followRequest";
 
 class App extends Component {
 	static _ERROR_DATA = [];
@@ -31,7 +34,9 @@ class App extends Component {
 						{this.state.hasError > 0 ? (
 							<Route render={(props) => <ApplicationError {...props} error={App._ERROR_DATA} />} />
 						) : null}
-						<Route exact path="/" render={(props) => <Test {...props} />} />
+						<Route exact path="/amrit" render={(props) => <Test {...props} />} />
+						<Route exact path="/" render={(props) => <LoginComponent {...props} />} />
+						<Route exact path="/temp-follow-request" render={(props) => <FollowRequest {...props} />} />
 						<Route component={HTML404}></Route>
 					</Switch>
 				</Router>
