@@ -7,22 +7,19 @@ import IconButton from "@mui/material/IconButton";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import axios from "axios";
+import Authentication from "../global/authentication";
+import { Typography } from "@mui/material";
 
 // https://mui.com/material-ui/react-card/, Material UI, 2022-10-27
 // TODO: add follow functionality
 // TODO: change follow icon when you are following them
 // TODO: change axios request to allow follow requests?
-const author = (props) => {
-	// do we show id/url/host?
-	const { author_id, displayName, github, profileImage, id } = props;
-
-	const followData = { id };
-
+const AuthorCardComponenet = ({ data }) => {
 	const handleFollow = (e) => {
 		axios({
 			method: "post",
-			url: "service/authors/" + displayName + "/inbox",
-			data: followData,
+			url: "authors/" + data.getId() + "/inbox",
+			data: Authentication.getInstance().getUser().getId(),
 		})
 			.then(function (response) {
 				console.log(response);
@@ -33,22 +30,22 @@ const author = (props) => {
 	};
 
 	return (
-		<Card sx={{ maxWidth: 345 }}>
-			<CardHeader
-				avatar={<Avatar alt="Profile Picture" src={profileImage}></Avatar>} // make sure pfp is in the right format (needs link?)
-				title={displayName}
-				subheader={author_id}
-			/>
-			<CardActions disableSpacing>
-				<IconButton aria-label="Follow" onClick={handleFollow}>
+		<div style={{ display: "flex", justifyContent: "space-between" }}>
+			<div style={{ display: "inherit" }}>
+				<Avatar alt="Profile Picture" src={data.getProfileImageUrl()}></Avatar>
+
+				<Typography style={{ marginLeft: "0.5em" }}>{data.getUsername()}</Typography>
+			</div>
+			<div>
+				<IconButton aria-label="Follow" title="Follow?" onClick={handleFollow}>
 					<PersonAddIcon />
 				</IconButton>
-				<IconButton aria-label="GitHub" href={github}>
+				<IconButton aria-label="GitHub" title="Github" href={data.getGithubUrl()}>
 					<GitHubIcon />
 				</IconButton>
-			</CardActions>
-		</Card>
+			</div>
+		</div>
 	);
 };
 
-export default author;
+export default AuthorCardComponenet;

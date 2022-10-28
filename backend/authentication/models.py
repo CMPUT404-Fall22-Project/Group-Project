@@ -31,6 +31,3 @@ class Session(models.Model):
 
     def is_expired(self):
         return self._get_current_time() > self.expiresAt
-
-    def __str__(self):
-        return self.displayName

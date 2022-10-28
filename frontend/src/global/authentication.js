@@ -96,7 +96,6 @@ export default class Authentication {
 			axios({
 				method: "post",
 				url: process.env.REACT_APP_HOST + "sessions/new/",
-				withCredentials: true,
 				// https://stackoverflow.com/a/37707074
 				// headers: {
 				// 	Authorization: "basic " + btoa(username) + ":" + btoa(password),

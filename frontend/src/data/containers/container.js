@@ -12,4 +12,8 @@ export default class DataContainer {
 	encodeDatabase() {
 		throw new Error("Not implemented");
 	}
+
+	copy() {
+		return this.constructor.parseDatabase(this.encodeDatabase());
+	}
 }

@@ -73,12 +73,12 @@ def authenticate_user(request):
 def end_session(request):
 
     try:
-        request.app_session
+        session = request.app_session
     except:
         return HttpResponse(status=200)  # not logged in, but OK
 
     try:
-        request.app_session.delete()
+        session.delete()
         return HttpResponse(status=200)
     except:
         return HttpResponse("Session could not be ended", status=500)

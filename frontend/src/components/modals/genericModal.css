@@ -1,0 +1,79 @@
+.genericModalBackground {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background-color: #44444400;
+	pointer-events: none;
+	animation: fly 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.genericModalBackdrop {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background-color: #44444400;
+	pointer-events: none;
+	animation: fade 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.genericModal {
+	background: white;
+	border-radius: 6px;
+	opacity: 1;
+	visibility: visible;
+	position: absolute;
+	pointer-events: auto;
+	box-shadow: 0 24px 38px 3px rgb(0 0 0 / 14%), 0 9px 46px 8px rgba(0 0 0 / 12%), 0 11px 15px -7px rgba(0 0 0 / 20%);
+}
+
+.genericModal .button-groups-container {
+	width: 100%;
+}
+
+.genericModal .button-groups-container .button-groups {
+	float: right;
+}
+
+.genericModal .button-groups-container .genericModal-toolbar-icons {
+	color: #5f6368;
+	float: right;
+	padding-left: 2px;
+}
+
+.modalFind {
+	animation: bump 0.25s ease-in-out;
+}
+
+@keyframes fade {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		transform: 1;
+	}
+}
+
+@keyframes fly {
+	0% {
+		transform: translate(0%, 100%);
+	}
+	100% {
+		transform: translate(0%, 0%);
+	}
+}
+
+@keyframes bump {
+	0% {
+		transform: scale(1, 1);
+	}
+	50% {
+		transform: scale(1.025, 1.025);
+	}
+	100% {
+		transform: scale(1, 1);
+	}
+}

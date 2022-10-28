@@ -14,6 +14,8 @@ import SignUpPage from "./pages/signUp";
 import SignInPage from "./pages/signIn";
 import Authentication from "./global/authentication";
 import MainFeed from "./pages/feeds";
+import EditProfile from "./components/editProfile";
+import ModalSystem from "./global/modalSystem";
 
 class App extends Component {
 	static _ERROR_DATA = [];
@@ -41,6 +43,7 @@ class App extends Component {
 		return (
 			<div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
 				<Router history={history}>
+					<ModalSystem></ModalSystem>
 					<AppHeader />
 					<NotificationBar />
 					<Switch>
@@ -53,6 +56,7 @@ class App extends Component {
 						<Route exact path="/amrit" render={(props) => <Test {...props} />} />
 						<Route exact path="/temp-follow-request" render={(props) => <FollowRequest {...props} />} />
 
+						<Route exact path="/zaza" render={(props) => <EditProfile {...props} />} />
 						<Route component={HTML404}></Route>
 					</Switch>
 				</Router>

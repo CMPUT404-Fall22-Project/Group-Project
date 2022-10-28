@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "./feeds.css";
 import { Paper } from "@mui/material";
+import MyFeed from "../components/myFeed";
 
 export default class MainFeed extends Component {
 	constructor(props) {
@@ -13,7 +14,9 @@ export default class MainFeed extends Component {
 	render() {
 		return (
 			<div className="feeds-body">
-				<Paper className="feeds-center" elevation={0} variant="outlined" />
+				<Paper className="feeds-center" elevation={0} variant="outlined" square>
+					<MyFeed></MyFeed>
+				</Paper>
 			</div>
 		);
 	}

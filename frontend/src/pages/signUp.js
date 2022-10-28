@@ -143,7 +143,7 @@ export default function SignUpPage() {
 						<CheckCircleOutlinedIcon />
 					</Avatar>
 					<Typography component="h1" variant="h4" style={{ maxWidth: "100%", margin: "1em" }}>
-						Account sucessfully created!
+						Account successfully created!
 					</Typography>
 					<Typography component="h1" variant="h6" style={{ maxWidth: "50%", textAlign: "center", color: "#919191" }}>
 						<i>

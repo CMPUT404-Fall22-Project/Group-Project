@@ -9,11 +9,11 @@ class AuthMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        request.app_session = None
         if not "user_session" in request.COOKIES:
             return self.get_response(request)
 
         token = request.COOKIES.get("user_session")
-        request.app_session = None
         try:
             sess = Session.objects.get(pk=token)
             if not sess.is_expired():

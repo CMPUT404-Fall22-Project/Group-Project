@@ -7,6 +7,7 @@ import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import Authentication from "../global/authentication";
 import { Autocomplete, TextField } from "@mui/material";
+import NotificationBar from "../global/centralNotificationBar";
 
 // Enables an Author to submit a Follow Request to another Author
 // Select component is auto-filled with the names of all authorized authors
@@ -55,12 +56,11 @@ export default function FollowRequest() {
 	const handleButtonClick = (event) => {
 		// Send a follow Request to the selected authorId's inbox
 		axios
-			.post(`http://127.0.0.1:8000/authors/${authorId}/inbox/`, { id: userId })
+			.post(process.env.REACT_APP_HOST`authors/${authorId}/inbox/`, { id: userId })
 			.then((res) => {
-				console.log(res);
-				alert("Follow request sent successfully!");
+				NotificationBar.getInstance().addNotification("Follow request sent successfully!", NotificationBar.NT_SUCCESS);
 			})
-			.catch((err) => console.log(err));
+			.catch((err) => NotificationBar.getInstance().addNotification(err, NotificationBar.NT_ERROR));
 	};
 
 	return (
