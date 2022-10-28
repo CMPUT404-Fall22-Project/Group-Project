@@ -23,7 +23,7 @@ class AuthorList(APIView):
             serializer = AuthorSerializer(author)
             serializer_data = serializer.data
             # set id and url as in rubric specs
-            serializer_data["id"] = author.get_full_path()
+            # serializer_data["id"] = author.get_full_path()
             serializer_data["url"] = author.get_full_path()
             serializer_arr.append(serializer_data)
 
@@ -54,7 +54,7 @@ class AuthorDetail(APIView):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = AuthorSerializer(author)
         serializer_data = serializer.data
-        serializer_data["id"] = author.get_full_path()
+        # serializer_data["id"] = author.get_full_path()
         serializer_data["url"] = author.get_full_path()
         return Response(serializer_data, status=status.HTTP_200_OK)
     
@@ -92,7 +92,7 @@ class FollowerDetail(APIView):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = AuthorSerializer(follower)
         serializer_data = serializer.data
-        serializer_data["id"] = author.get_full_path()
+        # serializer_data["id"] = author.get_full_path()
         serializer_data["url"] = author.get_full_path()
         return Response(serializer_data, status=status.HTTP_200_OK)
     
