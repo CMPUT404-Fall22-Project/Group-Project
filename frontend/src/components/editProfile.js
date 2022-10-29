@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom"
 import { Box, Grid, Button, TextField } from "@mui/material";
+import Authentication from "../global/authentication";
+import NotificationBar from "../global/centralNotificationBar";
 
 
 export default function EditProfile() {
-    const {id} = useParams()
+    const {id} = Authentication.getInstance().getUser().getId();
 
     const [author, setAuthor] = useState({
         displayName: "",
@@ -17,7 +18,7 @@ export default function EditProfile() {
 
     useEffect(() => {
         axios
-            .get('http://127.0.0.1:8000/authors/${id}/')
+            .get(process.env.REACT_APP_HOST + 'authors/${id}/')
             .then((res) => {
                 console.log(res);
                 HandleAuthor(res.data);
@@ -26,7 +27,7 @@ export default function EditProfile() {
         }, []);
 
     const HandleAuthor = (auth) => {
-        // Fill's author with the proper data
+        // Fill's author's fields with the proper data
         console.log(auth.target.name, ":", auth.target.value);
         setAuthor({ ...author, [auth.target.name]: auth.target.value});
     };
@@ -34,9 +35,9 @@ export default function EditProfile() {
     
     const HandleSubmit = (e) =>{
         axios
-            .post('http://127.0.0.1:8000/authors/${id}/')
-            .then((res) => console.log(res))
-            .catch((err) => console.log(err));
+            .post(process.env.REACT_APP_HOST + 'authors/${id}/')
+            .then((res) => NotificationBar.getInstance().addNotification("Edited successfully!", NotificationBar.NT_SUCCESS))
+            .catch((err) => NotificationBar.getInstance().addNotification(err, NotificationBar.NT_ERROR))
     };
 
 
@@ -85,7 +86,10 @@ export default function EditProfile() {
                         <Button
                         type="submit"
                         variant="contained"
-                        sx ={{ mb: 10 }}>
+                        sx ={{ mb: 10 }}
+                        onClick={() => {
+                            HandleSubmit();
+                        }}>
                         Submit 
                         </Button>
                     </Grid>
