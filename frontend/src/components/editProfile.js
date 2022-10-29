@@ -29,13 +29,15 @@ export default function EditProfile() {
         // Fill's author with the proper data
         console.log(auth.target.name, ":", auth.target.value);
         setAuthor({ ...author, [auth.target.name]: auth.target.value});
-    }
+    };
 
     
     const HandleSubmit = (e) =>{
-        // MARCUS!!!!!!!!!!!!11111111 axios post goes here
-
-    }
+        axios
+            .post('http://127.0.0.1:8000/authors/${id}/')
+            .then((res) => console.log(res))
+            .catch((err) => console.log(err));
+    };
 
 
     return (
