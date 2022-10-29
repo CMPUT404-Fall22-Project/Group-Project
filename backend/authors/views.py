@@ -35,9 +35,8 @@ class AuthorList(APIView):
         serializer = AuthorSerializer(data=request.data)
          # if valid user input
         if serializer.is_valid():
-            author: Author = serializer.save()
-            serializer_data = {"id":author.id}
-            return Response(serializer_data, status=status.HTTP_201_CREATED)
+            author = serializer.save()
+            return Response({"id":author.id}, status=status.HTTP_201_CREATED)
         # else failed POST attempt
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -58,8 +57,18 @@ class AuthorDetail(APIView):
         serializer_data["url"] = author.get_full_path()
         return Response(serializer_data, status=status.HTTP_200_OK)
     
-    # TODO: def post(self, request, id, format=None):
-    """POST [local]: update AUTHOR_ID’s profile"""
+    def post(self, request, id, format=None):
+        """POST [local]: update AUTHOR_ID’s profile"""
+        author = get_object_or_404(Author, id=id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        # serialize the author and set the attributes to the request.data values
+        serializer = AuthorSerializer(author, data=request.data)
+        if serializer.is_valid():
+            author = serializer.save()
+            return Response(status=status.HTTP_200_OK)
+        # else failed POST attempt
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FollowingList(APIView):

@@ -134,6 +134,31 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+    def test_change_author_attributes_via_post(self):
+        """
+        ensure we can change the attributes of an author
+        NOTE: The rubric specfifies handling this operation in POST
+        """
+        # post an author and get there id
+        id = self.post_and_authorize_author(self.test_author1_data)
+        url = self.get_author_detail_url(id)
+        # ensure we can change the attributes of the author
+        response = self.client.post(url, self.test_author2_data, format='json') # using test_author2_data
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # get the author whose attributes we changed
+        response = self.client.get(url, format='json')
+        # ensure the proper response code is given
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the author now has the attributes of test_author2_data
+        data = response.data
+        self.assertEqual(data["displayName"], self.test_author2_data["displayName"])
+        self.assertEqual(data["github"], self.test_author2_data["github"])
+        # ensure profile image is still same ("profileImage" wasn't included in test_author2_data )
+        self.assertEqual(data["profileImage"], self.test_author1_data["profileImage"])
+
+
+        
     def test_get_followers_for_author_with_no_followers(self):
         """Ensure {"type": "followers", "items": []} is returned for author with no followers."""
         # post an author and get there id
@@ -163,9 +188,6 @@ class AuthorTests(APITestCase, URLPatternsTestCase):
         response = self.client.get(url, format='json')
         # ensure the proper response code is given
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-
-
 
         
     def test_add_follower_for_author(self):
