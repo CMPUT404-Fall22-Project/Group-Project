@@ -10,7 +10,7 @@ import history from "../../history";
 import NotificationBar from "../../global/centralNotificationBar";
 import axios from "axios";
 import FollowRequestSearch from "../followRequestSearch";
-import { FollowRequests, TopAppBar } from "../followRequests";
+import { FollowRequestsButton } from "../followRequests";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {
@@ -117,7 +117,7 @@ export class AppHeader extends Component {
 					{!auth.isLoggedIn() ? null : (
 						<>
 							<FollowRequestSearch />
-							{/* <FollowRequests /> */}
+							{/* <FollowRequestsButton /> */}
 						</>
 					)}
 					<span style={{ whiteSpace: "nowrap", fontWeight: "600", color: "#ffffff" }}>
