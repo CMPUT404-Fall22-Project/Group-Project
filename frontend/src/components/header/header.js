@@ -9,6 +9,8 @@ import Authentication from "../../global/authentication";
 import history from "../../history";
 import NotificationBar from "../../global/centralNotificationBar";
 import axios from "axios";
+import FollowRequestSearch from "../followRequestSearch";
+import { FollowRequests, TopAppBar } from "../followRequests";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {
@@ -112,6 +114,12 @@ export class AppHeader extends Component {
 				</div>
 				{this.state.renderChild ? this.state.renderChild() : null}
 				<div className="topnav-toolbar-container">
+					{!auth.isLoggedIn() ? null : (
+						<>
+							<FollowRequestSearch />
+							{/* <FollowRequests /> */}
+						</>
+					)}
 					<span style={{ whiteSpace: "nowrap", fontWeight: "600", color: "#ffffff" }}>
 						{this.state.userData.getUsername()}
 					</span>
