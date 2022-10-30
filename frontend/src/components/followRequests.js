@@ -24,20 +24,37 @@ const Demo = styled("div")(({ theme }) => ({
 	backgroundColor: theme.palette.background.paper,
 }));
 
+export const FollowRequestsButton = () => {
+	const [clicked, setClicked] = useState(false);
+	return (
+		<div>
+			<Button
+				variant="contained"
+				onClick={() => {
+					setClicked(!clicked);
+				}}
+			>
+				Follow Requests
+			</Button>
+			{clicked ? <TopAppBar /> : null}
+		</div>
+	);
+};
+
 export function TopAppBar() {
 	return (
 		<div style={{ width: "50%", height: "100%", position: "absolute" }}>
 			<Box sx={{ flexGrow: 1, maxWidth: 1000 }}>
-				<AppBar position="static">
+				{/* <AppBar position="static">
 					<Toolbar>
-						{/* <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
+						<IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
 							<MenuIcon />
-						</IconButton> */}
+						</IconButton>
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
 							Follow Requests
 						</Typography>
 					</Toolbar>
-				</AppBar>
+				</AppBar> */}
 				<div style={{ width: "100%", height: "100%", position: "absolute", overflow: "auto" }}>
 					<FollowRequests></FollowRequests>
 				</div>
