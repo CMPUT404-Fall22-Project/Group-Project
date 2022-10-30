@@ -14,7 +14,7 @@ import NotificationBar from "../global/centralNotificationBar";
 // Selection of an author enables the "Submit Follow Request" button
 // Clicking the "Submit Follow Request" sends a POST request to the inbox of the selected Author
 
-export default function FollowRequest() {
+export default function FollowRequestSearch() {
 	const [authorId, setAuthorId] = useState("");
 	const [authors, setAuthors] = useState([]);
 	const userId = Authentication.getInstance().getUser().getId();
@@ -41,7 +41,6 @@ export default function FollowRequest() {
 		for (let f of following) {
 			followingIds.push(f.id);
 		}
-
 		const arr = [];
 		for (let a of authors) {
 			// only fill arr with authors that the author is not currently following
