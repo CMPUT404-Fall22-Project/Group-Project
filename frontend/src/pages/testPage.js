@@ -4,7 +4,7 @@ import { withStyles } from "@mui/styles";
 import "./login.css";
 import { APPLICATION_NAME } from "../constants";
 import background from "../static/back.webp";
-import FollowRequestComponent from "../components/followRequest";
+import FollowRequestSearch from "../components/followRequestSearch";
 
 const LoginButton = withStyles((theme) => ({
 	root: {
@@ -52,9 +52,9 @@ class TestPageComponent extends Component {
 								<div className="login-instructions">{APPLICATION_NAME}</div>
 
 								<div style={{ padding: "1em" }}></div>
-								<FollowRequestComponent variant="contained" onClick={this.login.bind(this, !this.props.check)}>
+								<FollowRequestSearch variant="contained" onClick={this.login.bind(this, !this.props.check)}>
 									Login
-								</FollowRequestComponent>
+								</FollowRequestSearch>
 							</div>
 						</div>
 					</div>
