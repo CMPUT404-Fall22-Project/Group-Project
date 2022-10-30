@@ -6,7 +6,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import Authentication from "../global/authentication";
-import { Autocomplete, TextField } from "@mui/material";
+import { Autocomplete, TextField, Grid } from "@mui/material";
 import NotificationBar from "../global/centralNotificationBar";
 
 // Enables an Author to submit a Follow Request to another Author
@@ -65,34 +65,41 @@ export default function FollowRequestSearch() {
 	return (
 		<Box sx={{ minWidth: 120 }}>
 			<FormControl fullWidth>
-				<Autocomplete
-					onChange={(event, author) => {
-						setAuthorId(author.id);
-					}}
-					freeSolo
-					id="free-solo-2-demo"
-					disableClearable
-					options={authors}
-					renderInput={(params) => (
-						<TextField
-							{...params}
-							label="Search Input"
-							InputProps={{
-								...params.InputProps,
-								type: "search",
+				<Grid container>
+					<Grid item xs={6}>
+						<Autocomplete
+							onChange={(event, author) => {
+								setAuthorId(author.id);
 							}}
+							freeSolo
+							id="free-solo-2-demo"
+							disableClearable
+							options={authors}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									label="Search Input"
+									InputProps={{
+										...params.InputProps,
+										type: "search",
+									}}
+								/>
+							)}
 						/>
-					)}
-				/>
-				<Button
-					variant="contained"
-					disabled={!authorId}
-					onClick={() => {
-						handleButtonClick();
-					}}
-				>
-					Submit Follow Request
-				</Button>
+					</Grid>
+					<Grid item xs={6}>
+						<Button
+							size="large"
+							variant="contained"
+							disabled={!authorId}
+							onClick={() => {
+								handleButtonClick();
+							}}
+						>
+							Submit
+						</Button>
+					</Grid>
+				</Grid>
 			</FormControl>
 		</Box>
 	);
