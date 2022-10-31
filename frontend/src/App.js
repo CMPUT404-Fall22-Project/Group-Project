@@ -60,8 +60,7 @@ class App extends Component {
 						/>
 						{/* <Route exact path="/amrit" render={(props) => <FollowRequestsButton {...props} />} /> */}
 						<Route exact path="/temp-follow-request" render={(props) => <FollowRequestSearch {...props} />} />
-
-						<Route exact path="/zaza" render={(props) => <EditProfile {...props} />} />
+						<Route exact path="/edit-author" render={(props) => <EditProfile {...props} />} />
 						<Route component={HTML404}></Route>
 					</Switch>
 				</Router>
