@@ -1,11 +1,12 @@
-import { Paper } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import React, { Component } from "react";
 import Post from "../data/containers/post";
 import PaginatedProvider, { GenericElementProvider } from "../data/paginatedProvider";
 import Authentication from "../global/authentication";
 import NotificationBar from "../global/centralNotificationBar";
-import NewPost, { NewPostButton } from "./posts/newPost";
-import PostViewComponent, { EditablePostContainer } from "./posts/post";
+import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlined";
+import { NewPostButton } from "./posts/newPost";
+import { EditablePostContainer } from "./posts/post";
 
 export default class FeedComponent extends Component {
 	constructor(props) {
@@ -16,6 +17,7 @@ export default class FeedComponent extends Component {
 			createdPost: null,
 			isCurrentUser: this.props.authorId === user.getId(),
 			posts: [],
+			hasAllPosts: false,
 		};
 
 		this.postSupplier = new PaginatedProvider(
@@ -27,6 +29,7 @@ export default class FeedComponent extends Component {
 				this.setState((prevState) => {
 					return {
 						posts: [...prevState.posts, ...formatted],
+						hasAllPosts: data.length === 0,
 					};
 				});
 			} else {
@@ -51,6 +54,23 @@ export default class FeedComponent extends Component {
 					{this.state.posts.map((x, idx) => (
 						<EditablePostContainer data={x} key={"Post#" + String(idx)}></EditablePostContainer>
 					))}
+				</div>
+			);
+		}
+		if (this.state.posts.length === 0 && this.state.hasAllPosts) {
+			const styles = {
+				opacity: 0.5,
+				padding: "1em",
+			};
+			return (
+				<div>
+					<Typography variant="h4" style={styles}>
+						<i>Nothing to see here...</i>
+					</Typography>
+					<HourglassEmptyOutlinedIcon style={{ fontSize: "10em", opacity: 0.5 }}></HourglassEmptyOutlinedIcon>
+					<Typography variant="h4" style={styles}>
+						Check back later to see new posts from this author!
+					</Typography>
 				</div>
 			);
 		}

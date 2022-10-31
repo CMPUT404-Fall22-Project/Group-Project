@@ -4,7 +4,7 @@ import { withStyles } from "@mui/styles";
 import "./login.css";
 import { APPLICATION_NAME } from "../constants";
 import background from "../static/back.webp";
-import FollowRequestSearch from "../components/followRequestSearch";
+import FollowRequestSearch from "../components/authorSearch";
 
 const LoginButton = withStyles((theme) => ({
 	root: {

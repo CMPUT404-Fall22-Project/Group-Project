@@ -7,7 +7,7 @@ import LoginComponent from "./pages/login";
 import TestPageComponent from "./pages/testPage";
 import "./App.css";
 import history from "./history";
-import FollowRequestSearch from "./components/followRequestSearch";
+import FollowRequestSearch from "./components/authorSearch";
 import NotificationBar from "./global/centralNotificationBar";
 import { AppHeader } from "./components/header/header";
 import SignUpPage from "./pages/signUp";

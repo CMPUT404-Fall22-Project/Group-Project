@@ -9,7 +9,7 @@ import Authentication from "../../global/authentication";
 import history from "../../history";
 import NotificationBar from "../../global/centralNotificationBar";
 import axios from "axios";
-import FollowRequestSearch from "../followRequestSearch";
+import FollowRequestSearch from "../authorSearch";
 import { FollowRequestsButton, FollowRequestsMenuItem } from "../followRequests";
 
 const DEFAULT_HEIGHT = "56px";

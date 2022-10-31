@@ -156,10 +156,10 @@ export default class NewPost extends Component {
 		}
 	}
 
-	sendPostRequest(data, postURL) {
+	sendPostRequest(data, postURL, method) {
 		return new Promise((resolve, reject) => {
 			axios({
-				method: "put",
+				method: method,
 				url: postURL,
 				data: data,
 			})
@@ -174,26 +174,27 @@ export default class NewPost extends Component {
 
 	getUrl(id) {
 		if (!id) {
-			return Authentication.getInstance().getUser().getUrl() + "/posts/";
+			return { url: Authentication.getInstance().getUser().getUrl() + "/posts/", method: "post" };
 		}
-		return Authentication.getInstance().getUser().getUrl() + "/posts/" + id;
+		return { url: Authentication.getInstance().getUser().getUrl() + "/posts/" + id, method: "put" };
 	}
 
 	handleError(err) {
-		NotificationBar.getInstance().addNotification(err, NotificationBar.NT_ERROR);
+		const e = JSON.stringify(err.response.data);
+		NotificationBar.getInstance().addNotification(e, NotificationBar.NT_ERROR);
 		this.setState({ isPosting: false });
 	}
 
 	handleImagePost(data) {
 		this.setState({ isPosting: true });
-		const url = this.getUrl(data.id);
+		const { url, method } = this.getUrl(data.id);
 		data.content = data.content.split(",")[1];
-		this.sendPostRequest(data, url).then(this.handleComplete.bind(this)).catch(this.handleError.bind(this));
+		this.sendPostRequest(data, url, method).then(this.handleComplete.bind(this)).catch(this.handleError.bind(this));
 	}
 
 	handleTextPost(data) {
 		this.setState({ isPosting: true });
-		const url = this.getUrl(data.id);
+		const { url, method } = this.getUrl(data.id);
 		if (this.state.imageData) {
 			const data2 = {
 				content: this.state.imageData.split(",")[1],
@@ -206,12 +207,16 @@ export default class NewPost extends Component {
 				author: Authentication.getInstance().getUser().copy(),
 				categories: [],
 			};
-			this.sendPostRequest(data2, url).then((id) => {
-				data.content += `\n![](${url}${id}/image)`;
-				this.sendPostRequest(data, url).then(this.handleComplete.bind(this));
-			});
+			this.sendPostRequest(data2, url)
+				.then((id) => {
+					data.content += `\n![](${url}${id}/image)`;
+					this.sendPostRequest(data, url, method)
+						.then(this.handleComplete.bind(this))
+						.catch(this.handleError.bind(this));
+				})
+				.catch(this.handleError.bind(this));
 		} else {
-			this.sendPostRequest(data, url).then(this.handleComplete.bind(this));
+			this.sendPostRequest(data, url, method).then(this.handleComplete.bind(this)).catch(this.handleError.bind(this));
 		}
 	}
 
@@ -396,7 +401,8 @@ export class NewPostButton extends Component {
 			return (
 				<NewPost
 					onClose={() => {
-						this.setState({ isOpen: false });
+						window.location.reload(); // TEMP. VERY BAD!!!
+						//this.setState({ isOpen: false });
 					}}
 				></NewPost>
 			);

@@ -103,7 +103,15 @@ export class EditablePostContainer extends Component {
 	render() {
 		var comp = null;
 		if (this.state.editMode) {
-			comp = <PostEditor prefillData={this.props.data.getBaseData()} overrideName="Edit Post..."></PostEditor>;
+			comp = (
+				<PostEditor
+					prefillData={this.props.data.getBaseData()}
+					overrideName="Edit Post..."
+					onClose={() => {
+						window.location.reload(); // TEMP. VERY BAD!!!
+					}}
+				></PostEditor>
+			);
 		} else {
 			comp = <PostViewComponent data={this.props.data}></PostViewComponent>;
 		}

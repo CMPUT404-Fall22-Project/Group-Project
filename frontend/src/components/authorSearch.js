@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Box from "@mui/material/Box";
 import FormControl from "@mui/material/FormControl";
-import Button from "@mui/material/Button";
 import Authentication from "../global/authentication";
-import { Autocomplete, TextField, Grid, IconButton } from "@mui/material";
+import { Autocomplete, TextField, Grid, IconButton, Menu, MenuItem } from "@mui/material";
 import NotificationBar from "../global/centralNotificationBar";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import history from "../history";
 
 // Enables an Author to submit a Follow Request to another Author
 // Select component is auto-filled with the names of all authorized authors
@@ -17,6 +18,14 @@ export default function FollowRequestSearch() {
 	const [authorId, setAuthorId] = useState("");
 	const [authors, setAuthors] = useState([]);
 	const userId = Authentication.getInstance().getUser().getId();
+
+	const [anchorEl, setAnchorEl] = useState();
+	const handleClick = (event) => {
+		setAnchorEl(event.currentTarget);
+	};
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
 
 	useEffect(() => {
 		handleAuthors();
@@ -29,12 +38,10 @@ export default function FollowRequestSearch() {
 
 		// Get all of the authors
 		var response = await axios.get(process.env.REACT_APP_HOST + `authors/`);
-		console.log(response);
 		const authors = response.data.items;
 
 		// get all authors that the logged in user is following
 		response = await axios.get(process.env.REACT_APP_HOST + `authors/${userId}/following/`);
-		console.log(response);
 		const following = response.data.items;
 		const followingIds = [];
 		for (let f of following) {
@@ -47,18 +54,27 @@ export default function FollowRequestSearch() {
 				arr.push({ label: a.displayName, id: a.id });
 			}
 			setAuthors(arr);
-			console.log("final arr", arr);
 		}
 	};
 
 	const handleButtonClick = (event) => {
+		handleClick(event);
+		return;
 		// Send a follow Request to the selected authorId's inbox
+	};
+
+	const viewProfile = () => {
+		history.push("/authors/" + authorId);
+	};
+
+	const sendFollowRequest = () => {
 		axios
 			.post(process.env.REACT_APP_HOST + `authors/${authorId}/inbox/`, { id: authorId })
 			.then((res) => {
 				NotificationBar.getInstance().addNotification("Follow request sent successfully!", NotificationBar.NT_SUCCESS);
 			})
 			.catch((err) => NotificationBar.getInstance().addNotification(err, NotificationBar.NT_ERROR));
+		setAuthorId("");
 	};
 
 	return (
@@ -92,16 +108,21 @@ export default function FollowRequestSearch() {
 						/>
 					)}
 				/>
-				<IconButton
-					aria-label="Send"
-					title="Send Follow Request"
-					disabled={!authorId}
-					onClick={() => {
-						handleButtonClick();
-					}}
-				>
-					<SendOutlinedIcon />
+				<IconButton aria-label="Options" title="See Options" disabled={!authorId} onClick={handleButtonClick}>
+					<MoreVertOutlinedIcon />
 				</IconButton>
+				<Menu
+					id="long-menu"
+					MenuListProps={{
+						"aria-labelledby": "long-button",
+					}}
+					anchorEl={anchorEl}
+					open={Boolean(anchorEl)}
+					onClose={handleClose}
+				>
+					<MenuItem onClick={viewProfile}>View Profile</MenuItem>
+					<MenuItem onClick={sendFollowRequest}>Send Follow Request</MenuItem>
+				</Menu>
 			</FormControl>
 		</Box>
 	);
