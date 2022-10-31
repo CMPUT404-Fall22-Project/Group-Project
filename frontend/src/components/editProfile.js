@@ -6,40 +6,37 @@ import NotificationBar from "../global/centralNotificationBar";
 
 
 export default function EditProfile() {
-    const {id} = Authentication.getInstance().getUser().getId();
+    // Used main ideas from https://www.youtube.com/watch?v=GBbGEuZdyRg&list=PL1oBBulPlvs84AmRmT-_3dGz4KHYuINsj&index=18
 
+    const userID = Authentication.getInstance().getUser().getId();
     const [author, setAuthor] = useState({
-        displayName: "",
-        gitHub: "",
-        pfpURL: "",
+        displayName:"",
+        github:"",
+        profileImage:"",
     });
-
-    const {displayName, gitHub, pfpURL} = author;
+    const {displayName, github, profileImage} = author;
 
     useEffect(() => {
-        axios
-            .get(process.env.REACT_APP_HOST + 'authors/${id}/')
-            .then((res) => {
-                console.log(res);
-                HandleAuthor(res.data);
-            })
-            .catch((err) => console.log(err));
-        }, []);
+        const loadAuthor = async ()=> {
+            const res = await axios.get(process.env.REACT_APP_HOST + authors/${userID})
+            setAuthor(res.data)
+        }
+        loadAuthor();
+    }, []);
 
     const HandleAuthor = (auth) => {
-        // Fill's author's fields with the proper data
+        // Fill's text field with the author's stored data
         console.log(auth.target.name, ":", auth.target.value);
         setAuthor({ ...author, [auth.target.name]: auth.target.value});
     };
 
-    
     const HandleSubmit = (e) =>{
+        // POSTs to author to update data
         axios
-            .post(process.env.REACT_APP_HOST + 'authors/${id}/')
+            .post(process.env.REACT_APP_HOST + authors/${userID}, author)
             .then((res) => NotificationBar.getInstance().addNotification("Edited successfully!", NotificationBar.NT_SUCCESS))
             .catch((err) => NotificationBar.getInstance().addNotification(err, NotificationBar.NT_ERROR))
     };
-
 
     return (
         <Box sx = {{
@@ -57,7 +54,7 @@ export default function EditProfile() {
                             id="displayName"
                             value={displayName}
                             label="Display Name"
-                            onChange={HandleAuthor}
+                            onChange={(e)=>HandleAuthor(e)}
                         />
                     </Grid>
                     <Grid item xs={10}>
@@ -66,20 +63,20 @@ export default function EditProfile() {
                         required
                         fullWidth
                         id="github"
-                        value={gitHub}
+                        value={github}
                         label="Github URL"
-                        onChange={HandleAuthor}
+                        onChange={(e)=>HandleAuthor(e)}
                         />
                     </Grid>
                     <Grid item xs={10}>
                         <TextField
-                        name='pfpURL'
+                        name='profileImage'
                         required
                         fullWidth
-                        id="pfpURL"
-                        value={pfpURL}
-                        label="Pfp URL"
-                        onChange={HandleAuthor}
+                        id="profileImage"
+                        value={profileImage}
+                        label="Profile image"
+                        onChange={(e)=>HandleAuthor(e)}
                         />
                     </Grid>
                     <Grid item xs={5}>

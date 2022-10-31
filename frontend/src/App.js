@@ -36,7 +36,7 @@ class App extends Component {
 						) : null}
 						<Route exact path="/" render={(props) => <LoginComponent {...props} />} />
 						<Route exact path="/temp-follow-request" render={(props) => <FollowRequest {...props} />} />
-						<Route exact path="/zaza" render={(props) => <EditProfile {...props} />} />
+						<Route exact path="/edit-author" render={(props) => <EditProfile {...props} />} />
 						<Route component={HTML404}></Route>
 					</Switch>
 				</Router>
