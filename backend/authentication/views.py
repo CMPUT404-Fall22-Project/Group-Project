@@ -72,10 +72,10 @@ def authenticate_user(request):
 @api_view(["POST"])
 def end_session(request):
 
-    try:
-        session = request.app_session
-    except:
-        return HttpResponse(status=200)  # not logged in, but OK
+
+    session = request.app_session
+    if not session:
+        return HttpResponse(status=200) # not logged in, but OK
 
     try:
         session.delete()
