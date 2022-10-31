@@ -90,6 +90,30 @@ export class AppHeader extends Component {
 			});
 	}
 
+	generateMenuItems(auth) {
+		const elements = [
+			<MenuItem key="logout" disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
+				Logout
+			</MenuItem>,
+		];
+		var rest = null;
+		if (auth.isLoggedIn()) {
+			elements.push(
+				<FollowRequestsMenuItem
+					key="follow-requests"
+					variant="outlined"
+					onClick={() => this.handleProfileClose()}
+				></FollowRequestsMenuItem>
+			);
+			elements.push(
+				<MenuItem key="edit-profile" variant="outlined" onClick={() => history.push("/edit-author")}>
+					Edit Profile...
+				</MenuItem>
+			);
+		}
+		return elements;
+	}
+
 	render() {
 		const auth = Authentication.getInstance();
 		return (
@@ -144,16 +168,7 @@ export class AppHeader extends Component {
 						open={Boolean(this.state.profileMenuAnchor)}
 						onClose={this.handleProfileClose.bind(this)}
 					>
-						<MenuItem disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
-							Logout
-						</MenuItem>
-						{auth.isLoggedIn() ? (
-							<FollowRequestsMenuItem
-								disabled={!auth.isLoggedIn()}
-								variant="outlined"
-								onClick={() => this.handleProfileClose()}
-							></FollowRequestsMenuItem>
-						) : null}
+						{this.generateMenuItems(auth)}
 					</Menu>
 				</div>
 			</div>

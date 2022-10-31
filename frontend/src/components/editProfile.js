@@ -3,6 +3,7 @@ import axios from "axios";
 import { Box, Grid, Button, TextField } from "@mui/material";
 import Authentication from "../global/authentication";
 import NotificationBar from "../global/centralNotificationBar";
+import history from "../history";
 
 export default function EditProfile() {
 	// Used main ideas from https://www.youtube.com/watch?v=GBbGEuZdyRg&list=PL1oBBulPlvs84AmRmT-_3dGz4KHYuINsj&index=18
@@ -30,14 +31,23 @@ export default function EditProfile() {
 	};
 
 	const HandleSubmit = (e) => {
+		if (e) {
+			e.preventDefault();
+		}
+
 		// POSTs to author to update data
 		axios({
 			method: "post",
 			url: process.env.REACT_APP_HOST + `authors/${userID}`,
 			data: author,
 		})
-			.then((res) => NotificationBar.getInstance().addNotification("Edited successfully!", NotificationBar.NT_SUCCESS))
-			.catch((err) => NotificationBar.getInstance().addNotification(err, NotificationBar.NT_ERROR));
+			.then((res) => {
+				Authentication.getInstance().notifyAuthDataChanged();
+				NotificationBar.getInstance().addNotification("Edited successfully!", NotificationBar.NT_SUCCESS);
+			})
+			.catch((err) =>
+				NotificationBar.getInstance().addNotification(JSON.stringify(err.response.data), NotificationBar.NT_ERROR)
+			);
 	};
 
 	return (
@@ -84,14 +94,7 @@ export default function EditProfile() {
 						/>
 					</Grid>
 					<Grid item xs={5}>
-						<Button
-							type="submit"
-							variant="contained"
-							sx={{ mb: 10 }}
-							onClick={() => {
-								HandleSubmit();
-							}}
-						>
+						<Button type="submit" variant="contained" sx={{ mb: 10 }}>
 							Submit
 						</Button>
 					</Grid>

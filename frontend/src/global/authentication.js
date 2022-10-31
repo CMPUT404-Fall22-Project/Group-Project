@@ -69,6 +69,16 @@ export default class Authentication {
 		this._authListeners.splice(index, 1);
 	}
 
+	/**
+	 * Notifies all listeners that data about the profile or other auth data
+	 * (not related to being logged in) has been updated somewhere in the app
+	 */
+	notifyAuthDataChanged() {
+		axios({ method: "get", url: process.env.REACT_APP_HOST + "authors/" + this._userData.getId() }).then((resp) => {
+			this._setAuthor(resp.data);
+		});
+	}
+
 	_notifyAuthChangedListeners(loggedIn) {
 		for (const listener of this._authListeners) {
 			listener(loggedIn);
@@ -77,6 +87,12 @@ export default class Authentication {
 
 	_sessionExists() {
 		return this._sessionToken !== null;
+	}
+
+	_setAuthor(data) {
+		cookies.set(Authentication.ID_COOKIE_AUTHOR, data);
+		this._userData = Author.parseDatabase(data);
+		this._notifyAuthChangedListeners(true);
 	}
 
 	authenticate(username, password) {
@@ -109,9 +125,7 @@ export default class Authentication {
 					const data = resp.data;
 					this._sessionToken = data.token;
 					this._isLoggedIn = true;
-					cookies.set(Authentication.ID_COOKIE_AUTHOR, data.author);
-					this._userData = Author.parseDatabase(data.author);
-					this._notifyAuthChangedListeners(true);
+					this._setAuthor(data.author);
 					resolve();
 				})
 				.catch((request) => {
