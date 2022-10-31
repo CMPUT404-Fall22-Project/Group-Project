@@ -3,14 +3,14 @@ import { Link } from "react-router-dom";
 
 import "./header.css";
 
-import { Avatar, MenuItem, Menu } from "@mui/material";
+import { Avatar, MenuItem, Menu, Divider } from "@mui/material";
 import { APPLICATION_NAME } from "../../constants";
 import Authentication from "../../global/authentication";
 import history from "../../history";
 import NotificationBar from "../../global/centralNotificationBar";
 import axios from "axios";
 import FollowRequestSearch from "../followRequestSearch";
-import { FollowRequestsButton } from "../followRequests";
+import { FollowRequestsButton, FollowRequestsMenuItem } from "../followRequests";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {
@@ -114,12 +114,13 @@ export class AppHeader extends Component {
 				</div>
 				{this.state.renderChild ? this.state.renderChild() : null}
 				<div className="topnav-toolbar-container">
-					{!auth.isLoggedIn() ? null : (
-						<>
+					{auth.isLoggedIn() ? (
+						<React.Fragment>
 							<FollowRequestSearch />
-							{/* <FollowRequestsButton /> */}
-						</>
-					)}
+							{/*cursed*/}
+							<Divider orientation="vertical" style={{ height: "10em", marginRight: "0.5em" }} />
+						</React.Fragment>
+					) : null}
 					<span style={{ whiteSpace: "nowrap", fontWeight: "600", color: "#ffffff" }}>
 						{this.state.userData.getUsername()}
 					</span>
@@ -146,6 +147,13 @@ export class AppHeader extends Component {
 						<MenuItem disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
 							Logout
 						</MenuItem>
+						{auth.isLoggedIn() ? (
+							<FollowRequestsMenuItem
+								disabled={!auth.isLoggedIn()}
+								variant="outlined"
+								onClick={() => this.handleProfileClose()}
+							></FollowRequestsMenuItem>
+						) : null}
 					</Menu>
 				</div>
 			</div>

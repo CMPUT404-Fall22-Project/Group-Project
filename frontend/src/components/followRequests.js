@@ -1,8 +1,7 @@
 import axios from "axios";
-import React, { Component, useEffect, useState } from "react";
-import { Button } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Button, MenuItem } from "@mui/material";
 import "./followRequests.css";
-import background from "../static/back.webp";
 import Box from "@mui/material/Box";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -10,15 +9,13 @@ import List from "@mui/material/List";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import DeleteIcon from "@mui/icons-material/Delete";
 import Stack from "@mui/material/Stack";
 import { styled } from "@mui/material/styles";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import { LikeButton } from "../components/likeButton";
 import Authentication from "../global/authentication";
 import Loader from "../components/loader";
+import AbstractModalProvider from "./modals/modalProvider";
+import ModalSystem from "../global/modalSystem";
+import AccountBoxOutlinedIcon from "@mui/icons-material/AccountBoxOutlined";
 
 const Demo = styled("div")(({ theme }) => ({
 	backgroundColor: theme.palette.background.paper,
@@ -36,25 +33,61 @@ export const FollowRequestsButton = () => {
 			>
 				Follow Requests
 			</Button>
-			{clicked ? <TopAppBar /> : null}
+			<FollowRequestsToggle open={clicked}></FollowRequestsToggle>
 		</div>
 	);
 };
 
+export const FollowRequestsMenuItem = ({ onClick, ...props }) => {
+	return (
+		<React.Fragment>
+			<MenuItem
+				{...props}
+				onClick={() => {
+					if (onClick) {
+						onClick();
+					}
+					const provider = new FollowRequestsModal();
+					ModalSystem.getInstance().addModal("Follow-Requests-Modal", provider, {
+						centered: true,
+						dialog: true,
+						draggable: false,
+						initialHeight: "40em",
+						initialWidth: "70em",
+						resizable: false,
+					});
+				}}
+			>
+				Follow Requests
+			</MenuItem>
+		</React.Fragment>
+	);
+};
+
+class FollowRequestsModal extends AbstractModalProvider {
+	constructor() {
+		super();
+	}
+
+	getTitle() {
+		return this.createTitleWithIcon(AccountBoxOutlinedIcon, "Follow Requests");
+	}
+
+	getContent() {
+		return <FollowRequests></FollowRequests>;
+	}
+}
+
+export const FollowRequestsToggle = ({ open }) => {
+	if (open) {
+		return <TopAppBar />;
+	}
+	return null;
+};
 export function TopAppBar() {
 	return (
 		<div style={{ width: "50%", height: "100%", position: "absolute" }}>
 			<Box sx={{ flexGrow: 1, maxWidth: 1000 }}>
-				{/* <AppBar position="static">
-					<Toolbar>
-						<IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
-							<MenuIcon />
-						</IconButton>
-						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-							Follow Requests
-						</Typography>
-					</Toolbar>
-				</AppBar> */}
 				<div style={{ width: "100%", height: "100%", position: "absolute", overflow: "auto" }}>
 					<FollowRequests></FollowRequests>
 				</div>

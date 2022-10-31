@@ -37,9 +37,9 @@ const AuthorCardComponenet = ({ data }) => {
 				<Typography style={{ marginLeft: "0.5em" }}>{data.getUsername()}</Typography>
 			</div>
 			<div>
-				<IconButton aria-label="Follow" title="Follow?" onClick={handleFollow}>
+				{/* <IconButton aria-label="Follow" title="Follow?" onClick={handleFollow}>
 					<PersonAddIcon />
-				</IconButton>
+				</IconButton> */}
 				<IconButton aria-label="GitHub" title="Github" href={data.getGithubUrl()}>
 					<GitHubIcon />
 				</IconButton>

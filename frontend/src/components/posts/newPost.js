@@ -25,7 +25,6 @@ export default class NewPost extends Component {
 	constructor(props) {
 		super(props);
 		const d = this.props.prefillData || {};
-		console.log(d);
 		this.state = {
 			type: d.contentType || POST_CONSTANTS.POST_TYPE_TEXT,
 			preview: false,
@@ -42,6 +41,10 @@ export default class NewPost extends Component {
 				visibility: d.visibility || POST_CONSTANTS.POST_VISIBILITY_PUBLIC,
 				unlisted: d.unlisted || false,
 				author: d.author || Authentication.getInstance().getUser().copy(),
+			},
+			extras: {
+				source: d.source || undefined,
+				origin: d.origin || undefined,
 			},
 		};
 	}
@@ -156,9 +159,8 @@ export default class NewPost extends Component {
 	sendPostRequest(data, postURL) {
 		return new Promise((resolve, reject) => {
 			axios({
-				method: "post",
+				method: "put",
 				url: postURL,
-				withCredentials: true,
 				data: data,
 			})
 				.then((resp) => {
@@ -177,11 +179,16 @@ export default class NewPost extends Component {
 		return Authentication.getInstance().getUser().getUrl() + "/posts/" + id;
 	}
 
+	handleError(err) {
+		NotificationBar.getInstance().addNotification(err, NotificationBar.NT_ERROR);
+		this.setState({ isPosting: false });
+	}
+
 	handleImagePost(data) {
 		this.setState({ isPosting: true });
 		const url = this.getUrl(data.id);
 		data.content = data.content.split(",")[1];
-		this.sendPostRequest(data, url).then(this.handleComplete.bind(this));
+		this.sendPostRequest(data, url).then(this.handleComplete.bind(this)).catch(this.handleError.bind(this));
 	}
 
 	handleTextPost(data) {
@@ -214,6 +221,7 @@ export default class NewPost extends Component {
 		}
 		const data = {
 			...this.state.post,
+			...this.state.extras,
 		};
 		if (this.state.type === POST_CONSTANTS.POST_TYPE_PNG) {
 			if (this.state.imageData === null) {
@@ -340,7 +348,9 @@ export default class NewPost extends Component {
 							style={{
 								width: "15%",
 							}}
-							control={<Checkbox value={this.state.post.unlisted} onChange={this.handleChangeGeneric.bind(this)} />}
+							control={
+								<Checkbox defaultChecked={this.state.post.unlisted} onChange={this.handleChangeGeneric.bind(this)} />
+							}
 							label="Unlisted"
 						/>
 					</div>

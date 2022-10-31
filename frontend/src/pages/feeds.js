@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "./feeds.css";
 import { Paper } from "@mui/material";
-import MyFeed from "../components/myFeed";
+import FeedComponent from "../components/genericFeed";
 
 export default class MainFeed extends Component {
 	constructor(props) {
@@ -15,7 +15,7 @@ export default class MainFeed extends Component {
 		return (
 			<div className="feeds-body">
 				<Paper className="feeds-center" elevation={0} variant="outlined" square>
-					<MyFeed></MyFeed>
+					<FeedComponent {...this.props}></FeedComponent>
 				</Paper>
 			</div>
 		);

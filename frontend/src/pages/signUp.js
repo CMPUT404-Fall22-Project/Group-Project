@@ -129,7 +129,7 @@ export default function SignUpPage() {
 		if (!data) {
 			return { error: true, helperText: "This field cannot be empty" };
 		}
-		if (isPassword) {
+		if (isPassword && password !== passwordConfirm) {
 			return { error: true, helperText: "Passwords do not match" };
 		}
 	};

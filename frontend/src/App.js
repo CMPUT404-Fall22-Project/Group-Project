@@ -47,14 +47,17 @@ class App extends Component {
 					<ModalSystem></ModalSystem>
 					<AppHeader />
 					<NotificationBar />
-					{auth.isLoggedIn() ? <FollowRequestsButton /> : null}
 					<Switch>
 						{this.state.hasError > 0 ? (
 							<Route render={(props) => <ApplicationError {...props} error={App._ERROR_DATA} />} />
 						) : null}
 						<Route exact path="/signup" render={(props) => <SignUpPage {...props} />} />
 						{!auth.isLoggedIn() ? <Route render={(props) => <SignInPage {...props} />} /> : null}
-						<Route exact path="/" render={(props) => <MainFeed {...props} />} />
+						<Route exact path="/" render={(props) => <MainFeed {...props} authorId={auth.getUser().getId()} />} />
+						<Route
+							path="/authors/:id"
+							render={({ match, ...props }) => <MainFeed {...props} authorId={match.params.id} />}
+						/>
 						{/* <Route exact path="/amrit" render={(props) => <FollowRequestsButton {...props} />} /> */}
 						<Route exact path="/temp-follow-request" render={(props) => <FollowRequestSearch {...props} />} />
 

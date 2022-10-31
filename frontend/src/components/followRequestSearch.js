@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Box from "@mui/material/Box";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import Authentication from "../global/authentication";
-import { Autocomplete, TextField, Grid } from "@mui/material";
+import { Autocomplete, TextField, Grid, IconButton } from "@mui/material";
 import NotificationBar from "../global/centralNotificationBar";
+import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 
 // Enables an Author to submit a Follow Request to another Author
 // Select component is auto-filled with the names of all authorized authors
@@ -64,42 +63,45 @@ export default function FollowRequestSearch() {
 
 	return (
 		<Box sx={{ minWidth: 120 }}>
-			<FormControl fullWidth>
-				<Grid container>
-					<Grid item xs={6}>
-						<Autocomplete
-							onChange={(event, author) => {
-								setAuthorId(author.id);
+			<FormControl fullWidth style={{ display: "flex", flexDirection: "row" }}>
+				<Autocomplete
+					onChange={(event, author) => {
+						setAuthorId(author.id);
+					}}
+					freeSolo
+					id="free-solo-2-demo"
+					disableClearable
+					options={authors}
+					style={{
+						margin: "0.25em",
+						width: "25em",
+					}}
+					size="small"
+					renderInput={(params) => (
+						<TextField
+							{...params}
+							style={{
+								background: "#ffffffff",
 							}}
-							freeSolo
-							id="free-solo-2-demo"
-							disableClearable
-							options={authors}
-							renderInput={(params) => (
-								<TextField
-									{...params}
-									label="Search Input"
-									InputProps={{
-										...params.InputProps,
-										type: "search",
-									}}
-								/>
-							)}
+							variant="standard"
+							label="Search Authors"
+							InputProps={{
+								...params.InputProps,
+								type: "search",
+							}}
 						/>
-					</Grid>
-					<Grid item xs={6}>
-						<Button
-							size="large"
-							variant="contained"
-							disabled={!authorId}
-							onClick={() => {
-								handleButtonClick();
-							}}
-						>
-							Submit
-						</Button>
-					</Grid>
-				</Grid>
+					)}
+				/>
+				<IconButton
+					aria-label="Send"
+					title="Send Follow Request"
+					disabled={!authorId}
+					onClick={() => {
+						handleButtonClick();
+					}}
+				>
+					<SendOutlinedIcon />
+				</IconButton>
 			</FormControl>
 		</Box>
 	);
