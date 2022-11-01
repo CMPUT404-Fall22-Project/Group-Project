@@ -96,7 +96,7 @@ export class EditablePostContainer extends Component {
 			axios({
 				method: "delete",
 				url: this.props.data.getBaseData().origin,
-			});
+			}).then(() => window.location.reload());
 		});
 	}
 

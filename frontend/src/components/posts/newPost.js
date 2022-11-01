@@ -207,7 +207,7 @@ export default class NewPost extends Component {
 				author: Authentication.getInstance().getUser().copy(),
 				categories: [],
 			};
-			this.sendPostRequest(data2, url)
+			this.sendPostRequest(data2, url, method)
 				.then((id) => {
 					data.content += `\n![](${url}${id}/image)`;
 					this.sendPostRequest(data, url, method)
