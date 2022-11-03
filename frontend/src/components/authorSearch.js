@@ -77,7 +77,7 @@ export default function FollowRequestSearch() {
 			return;
 		}
 		axios
-			.post(process.env.REACT_APP_HOST + `authors/${authorId}/inbox/`, { id: userId })
+			.post(process.env.REACT_APP_HOST + `authors/${authorId}/inbox/`, { id: userId, type: "follow" })
 			.then((res) => {
 				NotificationBar.getInstance().addNotification("Follow request sent successfully!", NotificationBar.NT_SUCCESS);
 			})
