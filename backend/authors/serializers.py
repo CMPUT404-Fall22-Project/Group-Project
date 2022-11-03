@@ -5,4 +5,5 @@ from .models import Author
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
-        fields = "__all__"
+        # don't include followers or isAuthorized
+        fields = ["id","type","host","displayName","github","profileImage"]
