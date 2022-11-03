@@ -20,7 +20,6 @@ from authors.serializers import AuthorSerializer
 # if the type is “follow” then that follow is added to AUTHOR_ID’s inbox to approve later
 # if the type is “like” then add that like to AUTHOR_ID’s inbox
 # if the type is “comment” then add that comment to AUTHOR_ID’s inbox
-# DELETE [local]: clear the inbox
 
 def add_data_to_inboxes_of_author_and_followers(author: Author, data):
     """
@@ -57,44 +56,69 @@ class InboxList(APIView):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         # get all of the inbox items for this author
         inbox = Inbox.objects.filter(author=author)
-        # print(inbox,"I am the inbox")
         serializer = InboxSerializer(inbox,many=True)
         dictionary = {"type":"inbox", "author":author.id,"items":serializer.data}
 
         return Response(dictionary, status=status.HTTP_200_OK)
 
-        # q = self.request.GET.get('q', '')
-        # if q:
-        #     data_type = Inbox.DataType.get_enum(q)
-        #     queryset = queryset.filter(state__key=data_type)
-
-        # serializer = InboxSerializer(data,many=True)
-        # dict = {"type": "inbox", "author": author.id, "items": serializer.data}
-        # return Response(dict, status=status.HTTP_200_OK)
-
-    
     def post(self, request, id, format=None):
-        """# POST [local, remote]: send a post to the author"""
-        # NOTE: think this will currently only handle follow requests
-
+        """
+        POST [local, remote]: send a post to the author
+        if the type is “post” then add that post to AUTHOR_ID’s inbox
+        if the type is “follow” then add that follow is added to AUTHOR_ID’s inbox to approve later
+        if the type is “like” then add that like to AUTHOR_ID’s inbox
+        if the type is “comment” then add that comment to AUTHOR_ID’s inbox
+        """
         # ensure the author exists and is authorized
         author = get_object_or_404(Author, id=id)
         if not author.isAuthorized:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         
-        # ensure the follower exists and is authorized
-        follower_id = request.data["id"] # TODO: get the pending follower
-        follower = get_object_or_404(Author, id=follower_id)
-        if not follower.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        
-        author_serializer = AuthorSerializer(author)
-        follower_serializer = AuthorSerializer(follower)
-        data = {}
-        data["type"] = "Follow"
-        data["summary"] = str(follower.displayName) + " wants to follow " + author.displayName
-        data["actor"] = follower_serializer.data
-        data["object"] = author_serializer.data
+        # get the data type
+        type = request.data["type"]
 
-        inbox = author.inboxes.create(data=data,dataType=data["type"])
-        return Response({"id":inbox.id}, status=status.HTTP_201_CREATED)
+        if type in ["post","like","comment"]:
+            # save the data to the author's inbox
+            data = request.data
+            del data["type"] # this key/value be saved under dataType
+            inbox = author.inboxes.create(data=request.data,dataType=type)
+            return Response({"id":inbox.id}, status=status.HTTP_201_CREATED)
+        
+        if type == "follow":
+            # ensure the follower exists and is authorized
+            follower_id = request.data["id"] # TODO: get the pending follower
+            follower = get_object_or_404(Author, id=follower_id)
+            if not follower.isAuthorized:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            
+            # Create the follow request (we only need the ids of the authors)
+            author_serializer = AuthorSerializer(author)
+            follower_serializer = AuthorSerializer(follower)
+            data = {}
+            data["type"] = "Follow"
+            data["summary"] = str(follower.displayName) + " wants to follow " + author.displayName
+            data["actor"] = follower_serializer.data
+            data["object"] = author_serializer.data
+
+            inbox = author.inboxes.create(data=data,dataType=data["type"])
+            return Response({"id":inbox.id}, status=status.HTTP_201_CREATED)
+        
+
+class InboxDetail(APIView):
+
+    def delete(self, request, author_id, inbox_id, format=None):
+        """DELETE [local]: clear the inbox"""
+        # ensure author exists and is authorized
+        author = get_object_or_404(Author, id=author_id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        # get all of the inbox items for this author
+        inbox = Inbox.objects.filter(author=author)
+        serializer = InboxSerializer(inbox,many=True)
+        dictionary = {"type":"inbox", "author":author.id,"items":serializer.data}
+        # get the inbox item to be deleted
+        inbox = get_object_or_404(Inbox, id=inbox_id)
+        # delete the inbox item
+        inbox.delete()
+        return Response(status=status.HTTP_200_OK)
+
