@@ -95,7 +95,7 @@ class InboxList(APIView):
             author_serializer = AuthorSerializer(author)
             follower_serializer = AuthorSerializer(follower)
             data = {}
-            data["type"] = "Follow"
+            data["type"] = "follow"
             data["summary"] = str(follower.displayName) + " wants to follow " + author.displayName
             data["actor"] = follower_serializer.data
             data["object"] = author_serializer.data

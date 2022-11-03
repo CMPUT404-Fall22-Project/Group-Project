@@ -71,7 +71,8 @@ export function FollowRequests() {
 		console.log(response);
 		const followRequests = [];
 		for (let item of response.data.items) {
-			if (item.dataType === "Follow") {
+			// Rubric states "Follow"
+			if (["Follow", "follow"].includes(item.dataType)) {
 				const id = item.data.actor.id;
 				// Don't add follow requests from authors already following this author
 				if (!followerIds.includes(id)) {
