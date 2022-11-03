@@ -2,12 +2,8 @@ import { Router, Route, Switch } from "react-router-dom";
 import ApplicationError from "./pages/applicationError";
 import HTML404 from "./components/errors/404";
 import React, { Component } from "react";
-import Test from "./pages/test";
-import LoginComponent from "./pages/login";
-import TestPageComponent from "./pages/testPage";
 import "./App.css";
 import history from "./history";
-import FollowRequestSearch from "./components/authorSearch";
 import NotificationBar from "./global/centralNotificationBar";
 import { AppHeader } from "./components/header/header";
 import SignUpPage from "./pages/signUp";
@@ -16,7 +12,6 @@ import Authentication from "./global/authentication";
 import MainFeed from "./pages/feeds";
 import EditProfile from "./components/editProfile";
 import ModalSystem from "./global/modalSystem";
-import { FollowRequestsButton } from "./components/followRequests";
 
 class App extends Component {
 	static _ERROR_DATA = [];
@@ -58,8 +53,6 @@ class App extends Component {
 							path="/authors/:id"
 							render={({ match, ...props }) => <MainFeed {...props} authorId={match.params.id} />}
 						/>
-						{/* <Route exact path="/amrit" render={(props) => <FollowRequestsButton {...props} />} /> */}
-						<Route exact path="/temp-follow-request" render={(props) => <FollowRequestSearch {...props} />} />
 						<Route exact path="/edit-author" render={(props) => <EditProfile {...props} />} />
 						<Route component={HTML404}></Route>
 					</Switch>

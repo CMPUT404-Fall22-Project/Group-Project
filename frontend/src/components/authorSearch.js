@@ -45,14 +45,12 @@ export default function FollowRequestSearch() {
 		// Get all of the authors
 		var response = await axios.get(process.env.REACT_APP_HOST + `authors/`);
 		const authors = response.data.items;
-		const arr = [];
+		var arr = [];
 		for (let a of authors) {
 			arr.push({ label: a.displayName, id: a.id });
 		}
 		// Remove the logged in author from arr
-		var author = arr.find((a) => a.id === userId);
-		var index = arr.indexOf(author);
-		arr.splice(index, 1);
+		arr = arr.filter((a) => a.id !== userId);
 		setAuthors(arr);
 	};
 
