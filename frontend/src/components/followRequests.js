@@ -16,6 +16,7 @@ import Loader from "../components/loader";
 import AbstractModalProvider from "./modals/modalProvider";
 import ModalSystem from "../global/modalSystem";
 import AccountBoxOutlinedIcon from "@mui/icons-material/AccountBoxOutlined";
+import NotificationBar from "../global/centralNotificationBar";
 
 const Demo = styled("div")(({ theme }) => ({
 	backgroundColor: theme.palette.background.paper,
@@ -144,7 +145,10 @@ export function FollowRequests() {
 			.put(process.env.REACT_APP_HOST + `authors/${userId}/followers/${followerId}`)
 			.then((res) => {
 				console.log(res);
-				alert(`${firstName} successfully added as a follower!`);
+				NotificationBar.getInstance().addNotification(
+					`${firstName} successfully added as a follower!`,
+					NotificationBar.NT_SUCCESS
+				);
 			})
 			.catch((err) => console.log(err));
 	}
