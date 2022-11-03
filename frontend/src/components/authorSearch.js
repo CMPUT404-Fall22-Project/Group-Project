@@ -17,6 +17,7 @@ import history from "../history";
 export default function FollowRequestSearch() {
 	const [authorId, setAuthorId] = useState("");
 	const [authors, setAuthors] = useState([]);
+	const [followingIds, setFollowingIds] = useState([]);
 	const userId = Authentication.getInstance().getUser().getId();
 
 	const [anchorEl, setAnchorEl] = useState();
@@ -32,29 +33,27 @@ export default function FollowRequestSearch() {
 	}, []);
 
 	const handleAuthors = async () => {
-		// gets all of the authors
-		// gets all of the users the author is following
-		// generates a list of all authors - the logged in author - authors the author is already following
-
-		// Get all of the authors
-		var response = await axios.get(process.env.REACT_APP_HOST + `authors/`);
-		const authors = response.data.items;
-
-		// get all authors that the logged in user is following
+		// get ids for all authors that the logged in user is following
 		response = await axios.get(process.env.REACT_APP_HOST + `authors/${userId}/following/`);
 		const following = response.data.items;
 		const followingIds = [];
 		for (let f of following) {
 			followingIds.push(f.id);
 		}
+		setFollowingIds(followingIds);
+
+		// Get all of the authors
+		var response = await axios.get(process.env.REACT_APP_HOST + `authors/`);
+		const authors = response.data.items;
 		const arr = [];
 		for (let a of authors) {
-			// only fill arr with authors that the author is not currently following
-			if (a.id !== userId && !followingIds.includes(a.id)) {
-				arr.push({ label: a.displayName, id: a.id });
-			}
-			setAuthors(arr);
+			arr.push({ label: a.displayName, id: a.id });
 		}
+		// Remove the logged in author from arr
+		var author = arr.find((a) => a.id === userId);
+		var index = arr.indexOf(author);
+		arr.splice(index, 1);
+		setAuthors(arr);
 	};
 
 	const handleButtonClick = (event) => {
@@ -68,6 +67,15 @@ export default function FollowRequestSearch() {
 	};
 
 	const sendFollowRequest = () => {
+		// if user is already finding this author
+		if (followingIds.includes(authorId)) {
+			var author = authors.find((author) => author.id === authorId);
+			NotificationBar.getInstance().addNotification(
+				`You're already following ${author.label}!`,
+				NotificationBar.NT_WARNING
+			);
+			return;
+		}
 		axios
 			.post(process.env.REACT_APP_HOST + `authors/${authorId}/inbox/`, { id: userId })
 			.then((res) => {
