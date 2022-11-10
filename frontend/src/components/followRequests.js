@@ -122,18 +122,13 @@ export function FollowRequests() {
 		var response = await axios.get(process.env.REACT_APP_HOST + `authors/${userId}/inbox/`);
 		console.log(response);
 		const followRequests = [];
-		console.log(response.data.items, "Inbox contents");
 		for (let item of response.data.items) {
-			if (item.dataType === "Follow") {
-				const id = item.data.actor.id;
-				// Don't add follow requests from authors already following this author
-				if (!followerIds.includes(id)) {
-					followRequests.push(item.data);
-				}
+			// Rubric states "Follow"
+			if (["Follow", "follow"].includes(item.dataType)) {
+				followRequests.push(item.data);
 			}
 		}
 		setFollowRequests(followRequests);
-		console.log("follow Requests", followRequests);
 		setIsLoaded(true);
 	};
 
@@ -147,6 +142,18 @@ export function FollowRequests() {
 				console.log(res);
 				NotificationBar.getInstance().addNotification(
 					`${firstName} successfully added as a follower!`,
+					NotificationBar.NT_SUCCESS
+				);
+			})
+			.catch((err) => console.log(err));
+	}
+	async function handleRejectButton(followRequest) {
+		axios
+			.put(process.env.REACT_APP_HOST + `authors/${userId}/inbox/`, { item: followRequest })
+			.then((res) => {
+				console.log(res);
+				NotificationBar.getInstance().addNotification(
+					`Follow request deleted successfully.`,
 					NotificationBar.NT_SUCCESS
 				);
 			})
@@ -170,7 +177,9 @@ export function FollowRequests() {
 											<Button variant="outlined" onClick={() => handleAcceptButton(followRequest)}>
 												Accept
 											</Button>
-											<Button variant="outlined">Reject</Button>
+											<Button variant="outlined" onClick={() => handleRejectButton(followRequest)}>
+												Reject
+											</Button>
 										</Stack>
 									}
 								>
