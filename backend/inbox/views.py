@@ -103,22 +103,29 @@ class InboxList(APIView):
             inbox = author.inboxes.create(data=data,dataType=data["type"])
             return Response({"id":inbox.id}, status=status.HTTP_201_CREATED)
         
+    def delete(self, request, id, format=None):
+        """DELETE [local]: clear the inbox"""
+        # ensure author exists and is authorized
+        author = get_object_or_404(Author, id=id)
+        if not author.isAuthorized:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        # delete all of the inbox items for this author
+        inbox = Inbox.objects.filter(author=author)
+        for item in inbox:
+            item.delete()
+        return Response(status=status.HTTP_200_OK)
+        
 
 class InboxDetail(APIView):
 
     def delete(self, request, author_id, inbox_id, format=None):
-        """DELETE [local]: clear the inbox"""
+        """Delete from inbox by id"""
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=author_id)
         if not author.isAuthorized:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        # get all of the inbox items for this author
-        inbox = Inbox.objects.filter(author=author)
-        serializer = InboxSerializer(inbox,many=True)
-        dictionary = {"type":"inbox", "author":author.id,"items":serializer.data}
-        # get the inbox item to be deleted
+        # get and delete the inbox item
         inbox = get_object_or_404(Inbox, id=inbox_id)
-        # delete the inbox item
         inbox.delete()
         return Response(status=status.HTTP_200_OK)
 

@@ -144,7 +144,7 @@ class InboxTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(len(items),1)
 
     def test_post_to_and_delete_from_inbox(self):
-        """Test posting to and deleting from an author's inbox"""
+        """Test posting to and deleting from an author's inbox by id"""
         # post an author
         author1_id = self.post_and_authorize_an_author(self.test_author1_data)
         # post another author
@@ -166,6 +166,42 @@ class InboxTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(len(items),1)
         # ensure we can delete the inbox item
         url = self.get_inbox_detail_url(author1_id,inbox_id)
+        response = self.client.delete(url, format='json')
+        # ensure the proper response code is returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the author's inbox is now empty
+        response = self.client.get(self.get_inbox_list_url(author1_id), format='json')
+        # ensure the proper response code is returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the proper author id is returned
+        self.assertEqual(response.data["author"],author1_id)
+        # ensure there is 0 item in items
+        items = response.data["items"]
+        self.assertEqual(len(items),0)
+
+
+    def test_post_to_and_delete_all_from_inbox(self):
+        """Test posting to and deleting from an author's inbox"""
+        # post an author
+        author1_id = self.post_and_authorize_an_author(self.test_author1_data)
+        # post another author
+        author2_id = self.post_and_authorize_an_author(self.test_author2_data)
+        # send a follow request from author2 to author1
+        url = self.get_inbox_list_url(author1_id)
+        response = self.client.post(url, {"id":author2_id,"type":"follow"}, format='json')
+        # ensure the proper response code is returned
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # get posts from inbox
+        response = self.client.get(self.get_inbox_list_url(author1_id), format='json')
+        # ensure the proper response code is returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # ensure the proper author id is returned
+        self.assertEqual(response.data["author"],author1_id)
+        # ensure there is 1 item in items
+        items = response.data["items"]
+        self.assertEqual(len(items),1)
+        # ensure we can delete the inbox item
+        url = self.get_inbox_list_url(author1_id)
         response = self.client.delete(url, format='json')
         # ensure the proper response code is returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
