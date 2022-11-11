@@ -125,7 +125,7 @@ export function FollowRequests() {
 		for (let item of response.data.items) {
 			// Rubric states "Follow"
 			if (["Follow", "follow"].includes(item.dataType)) {
-				followRequests.push(item.data);
+				followRequests.push(item);
 			}
 		}
 		setFollowRequests(followRequests);
@@ -134,8 +134,8 @@ export function FollowRequests() {
 
 	async function handleAcceptButton(followRequest) {
 		// PUT the Author with id === followerId as a follower of Author with id === userId
-		const followerId = followRequest.actor.id;
-		const firstName = followRequest.summary.split(" ")[0];
+		const followerId = followRequest.data.actor.id;
+		const firstName = followRequest.data.summary.split(" ")[0];
 		axios
 			.put(process.env.REACT_APP_HOST + `authors/${userId}/followers/${followerId}`)
 			.then((res) => {
@@ -145,11 +145,19 @@ export function FollowRequests() {
 					NotificationBar.NT_SUCCESS
 				);
 			})
+			.catch((err) => console.log(err));		
+		axios
+			.delete(process.env.REACT_APP_HOST + `authors/${userId}/inbox/${followRequest.id}`)
+			.then((res) => {
+				console.log(res);
+			})
 			.catch((err) => console.log(err));
 	}
+
 	async function handleRejectButton(followRequest) {
+
 		axios
-			.put(process.env.REACT_APP_HOST + `authors/${userId}/inbox/`, { item: followRequest })
+			.delete(process.env.REACT_APP_HOST + `authors/${userId}/inbox/${followRequest.id}`)
 			.then((res) => {
 				console.log(res);
 				NotificationBar.getInstance().addNotification(
@@ -184,9 +192,9 @@ export function FollowRequests() {
 									}
 								>
 									<ListItemAvatar>
-										<Avatar alt="actor" src={followRequest.actor.profileImage}></Avatar>
+										<Avatar alt="actor" src={followRequest.data.actor.profileImage}></Avatar>
 									</ListItemAvatar>
-									<ListItemText primary={followRequest.summary} key={followRequest.actor.id} />
+									<ListItemText primary={followRequest.data.summary} key={followRequest.data.actor.id} />
 								</ListItem>
 							))}
 						</List>
