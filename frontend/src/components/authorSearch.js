@@ -14,7 +14,7 @@ import history from "../history";
 // Selection of an author enables the "Submit Follow Request" button
 // Clicking the "Submit Follow Request" sends a POST request to the inbox of the selected Author
 
-export default function FollowRequestSearch() {
+export default function AuthorSearch() {
 	const [authorId, setAuthorId] = useState("");
 	const [authors, setAuthors] = useState([]);
 	const [followingIds, setFollowingIds] = useState([]);
@@ -65,7 +65,7 @@ export default function FollowRequestSearch() {
 	};
 
 	const sendFollowRequest = () => {
-		// if user is already finding this author
+		// if user is already following this author
 		if (followingIds.includes(authorId)) {
 			var author = authors.find((author) => author.id === authorId);
 			NotificationBar.getInstance().addNotification(
