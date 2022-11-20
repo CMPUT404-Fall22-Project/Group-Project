@@ -21,7 +21,7 @@ export default class FeedComponent extends Component {
 		};
 
 		var postsUrl = props.authorId + "/posts/";
-		if (!(props.authorId === user.getId())) {
+		if (!this.state.isCurrentUser) {
 			postsUrl = process.env.REACT_APP_HOST + `authors/${postsUrl}`;
 		}
 		this.postSupplier = new PaginatedProvider(new GenericElementProvider(postsUrl));
