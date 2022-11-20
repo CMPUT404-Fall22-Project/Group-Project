@@ -28,8 +28,15 @@ class Post(models.Model):
     origin = models.URLField()
     description = models.CharField(max_length=255)
     contentType = models.CharField(choices=ContentType.choices, null=False, max_length=255,default=ContentType.TEXT_PLAIN)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
     content = models.TextField(null=True)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    # categories (see Models below)
+    # count (total number of comments)
+    # comments (see Models below)
+    # commentsSrc is OPTIONAL and can be missing
+    # You should return ~ 5 comments per post.
+    # should be sorted newest(first) to oldest(last)
+    # this is to reduce API call counts
     published = models.DateTimeField(default=timezone.now, blank=False)
     visibilty = models.CharField(choices=Visibility.choices, max_length=7,default=Visibility.PUBLIC)
     unlisted = models.BooleanField(default=False)
