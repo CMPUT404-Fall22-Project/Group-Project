@@ -22,9 +22,6 @@ class AuthorList(APIView):
         for author in authors:
             serializer = AuthorSerializer(author)
             serializer_data = serializer.data
-            # set id and url as in rubric specs
-            # serializer_data["id"] = author.get_full_path()
-            serializer_data["url"] = author.get_full_path()
             serializer_arr.append(serializer_data)
 
         dict = {"type": "authors", "items": serializer_arr}
@@ -53,8 +50,6 @@ class AuthorDetail(APIView):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = AuthorSerializer(author)
         serializer_data = serializer.data
-        # serializer_data["id"] = author.get_full_path()
-        serializer_data["url"] = author.get_full_path()
         return Response(serializer_data, status=status.HTTP_200_OK)
     
     def post(self, request, id, format=None):
@@ -124,8 +119,6 @@ class FollowerDetail(APIView):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = AuthorSerializer(follower)
         serializer_data = serializer.data
-        # serializer_data["id"] = author.get_full_path()
-        serializer_data["url"] = author.get_full_path()
         return Response(serializer_data, status=status.HTTP_200_OK)
     
     def put(self, request, author_id, follower_id, format=None):
