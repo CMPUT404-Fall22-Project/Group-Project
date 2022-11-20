@@ -34,7 +34,7 @@ export default function FollowRequestSearch() {
 
 	const handleAuthors = async () => {
 		// get ids for all authors that the logged in user is following
-		response = await axios.get(process.env.REACT_APP_HOST + `authors/${userId}/following/`);
+		response = await axios.get(`${userId}/following/`);
 		const following = response.data.items;
 		const followingIds = [];
 		for (let f of following) {
@@ -75,7 +75,7 @@ export default function FollowRequestSearch() {
 			return;
 		}
 		axios
-			.post(process.env.REACT_APP_HOST + `authors/${authorId}/inbox/`, { id: userId, type: "follow" })
+			.post(`${authorId}/inbox/`, { id: userId, type: "follow" })
 			.then((res) => {
 				NotificationBar.getInstance().addNotification("Follow request sent successfully!", NotificationBar.NT_SUCCESS);
 			})

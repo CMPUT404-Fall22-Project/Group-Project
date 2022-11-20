@@ -110,7 +110,7 @@ export function FollowRequests() {
 
 	const handleFollowRequests = async () => {
 		// Get all followers
-		response = await axios.get(process.env.REACT_APP_HOST + `authors/${userId}/followers/`);
+		response = await axios.get(`${userId}/followers/`);
 		console.log(response);
 		const followerIds = [];
 		for (let follower of response.data.items) {
@@ -119,7 +119,7 @@ export function FollowRequests() {
 		setFollowerIds(followerIds);
 
 		// Get all follow requests
-		var response = await axios.get(process.env.REACT_APP_HOST + `authors/${userId}/inbox/`);
+		var response = await axios.get(`${userId}/inbox/`);
 		console.log(response);
 		const followRequests = [];
 		for (let item of response.data.items) {
@@ -137,7 +137,7 @@ export function FollowRequests() {
 		const followerId = followRequest.data.actor.id;
 		const firstName = followRequest.data.summary.split(" ")[0];
 		axios
-			.put(process.env.REACT_APP_HOST + `authors/${userId}/followers/${followerId}`)
+			.put(`${userId}/followers/${followerId}`)
 			.then((res) => {
 				console.log(res);
 				NotificationBar.getInstance().addNotification(
@@ -145,9 +145,9 @@ export function FollowRequests() {
 					NotificationBar.NT_SUCCESS
 				);
 			})
-			.catch((err) => console.log(err));		
+			.catch((err) => console.log(err));
 		axios
-			.delete(process.env.REACT_APP_HOST + `authors/${userId}/inbox/${followRequest.id}`)
+			.delete(`${userId}/inbox/${followRequest.id}`)
 			.then((res) => {
 				console.log(res);
 			})
@@ -155,9 +155,8 @@ export function FollowRequests() {
 	}
 
 	async function handleRejectButton(followRequest) {
-
 		axios
-			.delete(process.env.REACT_APP_HOST + `authors/${userId}/inbox/${followRequest.id}`)
+			.delete(`${userId}/inbox/${followRequest.id}`)
 			.then((res) => {
 				console.log(res);
 				NotificationBar.getInstance().addNotification(
