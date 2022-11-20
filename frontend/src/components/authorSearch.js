@@ -61,7 +61,7 @@ export default function FollowRequestSearch() {
 	};
 
 	const viewProfile = () => {
-		history.push("/authors/" + authorId);
+		history.push("/authors/" + authorId.split("/authors/")[1]);
 	};
 
 	const sendFollowRequest = () => {
