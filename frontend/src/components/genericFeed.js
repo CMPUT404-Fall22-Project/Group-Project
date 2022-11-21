@@ -7,6 +7,7 @@ import NotificationBar from "../global/centralNotificationBar";
 import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlined";
 import { NewPostButton } from "./posts/newPost";
 import { EditablePostContainer } from "./posts/post";
+import { FollowRequestButton } from "./followRequests";
 
 export default class FeedComponent extends Component {
 	constructor(props) {
@@ -16,6 +17,7 @@ export default class FeedComponent extends Component {
 		this.state = {
 			createdPost: null,
 			isCurrentUser: this.props.authorId === user.getId(),
+			userId: user.getId(),
 			posts: [],
 			hasAllPosts: false,
 		};
@@ -73,6 +75,7 @@ export default class FeedComponent extends Component {
 		}
 		return (
 			<div>
+				<FollowRequestButton authorId={this.props.authorId} userId={this.state.userId} />
 				{this.state.posts.map((x, idx) => (
 					<EditablePostContainer
 						isEditableFunc={() => false}

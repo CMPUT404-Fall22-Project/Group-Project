@@ -8,9 +8,8 @@ import { APPLICATION_NAME } from "../../constants";
 import Authentication from "../../global/authentication";
 import history from "../../history";
 import NotificationBar from "../../global/centralNotificationBar";
-import axios from "axios";
 import AuthorSearch from "../authorSearch";
-import { FollowRequestButton, FollowRequestsMenuItem } from "../followRequests";
+import { FollowRequestsMenuItem } from "../followRequests";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {
@@ -134,9 +133,6 @@ export class AppHeader extends Component {
 								{APPLICATION_NAME}
 							</span>
 						</Link>
-						<span style={{ whiteSpace: "nowrap" }} className="title">
-							<FollowRequestButton />
-						</span>
 					</div>
 				</div>
 				{this.state.renderChild ? this.state.renderChild() : null}
