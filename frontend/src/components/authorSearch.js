@@ -45,7 +45,7 @@ export default function AuthorSearch() {
 	};
 
 	const viewProfile = () => {
-		history.push("/authors/" + authorId.split("/authors/")[1]);
+		history.push({ pathname: "/authors/" + authorId.split("/authors/")[1], state: { authorId: authorId } });
 	};
 
 	return (

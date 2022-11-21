@@ -19,12 +19,7 @@ export default class FeedComponent extends Component {
 			posts: [],
 			hasAllPosts: false,
 		};
-
-		var postsUrl = props.authorId + "/posts/";
-		if (!this.state.isCurrentUser) {
-			postsUrl = process.env.REACT_APP_HOST + `authors/${postsUrl}`;
-		}
-		this.postSupplier = new PaginatedProvider(new GenericElementProvider(postsUrl));
+		this.postSupplier = new PaginatedProvider(new GenericElementProvider(`${this.props.authorId}/posts/`));
 		this.postSupplier.listen((success, data) => {
 			if (success) {
 				const formatted = data.map((x) => Post.parseDatabase(x));
