@@ -7,7 +7,7 @@ import NotificationBar from "../global/centralNotificationBar";
 import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlined";
 import { NewPostButton } from "./posts/newPost";
 import { EditablePostContainer } from "./posts/post";
-import { FollowRequestButton } from "./followRequests";
+import { FollowRequestButton } from "./sendFollowRequest";
 
 export default class FeedComponent extends Component {
 	constructor(props) {
