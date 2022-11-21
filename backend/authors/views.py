@@ -140,6 +140,7 @@ class FollowerDetail(APIView):
         """Remove an Author as a follower of another Author"""
         author = get_object_or_404(Author, id=author_id)
         followers = author.followers.all()
+        follower_id = follower_id.split("/authors/")[1]
         follower = get_object_or_404(followers, id=follower_id)
         author.followers.remove(follower)
         return Response(status=status.HTTP_200_OK)

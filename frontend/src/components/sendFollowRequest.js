@@ -64,12 +64,8 @@ export const FollowRequestButton = (props) => {
 		}
 		// buttonText === "UnFollow"
 		// remove userId as a follower of authorId
-		var response = await axios.put(`${authorId}/followers/${userId}`);
+		var response = await axios.delete(`${authorId}/followers/${userId}`);
 		if (response.status === 200) {
-			NotificationBar.getInstance().addNotification(
-				`You are no longer following ${authorId}`,
-				NotificationBar.NT_SUCCESS
-			);
 			setButtonText("Follow");
 		} else {
 			NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
