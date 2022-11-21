@@ -125,6 +125,7 @@ class FollowerDetail(APIView):
         """Add an Author as a follower of another Author"""
         # ensure author and follower exist and are both authorized
         author = get_object_or_404(Author, id=author_id)
+        follower_id = follower_id.split("/authors/")[1]
         follower = get_object_or_404(Author, id=follower_id)
         for a in [author,follower]:
             if not a.isAuthorized:
