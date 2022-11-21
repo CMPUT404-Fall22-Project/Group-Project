@@ -17,24 +17,63 @@ import AbstractModalProvider from "./modals/modalProvider";
 import ModalSystem from "../global/modalSystem";
 import AccountBoxOutlinedIcon from "@mui/icons-material/AccountBoxOutlined";
 import NotificationBar from "../global/centralNotificationBar";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+const theme = createTheme({
+	palette: {
+		primary: {
+			main: "#3366ff",
+		},
+	},
+});
 
 const Demo = styled("div")(({ theme }) => ({
 	backgroundColor: theme.palette.background.paper,
 }));
 
-export const FollowRequestsButton = () => {
-	const [clicked, setClicked] = useState(false);
-	return (
+export const FollowRequestButton = (props) => {
+	const [buttonText, setButtonText] = useState("");
+	const userId = props.userId;
+	const authorId = props.authorId;
+
+	useEffect(() => {
+		handleButtonText();
+	}, []);
+
+	async function handleButtonText() {
+		// get who the user is following
+		var response = await axios.get(`${userId}/following/`);
+		for (let author of response.data.items) {
+			if (author.id === authorId) {
+				setButtonText("UnFollow");
+			}
+		}
+		setButtonText("Follow");
+		// todo: check if follower is pending
+	}
+
+	async function handleButtonClick() {
+		// Handles Follow, Unfollow, and unsend
+		if (buttonText === "Follow") {
+			var response = await axios.post(`${authorId}/inbox/`, { id: userId, type: "follow" });
+			if (response.status === 201) {
+				NotificationBar.getInstance().addNotification("Follow request sent successfully!", NotificationBar.NT_SUCCESS);
+			} else {
+				NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
+			}
+		}
+	}
+
+	// prompt loader until buttonText is rendered
+	return !buttonText ? (
+		<Loader />
+	) : (
 		<div>
-			<Button
-				variant="contained"
-				onClick={() => {
-					setClicked(!clicked);
-				}}
-			>
-				Follow Requests
-			</Button>
-			<FollowRequestsToggle open={clicked}></FollowRequestsToggle>
+			<ThemeProvider theme={theme}>
+				<Button size="medium" variant="contained" onClick={handleButtonClick}>
+					{buttonText}
+				</Button>
+			</ThemeProvider>
 		</div>
 	);
 };
