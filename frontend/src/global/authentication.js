@@ -74,7 +74,7 @@ export default class Authentication {
 	 * (not related to being logged in) has been updated somewhere in the app
 	 */
 	notifyAuthDataChanged() {
-		axios({ method: "get", url: process.env.REACT_APP_HOST + "authors/" + this._userData.getId() }).then((resp) => {
+		axios({ method: "get", url: this._userData.getId() }).then((resp) => {
 			this._setAuthor(resp.data);
 		});
 	}

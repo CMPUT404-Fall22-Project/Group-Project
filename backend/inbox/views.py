@@ -86,7 +86,8 @@ class InboxList(APIView):
         
         if type == "follow":
             # ensure the follower exists and is authorized
-            follower_id = request.data["id"] # TODO: get the pending follower
+            follower_id = request.data["id"]
+            follower_id = follower_id.split("/authors/")[1]
             follower = get_object_or_404(Author, id=follower_id)
             if not follower.isAuthorized:
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
