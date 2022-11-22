@@ -2,9 +2,13 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+import requests
+from django import http
 
 from .models import Author
 from .serializers import AuthorSerializer
+from nodes.models import Node
+from nodes.serializers import NodeSerializer
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 class AuthorList(APIView):
@@ -17,12 +21,26 @@ class AuthorList(APIView):
         Example query: GET ://service/authors?page=10&size=5
         Gets the 5 authors, authors 45 to 49.
         """
+        def get_authors_from_nodes():
+            nodes = Node.objects.all() # TODO: filter out node for this server
+            arr = []
+            for node in nodes:
+                authors_url = node.host + "/authors/"
+                response = requests.get(authors_url, auth=(node.username, node.password))
+                arr.append(response.json())
+            return http.JsonResponse(arr)
+
+            
         authors = Author.objects.filter(isAuthorized=True) # only get authorized authors
         serializer_arr = []
         for author in authors:
             serializer = AuthorSerializer(author)
             serializer_data = serializer.data
             serializer_arr.append(serializer_data)
+        
+        # response = get_authors_from_nodes()
+        # print(response)
+        # TODO: add response data to serializer_arr
 
         dict = {"type": "authors", "items": serializer_arr}
         return Response(dict, status=status.HTTP_200_OK)
