@@ -89,7 +89,7 @@ export default function EditProfile() {
 							fullWidth
 							id="profileImage"
 							value={profileImage}
-							label="Profile image"
+							label="Profile Image"
 							onChange={(e) => HandleAuthor(e)}
 						/>
 					</Grid>
