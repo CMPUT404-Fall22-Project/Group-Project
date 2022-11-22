@@ -15,6 +15,9 @@ const theme = createTheme({
 });
 
 export const FollowRequestButton = (props) => {
+	var follow = "Follow";
+	var unfollow = "UnFollow";
+	var followPending = "Request Sent...";
 	const [buttonText, setButtonText] = useState("");
 	const userId = props.userId;
 	const authorId = props.authorId;
@@ -30,10 +33,8 @@ export const FollowRequestButton = (props) => {
 			// Rubric states "Follow"
 			if (["Follow", "follow"].includes(item.dataType)) {
 				// if follow request sender is the user
-				console.log("actor.id: ", item.data.actor.id);
-				console.log("userId: ", userId);
 				if (userId === item.data.actor.id) {
-					setButtonText("Request Sent...");
+					setButtonText(followPending);
 					return;
 				}
 			}
@@ -43,20 +44,20 @@ export const FollowRequestButton = (props) => {
 		console.log(response);
 		for (let author of response.data.items) {
 			if (author.id === authorId) {
-				setButtonText("UnFollow");
+				setButtonText(unfollow);
 				return;
 			}
 		}
-		setButtonText("Follow");
+		setButtonText(follow);
 	}
 
 	async function handleButtonClick() {
 		// Handles Follow, Unfollow, and unsend
-		if (buttonText === "Follow") {
+		if (buttonText === follow) {
 			var response = await axios.post(`${authorId}/inbox/`, { id: userId, type: "follow" });
 			if (response.status === 201) {
 				NotificationBar.getInstance().addNotification("Follow request sent successfully!", NotificationBar.NT_SUCCESS);
-				setButtonText("Request Sent...");
+				setButtonText(followPending);
 			} else {
 				NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
 			}
@@ -66,7 +67,7 @@ export const FollowRequestButton = (props) => {
 		// remove userId as a follower of authorId
 		var response = await axios.delete(`${authorId}/followers/${userId}`);
 		if (response.status === 200) {
-			setButtonText("Follow");
+			setButtonText(follow);
 		} else {
 			NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
 		}
