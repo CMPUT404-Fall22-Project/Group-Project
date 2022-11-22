@@ -77,14 +77,7 @@ export default class Author extends DataContainer {
 
 	static parseDatabase(data) {
 		this.validateTypeof(data, Author.TYPE);
-		return new Author(
-			data.id,
-			data.host,
-			data.displayName,
-			data.host + "authors/" + data.id, // TODO: remove hard coded
-			data.github,
-			data.profileImage
-		);
+		return new Author(data.id, data.host, data.displayName, data.id, data.github, data.profileImage);
 	}
 
 	static guest() {

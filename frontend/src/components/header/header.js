@@ -8,9 +8,8 @@ import { APPLICATION_NAME } from "../../constants";
 import Authentication from "../../global/authentication";
 import history from "../../history";
 import NotificationBar from "../../global/centralNotificationBar";
-import axios from "axios";
-import FollowRequestSearch from "../authorSearch";
-import { FollowRequestsButton, FollowRequestsMenuItem } from "../followRequests";
+import AuthorSearch from "../authorSearch";
+import { FollowRequestsMenuItem } from "../acceptFollowRequest";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {
@@ -140,7 +139,7 @@ export class AppHeader extends Component {
 				<div className="topnav-toolbar-container">
 					{auth.isLoggedIn() ? (
 						<React.Fragment>
-							<FollowRequestSearch />
+							<AuthorSearch />
 							{/*cursed*/}
 							<Divider orientation="vertical" style={{ height: "10em", marginRight: "0.5em" }} />
 						</React.Fragment>

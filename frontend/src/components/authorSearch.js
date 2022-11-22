@@ -9,21 +9,16 @@ import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import history from "../history";
 
-// Enables an Author to submit a Follow Request to another Author
+// Enables user to navigate another Author's page via search
 // Select component is auto-filled with the names of all authorized authors
-// Selection of an author enables the "Submit Follow Request" button
-// Clicking the "Submit Follow Request" sends a POST request to the inbox of the selected Author
 
-export default function FollowRequestSearch() {
+export default function AuthorSearch() {
 	const [authorId, setAuthorId] = useState("");
 	const [authors, setAuthors] = useState([]);
-	const [followingIds, setFollowingIds] = useState([]);
 	const userId = Authentication.getInstance().getUser().getId();
 
 	const [anchorEl, setAnchorEl] = useState();
-	const handleClick = (event) => {
-		setAnchorEl(event.currentTarget);
-	};
+
 	const handleClose = () => {
 		setAnchorEl(null);
 	};
@@ -33,15 +28,6 @@ export default function FollowRequestSearch() {
 	}, []);
 
 	const handleAuthors = async () => {
-		// get ids for all authors that the logged in user is following
-		response = await axios.get(process.env.REACT_APP_HOST + `authors/${userId}/following/`);
-		const following = response.data.items;
-		const followingIds = [];
-		for (let f of following) {
-			followingIds.push(f.id);
-		}
-		setFollowingIds(followingIds);
-
 		// Get all of the authors
 		var response = await axios.get(process.env.REACT_APP_HOST + `authors/`);
 		const authors = response.data.items;
@@ -55,32 +41,11 @@ export default function FollowRequestSearch() {
 	};
 
 	const handleButtonClick = (event) => {
-		handleClick(event);
-		return;
-		// Send a follow Request to the selected authorId's inbox
+		setAnchorEl(event.currentTarget);
 	};
 
 	const viewProfile = () => {
-		history.push("/authors/" + authorId);
-	};
-
-	const sendFollowRequest = () => {
-		// if user is already finding this author
-		if (followingIds.includes(authorId)) {
-			var author = authors.find((author) => author.id === authorId);
-			NotificationBar.getInstance().addNotification(
-				`You're already following ${author.label}!`,
-				NotificationBar.NT_WARNING
-			);
-			return;
-		}
-		axios
-			.post(process.env.REACT_APP_HOST + `authors/${authorId}/inbox/`, { id: userId, type: "follow" })
-			.then((res) => {
-				NotificationBar.getInstance().addNotification("Follow request sent successfully!", NotificationBar.NT_SUCCESS);
-			})
-			.catch((err) => NotificationBar.getInstance().addNotification(err, NotificationBar.NT_ERROR));
-		setAuthorId("");
+		history.push({ pathname: "/authors/" + authorId.split("/authors/")[1], state: { authorId: authorId } });
 	};
 
 	return (
@@ -127,7 +92,6 @@ export default function FollowRequestSearch() {
 					onClose={handleClose}
 				>
 					<MenuItem onClick={viewProfile}>View Profile</MenuItem>
-					<MenuItem onClick={sendFollowRequest}>Send Follow Request</MenuItem>
 				</Menu>
 			</FormControl>
 		</Box>

@@ -18,7 +18,7 @@ export default function EditProfile() {
 
 	useEffect(() => {
 		const loadAuthor = async () => {
-			const res = await axios.get(process.env.REACT_APP_HOST + `authors/${userID}`);
+			const res = await axios.get(`${userID}`);
 			setAuthor(res.data);
 		};
 		loadAuthor();
@@ -38,7 +38,7 @@ export default function EditProfile() {
 		// POSTs to author to update data
 		axios({
 			method: "post",
-			url: process.env.REACT_APP_HOST + `authors/${userID}`,
+			url: `${userID}`,
 			data: author,
 		})
 			.then((res) => {

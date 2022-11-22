@@ -10,34 +10,17 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
-import { styled } from "@mui/material/styles";
 import Authentication from "../global/authentication";
 import Loader from "../components/loader";
 import AbstractModalProvider from "./modals/modalProvider";
 import ModalSystem from "../global/modalSystem";
 import AccountBoxOutlinedIcon from "@mui/icons-material/AccountBoxOutlined";
 import NotificationBar from "../global/centralNotificationBar";
+import { styled } from "@mui/material/styles";
 
 const Demo = styled("div")(({ theme }) => ({
 	backgroundColor: theme.palette.background.paper,
 }));
-
-export const FollowRequestsButton = () => {
-	const [clicked, setClicked] = useState(false);
-	return (
-		<div>
-			<Button
-				variant="contained"
-				onClick={() => {
-					setClicked(!clicked);
-				}}
-			>
-				Follow Requests
-			</Button>
-			<FollowRequestsToggle open={clicked}></FollowRequestsToggle>
-		</div>
-	);
-};
 
 export const FollowRequestsMenuItem = ({ onClick, ...props }) => {
 	return (
@@ -79,24 +62,6 @@ class FollowRequestsModal extends AbstractModalProvider {
 	}
 }
 
-export const FollowRequestsToggle = ({ open }) => {
-	if (open) {
-		return <TopAppBar />;
-	}
-	return null;
-};
-export function TopAppBar() {
-	return (
-		<div style={{ width: "50%", height: "100%", position: "absolute" }}>
-			<Box sx={{ flexGrow: 1, maxWidth: 1000 }}>
-				<div style={{ width: "100%", height: "100%", position: "absolute", overflow: "auto" }}>
-					<FollowRequests></FollowRequests>
-				</div>
-			</Box>
-		</div>
-	);
-}
-
 export function FollowRequests() {
 	const userId = Authentication.getInstance().getUser().getId();
 	const [dense] = useState(false);
@@ -110,7 +75,7 @@ export function FollowRequests() {
 
 	const handleFollowRequests = async () => {
 		// Get all followers
-		response = await axios.get(process.env.REACT_APP_HOST + `authors/${userId}/followers/`);
+		response = await axios.get(`${userId}/followers/`);
 		console.log(response);
 		const followerIds = [];
 		for (let follower of response.data.items) {
@@ -119,7 +84,7 @@ export function FollowRequests() {
 		setFollowerIds(followerIds);
 
 		// Get all follow requests
-		var response = await axios.get(process.env.REACT_APP_HOST + `authors/${userId}/inbox/`);
+		var response = await axios.get(`${userId}/inbox/`);
 		console.log(response);
 		const followRequests = [];
 		for (let item of response.data.items) {
@@ -134,38 +99,31 @@ export function FollowRequests() {
 
 	async function handleAcceptButton(followRequest) {
 		// PUT the Author with id === followerId as a follower of Author with id === userId
-		const followerId = followRequest.data.actor.id;
+		var followerId = followRequest.data.actor.id;
 		const firstName = followRequest.data.summary.split(" ")[0];
-		axios
-			.put(process.env.REACT_APP_HOST + `authors/${userId}/followers/${followerId}`)
-			.then((res) => {
-				console.log(res);
-				NotificationBar.getInstance().addNotification(
-					`${firstName} successfully added as a follower!`,
-					NotificationBar.NT_SUCCESS
-				);
-			})
-			.catch((err) => console.log(err));		
-		axios
-			.delete(process.env.REACT_APP_HOST + `authors/${userId}/inbox/${followRequest.id}`)
-			.then((res) => {
-				console.log(res);
-			})
-			.catch((err) => console.log(err));
+		var response = await axios.put(`${userId}/followers/${followerId}`);
+		console.log(response);
+		if (response.status !== 200) {
+			// skip DELETE if PUT fails
+			return;
+		}
+		// delete the accepted follow request
+		var response = await axios.delete(`${userId}/inbox/${followRequest.id}`);
+		console.log(response);
+		setFollowRequests(followRequests.filter((e) => e != followRequest));
+		NotificationBar.getInstance().addNotification(
+			`${firstName} successfully added as a follower!`,
+			NotificationBar.NT_SUCCESS
+		);
 	}
 
 	async function handleRejectButton(followRequest) {
-
-		axios
-			.delete(process.env.REACT_APP_HOST + `authors/${userId}/inbox/${followRequest.id}`)
-			.then((res) => {
-				console.log(res);
-				NotificationBar.getInstance().addNotification(
-					`Follow request deleted successfully.`,
-					NotificationBar.NT_SUCCESS
-				);
-			})
-			.catch((err) => console.log(err));
+		var response = await axios.delete(`${userId}/inbox/${followRequest.id}`);
+		console.log(response);
+		if (response.status === 200) {
+			setFollowRequests(followRequests.filter((e) => e != followRequest));
+			NotificationBar.getInstance().addNotification(`Follow request deleted successfully.`, NotificationBar.NT_SUCCESS);
+		}
 	}
 
 	// prompt loader until followRequests are set
