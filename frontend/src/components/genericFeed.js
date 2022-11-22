@@ -63,6 +63,7 @@ export default class FeedComponent extends Component {
 			};
 			return (
 				<div>
+					<FollowRequestButton authorId={this.props.authorId} userId={this.state.userId} />
 					<Typography variant="h4" style={styles}>
 						<i>Nothing to see here...</i>
 					</Typography>
