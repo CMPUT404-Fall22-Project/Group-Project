@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'authentication.apps.AuthConfig',
     'posts.apps.PostsConfig',
     'inbox.apps.InboxConfig',
+    'nodes.apps.NodesConfig',
     'corsheaders'
 ]
 
