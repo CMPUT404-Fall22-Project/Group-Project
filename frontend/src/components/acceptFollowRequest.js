@@ -103,30 +103,27 @@ export function FollowRequests() {
 		const firstName = followRequest.data.summary.split(" ")[0];
 		var response = await axios.put(`${userId}/followers/${followerId}`);
 		console.log(response);
-		if (response.status === 200) {
-			NotificationBar.getInstance().addNotification(
-				`${firstName} successfully added as a follower!`,
-				NotificationBar.NT_SUCCESS
-			);
-		} else {
-			return; // skip DELETE if PUT fails
+		if (response.status !== 200) {
+			// skip DELETE if PUT fails
+			return;
 		}
 		// delete the accepted follow request
 		var response = await axios.delete(`${userId}/inbox/${followRequest.id}`);
 		console.log(response);
+		setFollowRequests(followRequests.filter((e) => e != followRequest));
+		NotificationBar.getInstance().addNotification(
+			`${firstName} successfully added as a follower!`,
+			NotificationBar.NT_SUCCESS
+		);
 	}
 
 	async function handleRejectButton(followRequest) {
-		axios
-			.delete(`${userId}/inbox/${followRequest.id}`)
-			.then((res) => {
-				console.log(res);
-				NotificationBar.getInstance().addNotification(
-					`Follow request deleted successfully.`,
-					NotificationBar.NT_SUCCESS
-				);
-			})
-			.catch((err) => console.log(err));
+		var response = await axios.delete(`${userId}/inbox/${followRequest.id}`);
+		console.log(response);
+		if (response.status === 200) {
+			setFollowRequests(followRequests.filter((e) => e != followRequest));
+			NotificationBar.getInstance().addNotification(`Follow request deleted successfully.`, NotificationBar.NT_SUCCESS);
+		}
 	}
 
 	// prompt loader until followRequests are set
