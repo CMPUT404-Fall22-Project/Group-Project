@@ -28,8 +28,10 @@ class App extends Component {
 	}
 
 	componentDidMount() {
-		Authentication.getInstance().addAuthChangedListener(() => {
-			this.setState({});
+		Authentication.getInstance().addAuthChangedListener((loggedIn) => {
+			if (loggedIn) {
+				this.setState({});
+			}
 		});
 	}
 

@@ -135,14 +135,11 @@ export default class Authentication {
 	}
 
 	logout() {
-		var promise = axios({
-			method: "post",
-			url: process.env.REACT_APP_HOST + `sessions/end/`,
-			data: {
-				session: this._sessionToken,
-			},
+		// compatibility reasons...
+		return new Promise((resolve, reject) => {
+			this.flushSession();
+			resolve();
 		});
-		return promise.then(this.flushSession.bind(this));
 	}
 
 	flushSession() {

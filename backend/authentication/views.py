@@ -13,12 +13,6 @@ import time
 import datetime
 
 
-def clear_ended_sessions():
-    t = int(time.time())
-    for obj in Session.objects.filter(expiresAt__lt=t):
-        obj.delete()
-
-
 def gen_random_salt():
     return secrets.token_hex(16)
 
@@ -54,34 +48,11 @@ def authenticate_user(request):
     if not user.author.isAuthorized:
         return HttpResponse("Account not yet authorized by server admin.", status=403)
 
-    # looks good, give them a session back
-    session_token = secrets.token_urlsafe(32)
-    # save CCID as it is a high access field
-    session = Session(user=user, author=user.author, token=session_token)
-    session.regenerate_expiry()
-
-    # delete all lingering sessions
-    clear_ended_sessions()
-
-    resp = JsonResponse({"token": session_token, "author": AuthorSerializer(user.author).data}, safe=False)
-    resp.set_cookie("user_session", session.token, expires=datetime.datetime.fromtimestamp(session.expiresAt))
+    resp = JsonResponse({"author": AuthorSerializer(user.author).data}, safe=False)
+    session = Session.objects.get(user=user)
+    resp.set_cookie("user_session", session.token)
 
     return resp
-
-
-@api_view(["POST"])
-def end_session(request):
-
-
-    session = request.app_session
-    if not session:
-        return HttpResponse(status=200) # not logged in, but OK
-
-    try:
-        session.delete()
-        return HttpResponse(status=200)
-    except:
-        return HttpResponse("Session could not be ended", status=500)
 
 
 def user_exists_db(id):
@@ -123,4 +94,9 @@ def signup(request):
 
     user = User(username=user_data["username"], passwordHash=hashed, salt=salt, author=author)
     user.save()
+    # looks good, give them a session back
+    session_token = secrets.token_urlsafe(32)
+    # save CCID as it is a high access field
+    session = Session(user=user, author=user.author, token=session_token)
+    session.save()
     return HttpResponse(status=201)

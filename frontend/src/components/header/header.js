@@ -90,12 +90,7 @@ export class AppHeader extends Component {
 	}
 
 	generateMenuItems(auth) {
-		const elements = [
-			<MenuItem key="logout" disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
-				Logout
-			</MenuItem>,
-		];
-		var rest = null;
+		const elements = [];
 		if (auth.isLoggedIn()) {
 			elements.push(
 				<FollowRequestsMenuItem
@@ -109,7 +104,13 @@ export class AppHeader extends Component {
 					Edit Profile...
 				</MenuItem>
 			);
+			elements.push(<Divider></Divider>);
 		}
+		elements.push(
+			<MenuItem key="logout" disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
+				Logout
+			</MenuItem>
+		);
 		return elements;
 	}
 

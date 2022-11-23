@@ -15,3 +15,14 @@ export function stringifyComponent(comp) {
 	}
 	return s;
 }
+
+export function tryStringifyObject(obj) {
+	if (obj instanceof String) {
+		return obj;
+	}
+	const keys = Object.keys(obj);
+	if (keys.length === 1) {
+		return new String(obj[keys[0]]);
+	}
+	return JSON.stringify(obj);
+}
