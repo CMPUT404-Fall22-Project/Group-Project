@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='author',
             name='host',
-            field=models.URLField(default=authors.models.get_scheme_and_netloc, editable=False),
+            field=models.URLField(default=utils.model_utils.get_host, editable=False),
         ),
         migrations.AlterField(
             model_name='author',
