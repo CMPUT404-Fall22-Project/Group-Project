@@ -42,10 +42,6 @@ export default class NewPost extends Component {
 				unlisted: d.unlisted || false,
 				author: d.author || Authentication.getInstance().getUser().copy(),
 			},
-			extras: {
-				source: d.source || undefined,
-				origin: d.origin || undefined,
-			},
 		};
 	}
 
@@ -226,7 +222,6 @@ export default class NewPost extends Component {
 		}
 		const data = {
 			...this.state.post,
-			...this.state.extras,
 		};
 		if (this.state.type === POST_CONSTANTS.POST_TYPE_PNG) {
 			if (this.state.imageData === null) {
