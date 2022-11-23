@@ -40,10 +40,9 @@ export const FollowRequestButton = (props) => {
 			}
 		}
 		// Check if user is already following this author
-		var response = await axios.get(`${userId}/following/`);
-		console.log(response);
+		var response = await axios.get(`${authorId}/followers/`);
 		for (let author of response.data.items) {
-			if (author.id === authorId) {
+			if (author.id === userId) {
 				setButtonText(unfollow);
 				return;
 			}
@@ -79,12 +78,7 @@ export const FollowRequestButton = (props) => {
 	) : (
 		<div>
 			<ThemeProvider theme={theme}>
-				<Button
-					size="medium"
-					variant="contained"
-					onClick={handleButtonClick}
-					disabled={buttonText === "Request Sent..."}
-				>
+				<Button size="medium" variant="contained" onClick={handleButtonClick} disabled={buttonText === followPending}>
 					{buttonText}
 				</Button>
 			</ThemeProvider>

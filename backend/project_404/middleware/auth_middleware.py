@@ -4,7 +4,7 @@ from django.http import HttpResponseBadRequest
 
 skip_paths = ["/swagger", "redoc/"]
 
-allowed_paths = ["/sessions/new/", "/admin/"]
+allowed_paths = ["/sessions/", "/users/", "/admin/"]
 
 
 class AuthMiddleware:

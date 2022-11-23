@@ -21,6 +21,7 @@ export default class FeedComponent extends Component {
 			posts: [],
 			hasAllPosts: false,
 		};
+		console.log(this.props.authorId);
 		this.postSupplier = new PaginatedProvider(new GenericElementProvider(`${this.props.authorId}/posts/`));
 		this.postSupplier.listen((success, data) => {
 			if (success) {

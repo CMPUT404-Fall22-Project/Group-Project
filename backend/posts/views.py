@@ -1,52 +1,21 @@
 from django.shortcuts import get_object_or_404
-from utils.model_utils import get_scheme_and_netloc, generate_random_string
-from utils.requests import paginate, paginate_values
-from utils.proxy import fetch_author
+from utils.model_utils import generate_random_string
+from utils.requests import paginate
+from utils.process_models import process_posts
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db import transaction
 from django.http import HttpResponse
 from authors.models import Author
 from .models import ContentType, Post, Comment, PostLike, CommentLike, Category
 from .serializers import PostSerializer, CommentSerializer, PostLikeSerializer, CommentLikeSerializer
 from authors.serializers import AuthorSerializer
 from inbox.views import add_data_to_inboxes_of_author_and_followers
-import json
 import base64
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
-
-
-def process_comments(comments):
-    parsed = CommentSerializer(comments, many=True).data
-    for comment in parsed:
-        comment["author"] = AuthorSerializer(fetch_author(comment["author"])).data
-
-    return parsed
-
-# this method will only be called for posts we own
-
-
-def process_posts(posts):
-    data = []
-    posts = posts.prefetch_related("author")
-    for post in posts:
-        serialized = PostSerializer(post).data
-        serialized["author"] = AuthorSerializer(post.author).data
-        serialized["origin"] = get_scheme_and_netloc() + f"authors/{post.author.id}/posts/{post.id}/"
-        serialized["source"] = serialized["origin"]
-
-        serialized["categories"] = Category.objects.all().filter(post=post).values_list("category", flat=True)
-
-        comments = post.comments.all()
-        serialized["comments"] = serialized["origin"] + "comments/"
-        serialized["count"] = len(comments)
-        serialized["commentsSrc"] = process_comments(paginate_values(0, 5, comments))
-
-        data.append(serialized)
-
-    return data
 
 
 def fill_optional_values(data):
@@ -84,6 +53,7 @@ class PostList(APIView):
         dict = {"type": "posts", "items": process_posts(posts)}
         return Response(dict, status=status.HTTP_200_OK)
 
+    @transaction.atomic
     def post(self, request, id, format=None):
         """POST [local] create a new post but generate a new id"""
         # ensure author exists and is authorized

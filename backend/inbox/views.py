@@ -5,11 +5,13 @@ from rest_framework.views import APIView
 from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLikeSerializer
 from posts.models import Post
 from posts.serializers import PostSerializer
-from authors.models import Author
+from utils.proxy import fetch_author, get_authorization_from_url
+from authors.models import Author, Follower, get_scheme_and_netloc
 from .models import Inbox
 from .serializers import InboxSerializer
 from authors.serializers import AuthorSerializer
-
+from utils.process_models import serialize_single_post, serialize_single_comment
+import requests
 
 # Inbox
 # The inbox is all the new posts from who you follow
@@ -21,6 +23,7 @@ from authors.serializers import AuthorSerializer
 # if the type is “like” then add that like to AUTHOR_ID’s inbox
 # if the type is “comment” then add that comment to AUTHOR_ID’s inbox
 
+
 def add_data_to_inboxes_of_author_and_followers(author: Author, data):
     """
     Saves data to the inboxes of all followers of an author
@@ -29,25 +32,36 @@ def add_data_to_inboxes_of_author_and_followers(author: Author, data):
     """
     # get the correct serializer
     if data.type == "post":
-        serializer = PostSerializer(data)
+        serialized = serialize_single_post(data)
+        serialized["type"] = data.type
     elif data.type == "comment":
-        serializer = CommentSerializer(data)
+        serialized = serialize_single_comment(data)
+        serialized["type"] = data.type
     else:
         if hasattr(data, "comment"):
-            serializer = CommentLikeSerializer(data)
+            serialized = CommentLikeSerializer(data).data
+            serialized["type"] = "comment"
         else:
-            serializer = PostLikeSerializer(data)
-    # add to the author's inbox
-    author.inboxes.create(data=serializer.data,dataType=data.type)
+            serialized = PostLikeSerializer(data).data
+            serialized["type"] = "like"
     # add to inbox of all of the author's followers
-    for author in author.followers.all():
-        author.inboxes.create(data=serializer.data,dataType=data.type)
+    followers = [fetch_author(x) for x in Follower.objects.all().filter(
+        author=author).values_list("follower", flat=True)]
+
+    for follower in followers:
+        print(serialized)
+        if follower.is_remote():
+            url = follower.id + "/inbox"  # id is the full URL because it's remote
+            requests.post(url, serialized, headers={'Authorization:': get_authorization_from_url(url)})
+            # no hanlder code :)
+        else:
+            follower.inboxes.create(data=serialized, dataType=data.type)
 
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 class InboxList(APIView):
     """ URL: ://service/authors/{AUTHOR_ID}/inbox """
-        
+
     def get(self, request, id, format=None):
         """GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)"""
         # ensure author exists and is authorized
@@ -56,34 +70,32 @@ class InboxList(APIView):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         # get all of the inbox items for this author
         inbox = Inbox.objects.filter(author=author)
-        serializer = InboxSerializer(inbox,many=True)
-        dictionary = {"type":"inbox", "author":author.id,"items":serializer.data}
+        serializer = InboxSerializer(inbox, many=True)
+        dictionary = {"type": "inbox", "author": author.id, "items": serializer.data}
 
         return Response(dictionary, status=status.HTTP_200_OK)
 
     def post(self, request, id, format=None):
         """
         POST [local, remote]: send a post to the author
-        if the type is “post” then add that post to AUTHOR_ID’s inbox
-        if the type is “follow” then add that follow is added to AUTHOR_ID’s inbox to approve later
-        if the type is “like” then add that like to AUTHOR_ID’s inbox
-        if the type is “comment” then add that comment to AUTHOR_ID’s inbox
+        if the type is “post” then add that post to AUTHOR_ID's inbox
+        if the type is “follow” then add that follow is added to AUTHOR_ID's inbox to approve later
+        if the type is “like” then add that like to AUTHOR_ID's inbox
+        if the type is “comment” then add that comment to AUTHOR_ID's inbox
         """
         # ensure the author exists and is authorized
         author = get_object_or_404(Author, id=id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        
+
         # get the data type
         type = request.data["type"]
 
-        if type in ["post","like","comment"]:
+        if type in ["post", "like", "comment"]:
             # save the data to the author's inbox
             data = request.data
-            del data["type"] # this key/value be saved under dataType
-            inbox = author.inboxes.create(data=request.data,dataType=type)
-            return Response({"id":inbox.id}, status=status.HTTP_201_CREATED)
-        
+            del data["type"]  # this key/value be saved under dataType
+            inbox = author.inboxes.create(data=request.data, dataType=type)
+            return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
+
         if type == "follow":
             # ensure the follower exists and is authorized
             follower_id = request.data["id"]
@@ -91,7 +103,7 @@ class InboxList(APIView):
             follower = get_object_or_404(Author, id=follower_id)
             if not follower.isAuthorized:
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
-            
+
             # Create the follow request (we only need the ids of the authors)
             author_serializer = AuthorSerializer(author)
             follower_serializer = AuthorSerializer(follower)
@@ -101,9 +113,9 @@ class InboxList(APIView):
             data["actor"] = follower_serializer.data
             data["object"] = author_serializer.data
 
-            inbox = author.inboxes.create(data=data,dataType=data["type"])
-            return Response({"id":inbox.id}, status=status.HTTP_201_CREATED)
-        
+            inbox = author.inboxes.create(data=data, dataType=data["type"])
+            return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
+
     def delete(self, request, id, format=None):
         """DELETE [local]: clear the inbox"""
         # ensure author exists and is authorized
@@ -115,7 +127,7 @@ class InboxList(APIView):
         for item in inbox:
             item.delete()
         return Response(status=status.HTTP_200_OK)
-        
+
 
 class InboxDetail(APIView):
 
@@ -129,4 +141,3 @@ class InboxDetail(APIView):
         inbox = get_object_or_404(Inbox, id=inbox_id)
         inbox.delete()
         return Response(status=status.HTTP_200_OK)
-

@@ -39,11 +39,11 @@ def fetch_author(data):
     authorString = data
     if authorString.startswith(get_scheme_and_netloc()):
         authorId = authorString[len(get_scheme_and_netloc() + "authors/"):]
-        return get_object_or_404(pk=authorId)
+        return get_object_or_404(Author, pk=authorId)
 
     # looks like we need to contact another server
 
-    result = requests.get(authorString, headers={'Authorization:': get_authorization_from_url(authorString)})
+    result = requests.get(authorString, headers={'Authorization': get_authorization_from_url(authorString)})
     if result.code == 200:
         return assign(Author(), json.loads(result.text))
 
