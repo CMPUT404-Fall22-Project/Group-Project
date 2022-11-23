@@ -83,9 +83,11 @@ export class AppHeader extends Component {
 		Authentication.getInstance()
 			.logout()
 			.then(() => {
-				history.push("/");
-				NotificationBar.getInstance().addNotification("Successfully logged out", NotificationBar.NT_SUCCESS);
-				this.handleProfileClose();
+				setTimeout(() => {
+					history.push("/");
+					NotificationBar.getInstance().addNotification("Successfully logged out", NotificationBar.NT_SUCCESS);
+					this.handleProfileClose();
+				}, 0);
 			});
 	}
 

@@ -15,7 +15,7 @@ export default class MainFeed extends Component {
 		return (
 			<div className="feeds-body">
 				<Paper className="feeds-center" elevation={0} variant="outlined" square>
-					<FeedComponent {...this.props}></FeedComponent>
+					<FeedComponent key={this.props.authorId} {...this.props}></FeedComponent>
 				</Paper>
 			</div>
 		);
