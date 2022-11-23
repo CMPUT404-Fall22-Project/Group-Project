@@ -1,6 +1,10 @@
 
 from authentication.models import Session
-import datetime
+from django.http import HttpResponseBadRequest
+
+skip_paths = ["/swagger", "redoc/"]
+
+allowed_paths = ["/sessions/new/", "/admin/"]
 
 
 class AuthMiddleware:
@@ -9,22 +13,31 @@ class AuthMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        request.app_session = None
-        if not "user_session" in request.COOKIES:
+        if any([request.path_info.startswith(x) for x in skip_paths]):
             return self.get_response(request)
 
-        token = request.COOKIES.get("user_session")
-        try:
-            sess = Session.objects.get(pk=token)
-            if not sess.is_expired():
-                sess.regenerate_expiry()
+        request.app_session = None
+        auth = None
+        token = None
+        if "Authorization" in request.headers:
+            auth = request.headers["Authorization"]
+
+        if auth and auth.startswith("Token "):
+            token = auth.split()[1]  # extract token
+
+        if not token:
+            allowed = any([request.path_info.startswith(x) for x in allowed_paths])
+            if not allowed:
+                resp = HttpResponseBadRequest("Missing token", status=401)
+                resp["WWW-Authenticate"] = "Token"
+                return resp
+
+        if token:
+            try:
+                sess = Session.objects.get(pk=token)
                 request.app_session = sess
-        except:
-            pass
+            except:
+                resp = HttpResponseBadRequest("Bad token", status=403)
+                return resp
 
-        resp = self.get_response(request)
-        if request.app_session:
-            resp.set_cookie("user_session", request.app_session.token,
-                            expires=datetime.datetime.fromtimestamp(request.app_session.expiresAt))
-
-        return resp
+        return self.get_response(request)

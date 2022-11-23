@@ -9,8 +9,6 @@ from .models import Session, User
 import hashlib
 import secrets
 import base64
-import time
-import datetime
 
 
 def gen_random_salt():
@@ -48,10 +46,8 @@ def authenticate_user(request):
     if not user.author.isAuthorized:
         return HttpResponse("Account not yet authorized by server admin.", status=403)
 
-    resp = JsonResponse({"author": AuthorSerializer(user.author).data}, safe=False)
     session = Session.objects.get(user=user)
-    resp.set_cookie("user_session", session.token)
-
+    resp = JsonResponse({"token": session.token, "author": AuthorSerializer(user.author).data}, safe=False)
     return resp
 
 

@@ -22,7 +22,7 @@ export function tryStringifyObject(obj) {
 	}
 	const keys = Object.keys(obj);
 	if (keys.length === 1) {
-		return new String(obj[keys[0]]);
+		return String(obj[keys[0]]);
 	}
 	return JSON.stringify(obj);
 }

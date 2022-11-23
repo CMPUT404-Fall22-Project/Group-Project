@@ -26,6 +26,10 @@ export default class Authentication {
 			this._isLoggedIn = this._sessionToken !== null;
 		}
 
+		if (this._isLoggedIn) {
+			axios.defaults.headers.common["Authorization"] = "Token " + this._sessionToken;
+		}
+
 		this._authListeners = [];
 	}
 
@@ -75,7 +79,7 @@ export default class Authentication {
 	 */
 	notifyAuthDataChanged() {
 		axios({ method: "get", url: this._userData.getId() }).then((resp) => {
-			this._setAuthor(resp.data);
+			this._setLoginData(resp.data);
 		});
 	}
 
@@ -89,9 +93,12 @@ export default class Authentication {
 		return this._sessionToken !== null;
 	}
 
-	_setAuthor(data) {
-		cookies.set(Authentication.ID_COOKIE_AUTHOR, data);
-		this._userData = Author.parseDatabase(data);
+	_setLoginData(author, token) {
+		cookies.set(Authentication.ID_COOKIE_AUTHOR, author);
+		this._userData = Author.parseDatabase(author);
+
+		cookies.set(Authentication.ID_COOKIE_TOKEN, token);
+
 		this._notifyAuthChangedListeners(true);
 	}
 
@@ -125,7 +132,8 @@ export default class Authentication {
 					const data = resp.data;
 					this._sessionToken = data.token;
 					this._isLoggedIn = true;
-					this._setAuthor(data.author);
+					this._setLoginData(data.author, data.token);
+					axios.defaults.headers.common["Authorization"] = "Token " + data.token;
 					resolve();
 				})
 				.catch((request) => {
@@ -148,6 +156,7 @@ export default class Authentication {
 		this._userData = null;
 		cookies.remove(Authentication.ID_COOKIE_TOKEN);
 		cookies.remove(Authentication.ID_COOKIE_AUTHOR);
+		delete axios.defaults.headers.common["Authorization"];
 		this._notifyAuthChangedListeners(false);
 	}
 

@@ -104,7 +104,7 @@ export class AppHeader extends Component {
 					Edit Profile...
 				</MenuItem>
 			);
-			elements.push(<Divider></Divider>);
+			elements.push(<Divider key="menuDivider1"></Divider>);
 		}
 		elements.push(
 			<MenuItem key="logout" disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
