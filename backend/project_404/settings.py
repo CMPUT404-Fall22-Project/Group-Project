@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+import django_on_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,7 @@ SECRET_KEY = 'django-insecure-lu#8z^)^8sz@imlk3y^=&ecfh48qjv8^tv75h2o3b12g0ejb1m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['team-16-site.herokuapp.com','localhost','127.0.0.1']
 
 
 # Application definition
@@ -92,21 +94,17 @@ WSGI_APPLICATION = 'project_404.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-
     'default': {
-
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'project_404',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
+        'NAME': 'd2derervtm1sqv',
+        'USER': 'tmatrsolzlsgtv',
+        'PASSWORD': '8922776592d5b0477d6e1e61224d468d9639e8b6bc18253a1c6f426c656f698d',
+        'HOST': 'ec2-54-159-22-90.compute-1.amazonaws.com',
         'PORT': 5432,
-        'TEST': {
-            'NAME': 'project_404_test',
-        }
-
+        # 'TEST': {
+        #     'NAME': 'project_404_test',
+        # }
     }
-
 }
 
 
@@ -144,7 +142,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+django_on_heroku.settings(locals())
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
