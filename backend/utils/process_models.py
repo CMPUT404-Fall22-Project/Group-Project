@@ -1,4 +1,4 @@
-from utils.model_utils import get_scheme_and_netloc
+from utils.model_utils import get_host
 from utils.requests import paginate_values
 from utils.proxy import fetch_author
 from posts.models import Category
@@ -10,7 +10,7 @@ def process_comments(comments):
     data = []
     parsed = CommentSerializer(comments, many=True).data
     for comment in parsed:
-        comment["id"] = get_scheme_and_netloc(
+        comment["id"] = get_host(
         ) + f"authors/{comment['author']}/posts/{comment['post']}/comments/{comment['id']}"
         comment["author"] = AuthorSerializer(fetch_author(comment["author"])).data
         del comment["post"]
@@ -34,7 +34,7 @@ def process_posts(posts):
     for post in posts:
         serialized = PostSerializer(post).data
         serialized["author"] = AuthorSerializer(post.author).data
-        serialized["origin"] = get_scheme_and_netloc() + f"authors/{post.author.id}/posts/{post.id}"
+        serialized["origin"] = get_host() + f"authors/{post.author.id}/posts/{post.id}"
         serialized["source"] = serialized["origin"]
         serialized["id"] = serialized["origin"]
 

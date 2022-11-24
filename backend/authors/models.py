@@ -34,7 +34,7 @@ class Author(models.Model):
         self.save()
 
     def is_remote(self):
-        self.host != get_scheme_and_netloc()
+        self.host != get_host()
 
 
 class Follower(models.Model):

@@ -7,7 +7,7 @@ from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLike
 from django.http import JsonResponse
 from utils.proxy import fetch_author, get_authorization_from_url, Ref
 from utils.requests import paginate
-from authors.models import Author, Follower, get_scheme_and_netloc
+from authors.models import Author, Follower
 from .models import Inbox
 from .serializers import InboxSerializer
 from authors.serializers import AuthorSerializer

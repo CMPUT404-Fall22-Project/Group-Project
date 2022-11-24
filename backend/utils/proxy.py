@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from utils.model_utils import get_scheme_and_netloc
+from utils.model_utils import get_host
 from authors.models import Author
 from authentication.models import ExternalNode
 from authors.serializers import AuthorSerializer
@@ -72,8 +72,8 @@ def fetch_author(data):
 
     # Are we self referrential?
     authorString = data
-    if authorString.startswith(get_scheme_and_netloc()):
-        authorId = authorString[len(get_scheme_and_netloc() + "authors/"):]
+    if authorString.startswith(get_host()):
+        authorId = authorString[len(get_host() + "authors/"):]
         return get_object_or_404(Author, pk=authorId)
 
     # looks like we need to contact another server
