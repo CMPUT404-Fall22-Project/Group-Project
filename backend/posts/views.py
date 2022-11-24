@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from utils.model_utils import generate_random_string
 from utils.requests import paginate
-from utils.process_models import process_posts
+from utils.process_models import process_posts, serialize_single_post
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,7 +11,7 @@ from authors.models import Author
 from .models import ContentType, Post, Comment, PostLike, CommentLike, Category
 from .serializers import PostSerializer, CommentSerializer, PostLikeSerializer, CommentLikeSerializer
 from authors.serializers import AuthorSerializer
-from inbox.views import add_data_to_inboxes_of_author_and_followers
+from inbox.views import send_to_all_followers
 import base64
 
 # Be aware that Posts can be images that need base64 decoding.
@@ -70,7 +70,7 @@ class PostList(APIView):
             post = serializer.save(id=d["id"])
             add_categories(post, d)
             # add the post to the inbox of each of the author's followers
-            add_data_to_inboxes_of_author_and_followers(author, post)
+            send_to_all_followers(author, post)
             return Response({"id": post.id}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -98,18 +98,13 @@ class PostDetail(APIView):
         """GET [local, remote] get the public post whose id is POST_ID"""
         # ensure author exists and is authorized
         post = get_object_or_404(Post, id=post_id)  # id is unique (don't need author_id)
-        post_serializer = PostSerializer(post).data
-        author = AuthorSerializer(author).data
-        post_serializer["author"] = author
-        post_serializer["count"] = len(Comment.objects.filter(post=post))
-        return Response(post_serializer, status=status.HTTP_200_OK)
+        data = serialize_single_post(post)
+        return Response(data, status=status.HTTP_200_OK)
 
     def put(self, request, author_id, post_id, format=None):
         """PUT [local] create a post where its id is POST_ID"""
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=author_id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         post = get_object_or_404(Post, id=post_id, author=author_id)
         request.data["author"] = author_id
@@ -175,7 +170,7 @@ class CommentList(APIView):
         if serializer.is_valid():
             comment = serializer.save()
             # add the comment to the inbox of the post author and all of their followers
-            add_data_to_inboxes_of_author_and_followers(post.author, comment)
+            send_to_all_followers(post.author, comment)
             return Response({"id": comment.id}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -242,7 +237,7 @@ class PostLikeList(APIView):
         # save a new like for this post
         like = post.likes.create(author=post.author)
         # add the like to the inbox of the post's author and all of their followers
-        add_data_to_inboxes_of_author_and_followers(post.author, like)
+        send_to_all_followers(post.author, like)
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -278,5 +273,5 @@ class CommentLikeList(APIView):
         # save a new like for this comment
         like = comment.likes.create(author=author)
         # add the like to the inbox of the post author and all of their followers
-        add_data_to_inboxes_of_author_and_followers(post.author, like)
+        send_to_all_followers(post.author, like)
         return Response({"id": like.id}, status=status.HTTP_201_CREATED)

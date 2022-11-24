@@ -2,16 +2,20 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLikeSerializer
-from posts.models import Post
-from posts.serializers import PostSerializer
-from utils.proxy import fetch_author, get_authorization_from_url
+from django.http import JsonResponse
+from utils.proxy import fetch_author, get_authorization_from_url, Ref
+from utils.requests import paginate
 from authors.models import Author, Follower, get_scheme_and_netloc
 from .models import Inbox
 from .serializers import InboxSerializer
 from authors.serializers import AuthorSerializer
 from utils.process_models import serialize_single_post, serialize_single_comment
 import requests
+from requests import HTTPError
+from utils.requests import get_optionally_list_parameter_or_default
+from django.core.exceptions import PermissionDenied
 
 # Inbox
 # The inbox is all the new posts from who you follow
@@ -24,7 +28,7 @@ import requests
 # if the type is “comment” then add that comment to AUTHOR_ID’s inbox
 
 
-def add_data_to_inboxes_of_author_and_followers(author: Author, data):
+def send_to_all_followers(author: Author, data):
     """
     Saves data to the inboxes of all followers of an author
     @params: author - The Author whose followers will receive the data to their inboxes
@@ -45,17 +49,40 @@ def add_data_to_inboxes_of_author_and_followers(author: Author, data):
             serialized = PostLikeSerializer(data).data
             serialized["type"] = "like"
     # add to inbox of all of the author's followers
-    followers = [fetch_author(x) for x in Follower.objects.all().filter(
-        author=author).values_list("follower", flat=True)]
+    followerUrls = Follower.objects.all().filter(
+        author=author).values_list("follower", flat=True)
 
-    for follower in followers:
-        print(serialized)
-        if follower.is_remote():
-            url = follower.id + "/inbox"  # id is the full URL because it's remote
-            requests.post(url, serialized, headers={'Authorization:': get_authorization_from_url(url)})
-            # no hanlder code :)
-        else:
-            follower.inboxes.create(data=serialized, dataType=data.type)
+    for followerUrl in followerUrls:
+        url = followerUrl + "/inbox/"  # id is the full URL because it's remote
+        result = requests.post(url, serialized, headers={'Authorization': get_authorization_from_url(url)})
+        if result.status_code >= 300:
+            raise HTTPError(f"POST to server at {url} failed! msg={result.text}")
+
+
+# sorry aaron, this is all i know.
+
+
+@api_view(["GET"])
+def filter_inbox(request, author_id):
+    """
+    URL: ://service/authors/{AUTHOR_ID}/inbox/filter/
+
+    Searches the inbox and returns the 
+    params:
+        types[]: Array of types to filter by
+        [page | 0]: The result page
+        [size | 5]: The number of results to return
+    """
+    types = get_optionally_list_parameter_or_default(request, "types", [])
+    author = get_object_or_404(Author, id=author_id)
+    if request.app_session.author != author:
+        raise PermissionDenied("Unauthorizeed access to inbox")
+    # get all of the inbox items for this author
+    inbox = paginate(request, Inbox.objects.filter(author=author, dataType__in=types))
+    serializer = InboxSerializer(inbox, many=True)
+    items = [Ref(x["data"]).as_data() for x in serializer.data]
+    dictionary = {"type": "inbox", "author": author.id, "items": items}
+    return JsonResponse(dictionary, safe=False)
 
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
@@ -64,14 +91,14 @@ class InboxList(APIView):
 
     def get(self, request, id, format=None):
         """GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)"""
-        # ensure author exists and is authorized
         author = get_object_or_404(Author, id=id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if request.app_session.author != author:
+            raise PermissionDenied("Unauthorizeed access to inbox")
         # get all of the inbox items for this author
-        inbox = Inbox.objects.filter(author=author)
+        inbox = paginate(request, Inbox.objects.filter(author=author))
         serializer = InboxSerializer(inbox, many=True)
-        dictionary = {"type": "inbox", "author": author.id, "items": serializer.data}
+        items = [Ref(x["data"]).as_data() for x in serializer.data]
+        dictionary = {"type": "inbox", "author": author.id, "items": items}
 
         return Response(dictionary, status=status.HTTP_200_OK)
 
@@ -89,7 +116,12 @@ class InboxList(APIView):
         # get the data type
         type = request.data["type"]
 
-        if type in ["post", "like", "comment"]:
+        if type == "post":
+            data = request.data
+            ref = Ref(data)
+            inbox = author.inboxes.create(data=ref.as_ref(), dataType=type)
+            return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
+        if type in ["like", "comment"]:
             # save the data to the author's inbox
             data = request.data
             del data["type"]  # this key/value be saved under dataType
