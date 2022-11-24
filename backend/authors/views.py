@@ -2,11 +2,53 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+import requests
+from utils.model_utils import get_host
 
 from .models import Author
 from .serializers import AuthorSerializer
+from nodes.models import Node
 
-#  https://www.django-rest-framework.org/tutorial/3-class-based-views/
+
+class AllAuthorList(APIView):
+    """/authors/all/ GET, POST"""
+
+    def get(self, request, format=None):
+        """GET [local, remote]: retrieve all profiles on the server (paginated)
+        page: how many pages
+        size: how big is a page
+        Example query: GET ://service/authors?page=10&size=5
+        Gets the 5 authors, authors 45 to 49.
+        """
+        def get_authors_from_remote_nodes():
+            """GET all authors across all remote nodes"""
+            nodes = Node.objects.exclude(host=get_host())
+            authors = []
+            for node in nodes:
+                authors_url =  node.host + "authors/"
+                response = requests.get(authors_url) #TODO: auth=(node.username, node.password))
+                data = response.json()
+                if response.status_code != 200:
+                    print(f'{node.host}: {response.status_code} {response}') # print bad response
+                    continue
+                for author in data["items"]:
+                    authors.append(author)
+            return authors
+
+        # Get local authors
+        local_authors = Author.objects.filter(isAuthorized=True)
+        serializer = AuthorSerializer(local_authors,many=True)
+        serializer_data: list = serializer.data
+        
+        # get remote authors
+        remote_authors = get_authors_from_remote_nodes()
+        for author in remote_authors:
+            serializer_data.append(author)
+
+        dict = {"type": "authors", "items": serializer_data}
+        return Response(dict, status=status.HTTP_200_OK)
+
+
 class AuthorList(APIView):
     """/authors/ GET, POST"""
         
@@ -17,14 +59,9 @@ class AuthorList(APIView):
         Example query: GET ://service/authors?page=10&size=5
         Gets the 5 authors, authors 45 to 49.
         """
-        authors = Author.objects.filter(isAuthorized=True) # only get authorized authors
-        serializer_arr = []
-        for author in authors:
-            serializer = AuthorSerializer(author)
-            serializer_data = serializer.data
-            serializer_arr.append(serializer_data)
-
-        dict = {"type": "authors", "items": serializer_arr}
+        authors = Author.objects.filter(isAuthorized=True)
+        serializer = AuthorSerializer(authors,many=True)
+        dict = {"type": "authors", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
 
     
