@@ -10,6 +10,7 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import Authentication from "../../global/authentication";
 import ModalTemplates from "../modals/genericModalTemplates";
 import axios from "axios";
+import {LikeButton} from '../../components/likeButton';
 
 export default class PostViewComponent extends Component {
 	constructor(props) {
@@ -51,7 +52,7 @@ export default class PostViewComponent extends Component {
 			>
 				<Paper
 					variant="outlined"
-					style={{
+					style={{ 
 						width: "90%",
 						margin: "auto",
 						display: "flex",
@@ -133,6 +134,7 @@ export class EditablePostContainer extends Component {
 				<IconButton aria-label="Follow" title="Delete above post" onClick={this.tryDeletePost.bind(this)}>
 					<DeleteOutlineOutlinedIcon />
 				</IconButton>
+
 			</React.Fragment>
 		);
 	}

@@ -8,6 +8,7 @@ import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlin
 import { NewPostButton } from "./posts/newPost";
 import { EditablePostContainer } from "./posts/post";
 import { FollowRequestButton } from "./sendFollowRequest";
+import {LikeButton} from './likeButton';
 
 export default class FeedComponent extends Component {
 	constructor(props) {
@@ -61,7 +62,7 @@ export default class FeedComponent extends Component {
 				opacity: 0.5,
 				padding: "1em",
 			};
-			return (
+			return ( 
 				<div>
 					<FollowRequestButton authorId={this.props.authorId} userId={this.state.userId} />
 					<Typography variant="h4" style={styles}>
@@ -78,11 +79,12 @@ export default class FeedComponent extends Component {
 			<div>
 				<FollowRequestButton authorId={this.props.authorId} userId={this.state.userId} />
 				{this.state.posts.map((x, idx) => (
-					<EditablePostContainer
+					<><EditablePostContainer
 						isEditableFunc={() => false}
 						data={x}
-						key={"Post#" + String(idx)}
-					></EditablePostContainer>
+						key={"Post#" + String(idx)} />
+						<LikeButton authorId={this.props.authorId} userId={this.state.userId} postId={this.state.posts[idx].data} />
+					</>
 				))}
 			</div>
 		);
