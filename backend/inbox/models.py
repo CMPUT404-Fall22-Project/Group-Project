@@ -1,8 +1,5 @@
-from random import choices
 from django.db import models
 from authors.models import Author
-from enum import Enum
-from django.shortcuts import get_object_or_404
 
 
 # Likes, Comments, Public Posts, Friends Only posts, Private posts are all sent to the inbox of the author.
