@@ -39,6 +39,8 @@ class Ref:
         if result.status_code < 300:
             self._dereferenced = json.loads(result.text)
             return self._dereferenced
+        if result.status_code == 404:
+            raise Http404(f"Remote server does not have the data. msg={result.text}")
         raise HTTPError(
             f"Unable to dereference remote data. Request returned HTTP{result.status_code}. msg={result.text}")
 

@@ -16,6 +16,7 @@ import requests
 from requests import HTTPError
 from utils.requests import get_optionally_list_parameter_or_default
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 
 # Inbox
 # The inbox is all the new posts from who you follow
@@ -60,6 +61,14 @@ def send_to_all_followers(author: Author, data):
 
 
 # sorry aaron, this is all i know.
+def derference_inbox(qs):
+    items = []
+    for x in qs:
+        try:
+            items.append(Ref(InboxSerializer(x).data["data"]).as_data())
+        except Http404:
+            x.delete()  # remove from the inbox...
+    return items
 
 
 @api_view(["GET"])
@@ -79,9 +88,7 @@ def filter_inbox(request, author_id):
         raise PermissionDenied("Unauthorizeed access to inbox")
     # get all of the inbox items for this author
     inbox = paginate(request, Inbox.objects.filter(author=author, dataType__in=types))
-    serializer = InboxSerializer(inbox, many=True)
-    items = [Ref(x["data"]).as_data() for x in serializer.data]
-    dictionary = {"type": "inbox", "author": author.id, "items": items}
+    dictionary = {"type": "inbox", "author": author.id, "items": derference_inbox(inbox)}
     return JsonResponse(dictionary, safe=False)
 
 
@@ -96,9 +103,7 @@ class InboxList(APIView):
             raise PermissionDenied("Unauthorizeed access to inbox")
         # get all of the inbox items for this author
         inbox = paginate(request, Inbox.objects.filter(author=author))
-        serializer = InboxSerializer(inbox, many=True)
-        items = [Ref(x["data"]).as_data() for x in serializer.data]
-        dictionary = {"type": "inbox", "author": author.id, "items": items}
+        dictionary = {"type": "inbox", "author": author.id, "items": derference_inbox(inbox)}
 
         return Response(dictionary, status=status.HTTP_200_OK)
 
