@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import AllAuthorList, AuthorDetail, AuthorList, FollowerDetail, FollowerList, FollowingList
+from .views import AllAuthorList, AuthorDetail, AuthorList, FollowerDetail, FollowerList
 
 urlpatterns = [
     path("authors/all/", AllAuthorList.as_view(), name="all_author_list"),
