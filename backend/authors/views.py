@@ -2,6 +2,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 from .models import Author
 from .serializers import AuthorSerializer
@@ -9,7 +11,40 @@ from .serializers import AuthorSerializer
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 class AuthorList(APIView):
     """/authors/ GET, POST"""
-        
+
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json":
+            {
+                        "type": "authors",      
+                        "items":[
+                            {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "url":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Greg Johnson",
+                                "github": "http://github.com/gjohnson",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            },
+                            {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Lara Croft",
+                                "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "github": "http://github.com/laracroft",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            }
+                        ]
+                    }    
+                }
+            )
+        }
+    )
     def get(self, request, format=None):
         """GET [local, remote]: retrieve all profiles on the server (paginated)
         page: how many pages
@@ -27,7 +62,22 @@ class AuthorList(APIView):
         dict = {"type": "authors", "items": serializer_arr}
         return Response(dict, status=status.HTTP_200_OK)
 
-    
+    @swagger_auto_schema(
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=["displayName","github"],
+        properties={
+            "displayName": openapi.Schema(type=openapi.TYPE_STRING),
+            "github": openapi.Schema(type=openapi.TYPE_STRING),
+            "profileImage": openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+    responses={
+        "201": openapi.Response(
+        description="OK",
+            )
+        }
+    )
     def post(self, request, format=None):
         serializer = AuthorSerializer(data=request.data)
          # if valid user input
@@ -41,6 +91,25 @@ class AuthorList(APIView):
 class AuthorDetail(APIView):
     """/authors/<id> GET, POST"""
 
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples={
+            "application/json":
+                    {
+                        "type":"author",
+                        "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "host":"http://127.0.0.1:5454/",
+                        "displayName":"Lara Croft",
+                        "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "github": "http://github.com/laracroft",
+                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                    }
+                }
+            )
+        }
+    )
     def get(self, request, id, format=None):
         """GET [local, remote]: retrieve AUTHOR_ID’s profile"""
         
@@ -51,7 +120,22 @@ class AuthorDetail(APIView):
         serializer = AuthorSerializer(author)
         serializer_data = serializer.data
         return Response(serializer_data, status=status.HTTP_200_OK)
-    
+
+    @swagger_auto_schema(
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=["type", "id", "host", "url", "displayName", "github", "profileImage"],
+        properties={
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "id": openapi.Schema(type=openapi.TYPE_STRING),
+                "host": openapi.Schema(type=openapi.TYPE_STRING),
+                "url": openapi.Schema(type=openapi.TYPE_STRING),
+                "displayName": openapi.Schema(type=openapi.TYPE_STRING),
+                "github": openapi.Schema(type=openapi.TYPE_STRING),
+                "profileImage": openapi.Schema(type=openapi.TYPE_STRING)
+            },
+        )
+    )
     def post(self, request, id, format=None):
         """POST [local]: update AUTHOR_ID’s profile"""
         author = get_object_or_404(Author, id=id)
@@ -68,7 +152,41 @@ class AuthorDetail(APIView):
 
 class FollowingList(APIView):
     """/authors/<id>/following/ GET"""
-        
+    
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json":
+                    {
+                        "type": "following",      
+                        "items":[
+                            {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "url":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Greg Johnson",
+                                "github": "http://github.com/gjohnson",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            },
+                            {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Lara Croft",
+                                "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "github": "http://github.com/laracroft",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            }
+                        ]
+                    }  
+                }
+            )
+        }
+    )
+
     def get(self, request, id, format=None):
         """Get all Author's that an Author is following"""
         author = get_object_or_404(Author, id=id)
@@ -92,6 +210,40 @@ class FollowingList(APIView):
 class FollowerList(APIView):
     """/authors/<id>/followers/ GET"""
         
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json":
+                    {
+                        "type": "followers",      
+                        "items":[
+                            {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "url":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Greg Johnson",
+                                "github": "http://github.com/gjohnson",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            },
+                            {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Lara Croft",
+                                "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "github": "http://github.com/laracroft",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            }
+                        ]
+                    }     
+                }
+            )
+        }
+    )
+
     def get(self, request, id, format=None):
         """Get all followers of a specified Author"""
         author = get_object_or_404(Author, id=id)
@@ -105,6 +257,26 @@ class FollowerList(APIView):
 
 class FollowerDetail(APIView):
     """/authors/<author_id>/followers/<follower_id> GET, PUT, DELETE"""
+
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= {
+        "application/json":
+                    {
+                        "type":"author",
+                        "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "host":"http://127.0.0.1:5454/",
+                        "displayName":"Lara Croft",
+                        "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "github": "http://github.com/laracroft",
+                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                    }
+                }
+            )
+        }
+    )
 
     def get(self, request, author_id, follower_id, format=None):
         """Get a specific Author that is following another specific Author"""
@@ -121,6 +293,19 @@ class FollowerDetail(APIView):
         serializer_data = serializer.data
         return Response(serializer_data, status=status.HTTP_200_OK)
     
+    @swagger_auto_schema(
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=[],
+        properties={}
+        ),
+    responses={
+        "200": openapi.Response(
+        description="OK",
+            )
+        }
+    )
+
     def put(self, request, author_id, follower_id, format=None):
         """Add an Author as a follower of another Author"""
         # ensure author and follower exist and are both authorized
@@ -135,6 +320,19 @@ class FollowerDetail(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         author.followers.add(follower)  # this adds the entry to the Follower table
         return Response(status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=[],
+        properties={}
+        ),
+    responses={
+        "200": openapi.Response(
+        description="OK",
+            )
+        }
+    )
     
     def delete(self, request, author_id, follower_id, format=None):
         """Remove an Author as a follower of another Author"""
