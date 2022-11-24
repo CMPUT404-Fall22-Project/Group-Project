@@ -9,7 +9,7 @@ import { AppHeader } from "./components/header/header";
 import SignUpPage from "./pages/signUp";
 import SignInPage from "./pages/signIn";
 import Authentication from "./global/authentication";
-import MainFeed from "./pages/feeds";
+import MainFeed, { GenericURLFeedView } from "./pages/feeds";
 import EditProfile from "./components/editProfile";
 import ModalSystem from "./global/modalSystem";
 
@@ -49,6 +49,12 @@ class App extends Component {
 						<Route exact path="/signup" render={(props) => <SignUpPage {...props} />} />
 						{!auth.isLoggedIn() ? <Route render={(props) => <SignInPage {...props} />} /> : null}
 						<Route exact path="/" render={(props) => <MainFeed {...props} authorId={auth.getUser().getId()} />} />
+						<Route
+							path="/inbox/"
+							render={(props) => (
+								<GenericURLFeedView {...props} url={auth.getUser().getId() + "/inbox/?types[]=post"} />
+							)}
+						/>
 						<Route
 							path="/authors/:id"
 							render={(props) => <MainFeed {...props} authorId={props.location.state.authorId} />}

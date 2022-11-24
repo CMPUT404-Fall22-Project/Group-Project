@@ -27,18 +27,6 @@ export const FollowRequestButton = (props) => {
 	}, []);
 
 	async function handleButtonText() {
-		// Check if author already has a pending follow request from user
-		var response = await axios.get(`${authorId}/inbox/`);
-		for (let item of response.data.items) {
-			// Rubric states "Follow"
-			if (["Follow", "follow"].includes(item.dataType)) {
-				// if follow request sender is the user
-				if (userId === item.data.actor.id) {
-					setButtonText(followPending);
-					return;
-				}
-			}
-		}
 		// Check if user is already following this author
 		var response = await axios.get(`${authorId}/followers/`);
 		for (let author of response.data.items) {

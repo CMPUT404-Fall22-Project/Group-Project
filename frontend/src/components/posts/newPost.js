@@ -131,6 +131,7 @@ export default class NewPost extends Component {
 						label=""
 						value={this.state.post.content}
 						onChange={this.handleChangeGeneric.bind(this)}
+						error={!this.state.post.content}
 					/>
 					{imgComponent}
 				</React.Fragment>
@@ -217,7 +218,8 @@ export default class NewPost extends Component {
 	}
 
 	handlePost() {
-		if (!this.state.post.title) {
+		if (!this.state.post.title || !this.state.post.description) {
+			NotificationBar.getInstance().addNotification("Please fill out all required fields.", NotificationBar.NT_ERROR);
 			return;
 		}
 		const data = {
@@ -231,6 +233,10 @@ export default class NewPost extends Component {
 			data.content = this.state.imageData;
 			this.handleImagePost(data);
 		} else {
+			if (!this.state.post.content) {
+				NotificationBar.getInstance().addNotification("Please fill out all required fields.", NotificationBar.NT_ERROR);
+				return;
+			}
 			this.handleTextPost(data);
 		}
 	}
