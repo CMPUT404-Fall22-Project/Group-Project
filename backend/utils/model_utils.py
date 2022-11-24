@@ -1,5 +1,6 @@
 import random
 import string
+from project_404 import settings
 
 
 def generate_random_string():
@@ -8,6 +9,8 @@ def generate_random_string():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
 
 
-def get_scheme_and_netloc():
-    """TODO: This needs to include scheme and netloc"""
-    return 'http://127.0.0.1:8000/'
+def get_host():
+    """Host is either 'http://127.0.0.1:8000/' or 'https://team-sixteen.herokuapp.com/' """
+    if settings.DEBUG:
+        return 'http://127.0.0.1:8000/'
+    return "https://team-sixteen.herokuapp.com/"

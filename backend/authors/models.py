@@ -1,16 +1,12 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from utils.model_utils import generate_random_string
-
-def get_scheme_and_netloc():
-    """TODO: This needs to include scheme and netloc"""
-    return 'http://127.0.0.1:8000/'
+from utils.model_utils import generate_random_string, get_host
 
 
 class Author(models.Model):
     id = models.CharField(primary_key=True, editable=False, max_length=255, default=generate_random_string)
     type = models.CharField(max_length=255, default="author", editable=False)
-    host = models.URLField(blank=False, editable=False, default=get_scheme_and_netloc)
+    host = models.URLField(blank=False, editable=False, default=get_host)
     displayName = models.CharField(max_length=255, null=False)
     github = models.URLField() # e.g. "http://github.com/laracroft"
     profileImage = models.URLField(default="https://i.imgur.com/k7XVwpB.jpeg") # e.g. "https://i.imgur.com/k7XVwpB.jpeg"
