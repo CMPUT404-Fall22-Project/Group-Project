@@ -5,7 +5,9 @@ from rest_framework.views import APIView
 import requests
 from utils.model_utils import get_host
 
-from .models import Author
+from utils.proxy import fetch_author
+
+from .models import Author, Follower
 from .serializers import AuthorSerializer
 from nodes.models import Node
 
@@ -51,7 +53,7 @@ class AllAuthorList(APIView):
 
 class AuthorList(APIView):
     """/authors/ GET, POST"""
-        
+
     def get(self, request, format=None):
         """GET [local, remote]: retrieve all profiles on the server (paginated)
         page: how many pages
@@ -64,13 +66,12 @@ class AuthorList(APIView):
         dict = {"type": "authors", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
 
-    
     def post(self, request, format=None):
         serializer = AuthorSerializer(data=request.data)
-         # if valid user input
+        # if valid user input
         if serializer.is_valid():
             author = serializer.save()
-            return Response({"id":author.id}, status=status.HTTP_201_CREATED)
+            return Response({"id": author.id}, status=status.HTTP_201_CREATED)
         # else failed POST attempt
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -80,7 +81,7 @@ class AuthorDetail(APIView):
 
     def get(self, request, id, format=None):
         """GET [local, remote]: retrieve AUTHOR_ID’s profile"""
-        
+
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=id)
         if not author.isAuthorized:
@@ -88,7 +89,7 @@ class AuthorDetail(APIView):
         serializer = AuthorSerializer(author)
         serializer_data = serializer.data
         return Response(serializer_data, status=status.HTTP_200_OK)
-    
+
     def post(self, request, id, format=None):
         """POST [local]: update AUTHOR_ID’s profile"""
         author = get_object_or_404(Author, id=id)
@@ -103,41 +104,28 @@ class AuthorDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class FollowingList(APIView):
-    """/authors/<id>/following/ GET"""
-        
-    def get(self, request, id, format=None):
-        """Get all Author's that an Author is following"""
-        author = get_object_or_404(Author, id=id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        # exclude the current author from authors
-        authors = Author.objects.filter(isAuthorized=True).exclude(id=id)
-
-        for a in authors:
-            followers_of_a = a.followers.all()
-            # exclude a from queryset if author is not following a
-            if author not in followers_of_a:
-                authors = authors.exclude(id=a.id)
-                
-        # authors is now a queryset of Author objects that author is following
-        serializer = AuthorSerializer(authors, many=True)
-        dict = {"type": "following", "items": serializer.data}
-        return Response(dict, status=status.HTTP_200_OK)
-    
-
 class FollowerList(APIView):
     """/authors/<id>/followers/ GET"""
-        
+
     def get(self, request, id, format=None):
         """Get all followers of a specified Author"""
         author = get_object_or_404(Author, id=id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        followers = author.followers.all()
-        serializer = AuthorSerializer(followers, many=True)
+        followers = Follower.objects.all().filter(author=author).values_list("follower", flat=True)
+
+        serializer = AuthorSerializer([fetch_author(x) for x in followers], many=True)
         dict = {"type": "followers", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
+
+
+def find_follower(author_id, follower_id):
+    author = get_object_or_404(Author, id=author_id)
+    followers = Follower.objects.all().filter(author=author).values_list("follower", flat=True)
+    for x in followers:
+        f = fetch_author(x)
+        print(x)
+        if x == follower_id or f.id == follower_id:
+            return (author, x, f)
+    return (author, None, None)
 
 
 class FollowerDetail(APIView):
@@ -146,38 +134,19 @@ class FollowerDetail(APIView):
     def get(self, request, author_id, follower_id, format=None):
         """Get a specific Author that is following another specific Author"""
         # ensure author exists
-        author = get_object_or_404(Author, id=author_id)
-        followers = author.followers.all()
-        # ensure follower is actually a follower of author
-        follower: Author = get_object_or_404(followers, id=follower_id)
-        # ensure both are authorized
-        for a in [author,follower]:
-            if not a.isAuthorized:
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
-        serializer = AuthorSerializer(follower)
-        serializer_data = serializer.data
-        return Response(serializer_data, status=status.HTTP_200_OK)
-    
+        _, followObj, follower = find_follower(author_id, follower_id)
+        if (follower != None):
+            return Response({"isFollowing": True, "isAccepted": followObj.isAccepted}, status=status.HTTP_200_OK)
+        return Response({"isFollowing": False, "isAccepted": False}, status=status.HTTP_200_OK)
+
     def put(self, request, author_id, follower_id, format=None):
         """Add an Author as a follower of another Author"""
-        # ensure author and follower exist and are both authorized
-        author = get_object_or_404(Author, id=author_id)
-        follower_id = follower_id.split("/authors/")[1]
-        follower = get_object_or_404(Author, id=follower_id)
-        for a in [author,follower]:
-            if not a.isAuthorized:
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
-        # prevent author from adding self as follower
-        if author_id == follower_id:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        author.followers.add(follower)  # this adds the entry to the Follower table
+        Follower(author=get_object_or_404(Author, pk=author_id),
+                 follower=follower_id).save()  # this adds the entry to the Follower table
         return Response(status=status.HTTP_200_OK)
-    
+
     def delete(self, request, author_id, follower_id, format=None):
         """Remove an Author as a follower of another Author"""
-        author = get_object_or_404(Author, id=author_id)
-        followers = author.followers.all()
-        follower_id = follower_id.split("/authors/")[1]
-        follower = get_object_or_404(followers, id=follower_id)
-        author.followers.remove(follower)
+        follower = get_object_or_404(Follower, author=get_object_or_404(Author, pk=author_id), follower=follower_id)
+        follower.delete()
         return Response(status=status.HTTP_200_OK)

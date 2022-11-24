@@ -83,19 +83,16 @@ export class AppHeader extends Component {
 		Authentication.getInstance()
 			.logout()
 			.then(() => {
-				history.push("/");
-				NotificationBar.getInstance().addNotification("Successfully logged out", NotificationBar.NT_SUCCESS);
-				this.handleProfileClose();
+				setTimeout(() => {
+					history.push("/");
+					NotificationBar.getInstance().addNotification("Successfully logged out", NotificationBar.NT_SUCCESS);
+					this.handleProfileClose();
+				}, 0);
 			});
 	}
 
 	generateMenuItems(auth) {
-		const elements = [
-			<MenuItem key="logout" disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
-				Logout
-			</MenuItem>,
-		];
-		var rest = null;
+		const elements = [];
 		if (auth.isLoggedIn()) {
 			elements.push(
 				<FollowRequestsMenuItem
@@ -109,7 +106,13 @@ export class AppHeader extends Component {
 					Edit Profile...
 				</MenuItem>
 			);
+			elements.push(<Divider key="menuDivider1"></Divider>);
 		}
+		elements.push(
+			<MenuItem key="logout" disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
+				Logout
+			</MenuItem>
+		);
 		return elements;
 	}
 

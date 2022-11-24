@@ -1,5 +1,9 @@
+import NotificationBar from "../../global/centralNotificationBar";
+import { tryStringifyObject } from "../../utils/stringify";
+import PaginatedProvider, { GenericElementProvider } from "../paginatedProvider";
 import Author from "./author";
 import DataContainer from "./container";
+import Comment from "./comment";
 
 export default class Post extends DataContainer {
 	static TYPE = "post";
@@ -13,37 +17,51 @@ export default class Post extends DataContainer {
 		} else {
 			this._baseData.author = Author.parseDatabase(this._baseData.author);
 		}
+		this._baseData.commentsSrc = this._baseData.commentsSrc || [];
 		if (comments) {
 			this._baseData.commentsSrc = comments;
 		}
+
+		this._baseData.commentsSrc = this._baseData.commentsSrc.map((x) => Comment.parseDatabase(x));
+
+		this.commentSupplier = new PaginatedProvider(new GenericElementProvider(this._baseData.comments));
+		this.commentSupplier.skip(this._baseData.commentsSrc.length);
+		this.commentSupplier.listen((success, data) => {
+			if (success) {
+				const formatted = data.map((x) => Comment.parseDatabase(x));
+				this._baseData.commentsSrc = [...this._baseData.commentsSrc, ...formatted];
+			} else {
+				NotificationBar.getInstance().addNotification(
+					"Failed to load comments." + tryStringifyObject(data),
+					NotificationBar.NT_ERROR,
+					10_000
+				);
+			}
+		});
 	}
 
 	getAuthor() {
 		return this._baseData.author;
 	}
 
-	setAuthor(author) {
-		this._baseData.author = author;
-	}
-
 	getNumComments() {
 		return this._baseData.count;
 	}
 
-	getNextComments() {
-		// TODO
+	requestNextComments() {
+		return this.commentSupplier.requestData();
 	}
 
 	getComments() {
-		return this._baseData.commentsSrc.comments;
+		return this._baseData.commentsSrc;
 	}
 
 	getBaseData() {
 		return this._baseData;
 	}
 
-	setBaseData(baseData) {
-		this._baseData = baseData;
+	isLocalPost() {
+		return this._baseData.origin.startsWith(process.env.REACT_APP_HOST);
 	}
 
 	encodeDatabase() {
