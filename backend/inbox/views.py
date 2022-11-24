@@ -29,13 +29,8 @@ from django.http import Http404
 # if the type is “comment” then add that comment to AUTHOR_ID’s inbox
 
 
-def send_to_all_followers(author: Author, data):
-    """
-    Saves data to the inboxes of all followers of an author
-    @params: author - The Author whose followers will receive the data to their inboxes
-            data - A Post, Follow, Like, or Comment
-    """
-    # get the correct serializer
+def serialize_data(data):
+    serialized = None
     if data.type == "post":
         serialized = serialize_single_post(data)
         serialized["type"] = data.type
@@ -49,6 +44,17 @@ def send_to_all_followers(author: Author, data):
         else:
             serialized = PostLikeSerializer(data).data
             serialized["type"] = "like"
+    return serialized
+
+
+def send_to_all_followers(author: Author, data):
+    """
+    Saves data to the inboxes of all followers of an author
+    @params: author - The Author whose followers will receive the data to their inboxes
+            data - A Post, Follow, Like, or Comment
+    """
+    # get the correct serializer
+    serialized = serialize_data(data)
     # add to inbox of all of the author's followers
     followerUrls = Follower.objects.all().filter(
         author=author).values_list("follower", flat=True)
@@ -58,6 +64,15 @@ def send_to_all_followers(author: Author, data):
         result = requests.post(url, serialized, headers={'Authorization': get_authorization_from_url(url)})
         if result.status_code >= 300:
             raise HTTPError(f"POST to server at {url} failed! msg={result.text}")
+
+
+def send_to_user(authorUrl, data):
+    serialized = serialize_data(data)
+    result = requests.post(authorUrl, serialized, headers={'Authorization': get_authorization_from_url(authorUrl)})
+    if result.status_code >= 300:
+        raise HTTPError(f"POST to server at {authorUrl} failed! msg={result.text}")
+
+    return serialized
 
 
 # sorry aaron, this is all i know.
@@ -128,8 +143,6 @@ class InboxList(APIView):
             return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
         if type in ["like", "comment"]:
             # save the data to the author's inbox
-            data = request.data
-            del data["type"]  # this key/value be saved under dataType
             inbox = author.inboxes.create(data=request.data, dataType=type)
             return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
 

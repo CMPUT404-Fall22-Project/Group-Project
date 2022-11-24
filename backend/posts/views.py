@@ -1,18 +1,20 @@
 from django.shortcuts import get_object_or_404
 from utils.model_utils import generate_random_string
 from utils.requests import paginate
-from utils.process_models import process_posts, serialize_single_post
+from utils.process_models import process_posts, serialize_single_post, process_comments
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from django.db import transaction
 from django.http import HttpResponse
 from authors.models import Author
 from .models import ContentType, Post, Comment, PostLike, CommentLike, Category
 from .serializers import PostSerializer, CommentSerializer, PostLikeSerializer, CommentLikeSerializer
 from authors.serializers import AuthorSerializer
-from inbox.views import send_to_all_followers
+from inbox.views import send_to_all_followers, send_to_user
 import base64
+from django.http import JsonResponse
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
@@ -139,15 +141,13 @@ class CommentList(APIView):
         """GET [local, remote] get the list of comments of the post whose id is POST_ID (paginated)"""
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=author_id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         # get the post
         post = get_object_or_404(Post, id=post_id)
         # get all comments for the post
-        comments = post.comments.all()
-        serializer = CommentSerializer(comments, many=True)
-        dict = {"type": "comments", "items": serializer.data}
+        comments = paginate(request, post.comments.all().order_by("-published"))
+        serialized = process_comments(comments)
+        dict = {"type": "comments", "items": serialized}
         return Response(dict, status=status.HTTP_200_OK)
 
     def post(self, request, author_id, post_id, format=None):
@@ -265,8 +265,6 @@ class CommentLikeList(APIView):
         """POST a 'like' to a particular comment"""
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=author_id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
         # ensure the post and comment exist
         post = get_object_or_404(Post, id=post_id)
         comment = get_object_or_404(Comment, id=comment_id)
@@ -275,3 +273,19 @@ class CommentLikeList(APIView):
         # add the like to the inbox of the post author and all of their followers
         send_to_all_followers(post.author, like)
         return Response({"id": like.id}, status=status.HTTP_201_CREATED)
+
+
+@api_view(["POST"])
+@transaction.atomic
+def add_new_comment(request, author_id, post_id):
+    post_owner = get_object_or_404(Author, id=author_id)
+    post = get_object_or_404(Post, id=post_id)
+    data = request.data
+    # can only post to local. so this is OK
+    id = data["authorId"].split("/")
+    id = id[len(id)-1]
+    author = get_object_or_404(Author, id=id)  # author that made the comment
+    comment = Comment(author=author, post=post, contentType=data["contentType"], content=data["content"])
+    comment.save()
+    serialized = send_to_user(post_owner.host + "authors/" + post_owner.id+"/inbox/", comment)
+    return JsonResponse(serialized, safe=False)

@@ -20,6 +20,10 @@ export function tryStringifyObject(obj) {
 	if (obj instanceof String) {
 		return obj;
 	}
+	var s = String(obj);
+	if (s != "object") {
+		return s;
+	}
 	const keys = Object.keys(obj);
 	if (keys.length === 1) {
 		return String(obj[keys[0]]);

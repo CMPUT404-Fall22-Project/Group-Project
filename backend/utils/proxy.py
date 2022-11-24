@@ -66,7 +66,7 @@ def fetch_author(data):
 
     # try local first
     try:
-        return Author.object.get(pk=data)
+        return Author.objects.get(pk=data)
     except:
         pass
 

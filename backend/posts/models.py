@@ -56,9 +56,10 @@ class Category(models.Model):
 
 class Comment(models.Model):
 
+    id = models.CharField(primary_key=True, editable=False, max_length=255, default=generate_random_string)
     type = models.CharField(max_length=7, default="comment", editable=False)
-    # the author that commented (could be remote!)
-    author = models.TextField(null=False)
+    # the author that commented
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="comments")
     # the Post that was commented on
     post = models.ForeignKey(Post, related_name="comments", on_delete=models.CASCADE)
     contentType = models.CharField(choices=ContentType.choices, null=False,

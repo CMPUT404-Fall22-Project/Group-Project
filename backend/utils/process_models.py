@@ -7,11 +7,18 @@ from authors.serializers import AuthorSerializer
 
 
 def process_comments(comments):
+    data = []
     parsed = CommentSerializer(comments, many=True).data
     for comment in parsed:
+        comment["id"] = get_scheme_and_netloc(
+        ) + f"authors/{comment['author']}/posts/{comment['post']}/comments/{comment['id']}"
         comment["author"] = AuthorSerializer(fetch_author(comment["author"])).data
+        del comment["post"]
+        comment["comment"] = comment["content"]
+        del comment["content"]
+        data.append(comment)
 
-    return parsed
+    return data
 
 
 def serialize_single_comment(comment):
@@ -33,7 +40,7 @@ def process_posts(posts):
 
         serialized["categories"] = list(Category.objects.all().filter(post=post).values_list("category", flat=True))
 
-        comments = post.comments.all()
+        comments = post.comments.all().order_by("-published")
         serialized["comments"] = serialized["origin"] + "/comments"
         serialized["count"] = len(comments)
         serialized["commentsSrc"] = process_comments(paginate_values(0, 5, comments))
