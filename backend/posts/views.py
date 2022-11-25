@@ -15,6 +15,8 @@ from authors.serializers import AuthorSerializer
 from inbox.views import send_to_all_followers, send_to_user
 import base64
 from django.http import JsonResponse
+from nodes.models import Node
+import requests
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
@@ -35,6 +37,48 @@ def add_categories(post, raw_data):
             Category(category=category, post=post).save()
 
 class AllPostList(APIView):
+    """/posts/all/ GET"""
+
+    #TODO: THIS IS BAD. I JUST WANT SOMETHING TO RETURN FOR NOW.
+    # The functions that process the posts require the posts to be Post objects in a queryset
+    # The remote posts are Json objects in a regular list
+    def get(self, request, format=None):
+        """GET [local, remote] get all posts for all authors across all nodes (paginated)"""
+
+        def get_posts_from_remote_nodes():
+            """GET all posts across all remote nodes"""
+            nodes = Node.objects.exclude(host=get_host())
+            posts = []
+            for node in nodes:
+                posts_url =  node.host + "posts/"
+                response = requests.get(posts_url, auth=(node.username, node.password))
+                data = response.json()
+                if response.status_code != 200:
+                    print(f'{node.host}: {response.status_code} {response}') # print the error
+                    continue
+                for post in data["items"]:
+                    # post = Post(post) #TODO: turn this into a Post object?
+                    posts.append(post)
+            return posts
+
+        
+        authors = Author.objects.filter(isAuthorized=True)
+        posts = Post.objects.all().filter(author__in=authors, visibilty=Post.Visibility.PUBLIC) # TODO Account for non-public posts amongst followers
+
+        json_posts = get_posts_from_remote_nodes() # TODO: combine these jsonPosts with the PythonPosts
+
+        posts = posts.order_by("-published")
+        posts = paginate(request, posts)
+        posts = process_posts(posts)
+
+        for json_post in json_posts:
+            posts.append(json_post)
+
+        # dict = {"type": "posts", "items": process_posts(posts)}
+        dict = {"type": "posts", "items": posts}
+        return Response(dict, status=status.HTTP_200_OK)
+
+class AllLocalPostList(APIView):
     """/posts/ GET"""
 
     def get(self, request, format=None):
@@ -42,9 +86,6 @@ class AllPostList(APIView):
 
         authors = Author.objects.filter(isAuthorized=True)
         posts = Post.objects.all().filter(author__in=authors, visibilty=Post.Visibility.PUBLIC) # TODO Account for non-public posts amongst followers
-
-        # if request.app_session.author != author:
-        #     posts = posts.filter(unlisted=False)
 
         posts = posts.order_by("-published")
         posts = paginate(request, posts)
@@ -62,7 +103,7 @@ class PostList(APIView):
         author = get_object_or_404(Author, id=id)
         posts = Post.objects.all().filter(author=id)
 
-        if request.app_session.author != author:
+        if request.app_session and request.app_session.author != author:
             posts = posts.filter(unlisted=False)
 
         posts = posts.order_by("-published")
