@@ -2,6 +2,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLikeSerializer
 from posts.models import Post
 from posts.serializers import PostSerializer
@@ -47,6 +49,47 @@ def add_data_to_inboxes_of_author_and_followers(author: Author, data):
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 class InboxList(APIView):
     """ URL: ://service/authors/{AUTHOR_ID}/inbox """
+
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= {
+        "application/json":
+                    {
+                        "type":"inbox",
+                        "author":"http://127.0.0.1:5454/authors/c1e3db8ccea4541a0f3d7e5c75feb3fb",
+                        "items":[
+                            {
+                                "type":"post",
+                                "title":"A Friendly post title about a post about web dev",
+                                "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                                "source":"http://lastplaceigotthisfrom.com/posts/yyyyy",
+                                "origin":"http://whereitcamefrom.com/posts/zzzzz",
+                                "description":"This post discusses stuff -- brief",
+                                "contentType":"text/plain",
+                                "content":"Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge",
+                                "author": {
+                                    "type":"author",
+                                    "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                    "host":"http://127.0.0.1:5454/",
+                                    "displayName":"Lara Croft",
+                                    "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                    "github": "http://github.com/laracroft",
+                                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                                },
+                                "categories":["web","tutorial"],
+                                "comments":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments",
+                                "published":"2015-03-09T13:07:04+00:00",
+                                "visibility":"FRIENDS",
+                                "unlisted":False
+                            },      
+                        ]
+                    }
+                }
+            )
+        }
+    )
         
     def get(self, request, id, format=None):
         """GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)"""
@@ -60,6 +103,7 @@ class InboxList(APIView):
         dictionary = {"type":"inbox", "author":author.id,"items":serializer.data}
 
         return Response(dictionary, status=status.HTTP_200_OK)
+    
 
     def post(self, request, id, format=None):
         """

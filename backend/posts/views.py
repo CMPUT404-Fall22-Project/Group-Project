@@ -4,6 +4,8 @@ from utils.requests import paginate
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from django.http import HttpResponse
 from authors.models import Author
 from .models import ContentType, Post, Comment, PostLike, CommentLike
@@ -12,6 +14,75 @@ from authors.serializers import AuthorSerializer
 from inbox.views import add_data_to_inboxes_of_author_and_followers
 import base64
 
+post_example = {
+                "type":"post",
+                "title":"A post title about a post about web dev",
+                "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                "source":"http://lastplaceigotthisfrom.com/posts/yyyyy",
+                "origin":"http://whereitcamefrom.com/posts/zzzzz",
+                "description":"This post discusses stuff -- brief",
+                "contentType":"text/plain",
+                "content":"Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge",
+                "author":{
+                    "type":"author",
+                    "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                    "host":"http://127.0.0.1:5454/",
+                    "displayName":"Lara Croft",
+                    "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                    "github": "http://github.com/laracroft",
+                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                },
+                "categories":["web","tutorial"],
+                "count": 1023,
+                "comments":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments",
+                "commentsSrc":{
+                    "type":"comments",
+                    "page":1,
+                    "size":5,
+                    "post":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                    "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments",
+                    "comments":[
+                        {
+                            "type":"comment",
+                            "author":{
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "url":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Greg Johnson",
+                                "github": "http://github.com/gjohnson",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            },
+                            "comment":"Sick Olde English",
+                            "contentType":"text/markdown",
+                            "published":"2015-03-09T13:07:04+00:00",
+                            "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments/f6255bb01c648fe967714d52a89e8e9c",
+                        }
+                    ]
+                },
+                "published":"2015-03-09T13:07:04+00:00",
+                "visibility":"PUBLIC",
+                "unlisted":False
+            }
+
+like_example = {
+                "type": "like",
+                "@context": "https://www.w3.org/ns/activitystreams",
+                "summary": "Lara Croft Likes your comment",         
+                "author":{
+                    "type":"author",
+                    "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                    "host":"http://127.0.0.1:5454/",
+                    "displayName":"Lara Croft",
+                    "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                    "github":"http://github.com/laracroft",
+                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                    },
+                    "object":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e"
+                }
+
+
+
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
 
@@ -19,6 +90,22 @@ import base64
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
 class PostList(APIView):
     """Creation URL ://service/authors/{AUTHOR_ID}/posts/"""
+
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json": {
+                            "type":"posts",
+                            "items": [
+                                post_example
+                            ]
+                        }
+                    }
+                )
+            }
+        )
 
     def get(self, request, id, format=None):
         """GET [local, remote] get the recent posts from post AUTHOR_ID (paginated)"""
@@ -43,19 +130,44 @@ class PostList(APIView):
         dict = {"type": "posts", "items": serializedPosts}
         return Response(dict, status=status.HTTP_200_OK)
 
-    def fill_optional_values(self, data, authorId):
-        postId = generate_random_string()
-        if "id" in data:
-            postId = data["id"]
-        else:
-            data["id"] = postId
-
-        if not "source" in data:
-            data["source"] = get_host() + "authors/" + authorId + "/posts/" + postId
-        if not "origin" in data:
-            data["origin"] = get_host() + "authors/" + authorId + "/posts/" + postId
-        if not "comments" in data:
-            data["comments"] = get_host() + "authors/" + authorId + "/posts/" + postId + "/comments/"
+    @swagger_auto_schema(
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "title": openapi.Schema(type=openapi.TYPE_STRING),
+            "description": openapi.Schema(type=openapi.TYPE_STRING),
+            "content": openapi.Schema(type=openapi.TYPE_STRING),
+            "contentType": openapi.Schema(type=openapi.TYPE_STRING),
+            "categories": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+            "visibility": openapi.Schema(type=openapi.TYPE_STRING),
+            "unlisted": openapi.Schema(type=openapi.TYPE_BOOLEAN)
+            }
+        ),
+    responses={
+        "200": openapi.Schema(
+        description="OK",
+        type=openapi.TYPE_OBJECT,
+        properties= {
+                    "type": openapi.Schema(type=openapi.TYPE_STRING),
+                    "title": openapi.Schema(type=openapi.TYPE_STRING),
+                    "id": openapi.Schema(type=openapi.TYPE_STRING),
+                    "source": openapi.Schema(type=openapi.TYPE_STRING),
+                    "origin": openapi.Schema(type=openapi.TYPE_STRING),
+                    "description": openapi.Schema(type=openapi.TYPE_STRING),
+                    "contentType": openapi.Schema(type=openapi.TYPE_STRING),
+                    "content": openapi.Schema(type=openapi.TYPE_STRING),
+                    "author": openapi.Schema(type=openapi.TYPE_STRING),
+                    "categories": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+                    "count": openapi.Schema(type=openapi.TYPE_NUMBER),
+                    "comments": openapi.Schema(type=openapi.TYPE_STRING),
+                    "commentsSrc": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+                    "published": openapi.Schema(type=openapi.TYPE_STRING),
+                    "visibility": openapi.Schema(type=openapi.TYPE_STRING),
+                    "unlisted": openapi.Schema(type=openapi.TYPE_BOOLEAN)
+                }
+            )
+        }
+    )
 
     def post(self, request, id, format=None):
         """POST [local] create a new post but generate a new id"""
@@ -77,9 +189,25 @@ class PostList(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def fill_optional_values(self, data, authorId):
+        postId = generate_random_string()
+        if "id" in data:
+            postId = data["id"]
+        else:
+            data["id"] = postId
+
+        if not "source" in data:
+            data["source"] = get_host() + "authors/" + authorId + "/posts/" + postId
+        if not "origin" in data:
+            data["origin"] = get_host() + "authors/" + authorId + "/posts/" + postId
+        if not "comments" in data:
+            data["comments"] = get_host() + "authors/" + authorId + "/posts/" + postId + "/comments/"
+
 
 class PostImage(APIView):
     """Creation URL ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/image"""
+
+    # TODO: swagger for image post:
 
     def get(self, request, author_id, post_id):
         """GET [local, remote] get the image contents of a post, or return a 404 if the post is not an image"""
@@ -96,8 +224,18 @@ class PostImage(APIView):
 
 
 class PostDetail(APIView):
-    """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}
-    POST [local] update the post whose id is POST_ID (must be authenticated)"""
+    """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}"""
+
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json": post_example
+                    }
+                )
+            }
+        )
 
     def get(self, request, author_id, post_id, format=None):
         """GET [local, remote] get the public post whose id is POST_ID"""
@@ -112,8 +250,48 @@ class PostDetail(APIView):
         post_serializer["count"] = len(Comment.objects.filter(post=post))
         return Response(post_serializer, status=status.HTTP_200_OK)
 
+    
+    @swagger_auto_schema(
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "title": openapi.Schema(type=openapi.TYPE_STRING),
+            "description": openapi.Schema(type=openapi.TYPE_STRING),
+            "content": openapi.Schema(type=openapi.TYPE_STRING),
+            "contentType": openapi.Schema(type=openapi.TYPE_STRING),
+            "categories": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+            "visibility": openapi.Schema(type=openapi.TYPE_STRING),
+            "unlisted": openapi.Schema(type=openapi.TYPE_BOOLEAN)
+            }
+        ),
+    responses={
+        "200": openapi.Schema(
+        description="OK",
+        type=openapi.TYPE_OBJECT,
+        properties= {
+                    "type": openapi.Schema(type=openapi.TYPE_STRING),
+                    "title": openapi.Schema(type=openapi.TYPE_STRING),
+                    "id": openapi.Schema(type=openapi.TYPE_STRING),
+                    "source": openapi.Schema(type=openapi.TYPE_STRING),
+                    "origin": openapi.Schema(type=openapi.TYPE_STRING),
+                    "description": openapi.Schema(type=openapi.TYPE_STRING),
+                    "contentType": openapi.Schema(type=openapi.TYPE_STRING),
+                    "content": openapi.Schema(type=openapi.TYPE_STRING),
+                    "author": openapi.Schema(type=openapi.TYPE_STRING),
+                    "categories": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+                    "count": openapi.Schema(type=openapi.TYPE_NUMBER),
+                    "comments": openapi.Schema(type=openapi.TYPE_STRING),
+                    "commentsSrc": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+                    "published": openapi.Schema(type=openapi.TYPE_STRING),
+                    "visibility": openapi.Schema(type=openapi.TYPE_STRING),
+                    "unlisted": openapi.Schema(type=openapi.TYPE_BOOLEAN)
+                }
+            )
+        }
+    )
+
     def put(self, request, author_id, post_id, format=None):
-        """PUT [local] create a post where its id is POST_ID"""
+        """PUT [local] create a post where its id is POST_ID (must be authenticated"""
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=author_id)
         if not author.isAuthorized:
@@ -128,6 +306,7 @@ class PostDetail(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
     def delete(self, request, author_id, post_id, format=None):
         """DELETE [local] remove the post whose id is POST_ID"""
         # ensure author exists and is authorized
@@ -139,13 +318,49 @@ class PostDetail(APIView):
         post.delete()
         return Response(status=status.HTTP_200_OK)
 
-############
-# COMMENTS #
-############
+##################################################################################################################
+#                                               COMMENTS                                                         #
+##################################################################################################################
 
 
 class CommentList(APIView):
     """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments"""
+
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json":
+                {
+                    "type": "comments",
+                    "page": 1,
+                    "size": 5,
+                    "post": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                    "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments",
+                    "comments": [
+                        {
+                            "type": "comment",
+                            "author": {
+                                "type": "author",
+                                "id": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "url": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "host": "http://127.0.0.1:5454/",
+                                "displayName": "Greg Johnson",
+                                "github": "http://github.com/gjohnson",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            },
+                            "comment": "Sick Olde English",
+                            "contentType": "text/markdown",
+                            "published": "2015-03-09T13:07:04+00:00",
+                            "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments/f6255bb01c648fe967714d52a89e8e9c",
+                        }
+                    ]
+                } 
+                }
+            )
+        }
+    )
 
     def get(self, request, author_id, post_id, format=None):
         """GET [local, remote] get the list of comments of the post whose id is POST_ID (paginated)"""
@@ -161,6 +376,30 @@ class CommentList(APIView):
         serializer = CommentSerializer(comments, many=True)
         dict = {"type": "comments", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "comment": openapi.Schema(type=openapi.TYPE_STRING),
+            "contentType": openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+    responses={
+        "200": openapi.Schema(
+        description="OK",
+        type=openapi.TYPE_OBJECT,
+        properties= {
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "author": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+                "comment": openapi.Schema(type=openapi.TYPE_STRING),
+                "contentType": openapi.Schema(type=openapi.TYPE_STRING),
+                "published": openapi.Schema(type=openapi.TYPE_STRING),
+                "id": openapi.Schema(type=openapi.TYPE_STRING),
+                }
+            )
+        }
+    )
 
     def post(self, request, author_id, post_id, format=None):
         """
@@ -188,12 +427,29 @@ class CommentList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-#########
-# LIKED #
-#########
+##################################################################################################################
+#                                               LIKED                                                            #
+##################################################################################################################
 
 class LikedList(APIView):
     """URL: ://service/authors/{AUTHOR_ID}/liked"""
+
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json":
+                {
+                    "type":"liked",
+                    "items":[
+                        like_example
+                    ]
+                }  
+                }
+            )
+        }
+    )
 
     def get(self, request, author_id, format=None):
         """GET [local, remote] list what public things AUTHOR_ID liked."""
@@ -216,13 +472,30 @@ class LikedList(APIView):
                 arr.append(dict(data))
         return Response({"type": "liked", "items": arr}, status=status.HTTP_200_OK)
 
-##############
-# POST LIKES #
-##############
+##################################################################################################################
+#                                               POST LIKES                                                       #
+##################################################################################################################
 
 
 class PostLikeList(APIView):
     """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/likes"""
+
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json":
+                {
+                    "type": "likes",
+                    "items": [
+                        like_example
+                    ]
+                }
+                }
+            )
+        }
+    )
 
     def get(self, request, author_id, post_id, format=None):
         """GET [local, remote] a list of likes from other authors on AUTHOR_ID’s post POST_ID"""
@@ -237,6 +510,23 @@ class PostLikeList(APIView):
         serializer = PostLikeSerializer(likes, many=True)
         dict = {"type": "likes", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json":
+                {
+                    "type": "likes",
+                    "items":[ 
+                        like_example
+                    ]
+                }
+                }
+            )
+        }
+    )
 
     def post(self, request, author_id, post_id, format=None):
         "POST a like for a particular post"
@@ -253,12 +543,29 @@ class PostLikeList(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-#################
-# COMMENT LIKES #
-#################
+##################################################################################################################
+#                                               COMMENT LIKES                                                    #
+##################################################################################################################
 
 class CommentLikeList(APIView):
     """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments/{COMMENT_ID}/likes"""
+
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json":
+                {
+                    "type": "likes",
+                    "items":[ 
+                        like_example
+                    ]
+                }
+                }
+            )
+        }
+    )
 
     def get(self, request, author_id, post_id, comment_id, format=None):
         """POST a 'like' to a particular comment"""
@@ -272,6 +579,24 @@ class CommentLikeList(APIView):
         serializer = CommentLikeSerializer(comment_likes, many=True)
         dict = {"type": "likes", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
+
+    
+    @swagger_auto_schema(
+    responses={
+        "200": openapi.Response(
+        description="OK",
+        examples= { 
+        "application/json":
+                {
+                    "type": "likes",
+                    "items":[ 
+                        like_example
+                    ]
+                }
+                }
+            )
+        }
+    )
 
     def post(self, request, author_id, post_id, comment_id, format=None):
         """POST a 'like' to a particular comment"""

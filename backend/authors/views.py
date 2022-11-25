@@ -18,29 +18,15 @@ class AuthorList(APIView):
         description="OK",
         examples= { 
         "application/json":
-            {
-                        "type": "authors",      
-                        "items":[
-                            {
-                                "type":"author",
-                                "id":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "url":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "host":"http://127.0.0.1:5454/",
-                                "displayName":"Greg Johnson",
-                                "github": "http://github.com/gjohnson",
-                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                            },
-                            {
-                                "type":"author",
-                                "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "host":"http://127.0.0.1:5454/",
-                                "displayName":"Lara Croft",
-                                "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "github": "http://github.com/laracroft",
-                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                            }
-                        ]
-                    }    
+                {
+                    "type":"author",
+                    "id":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                    "url":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                    "host":"http://127.0.0.1:5454/",
+                    "displayName":"Greg Johnson",
+                    "github": "http://github.com/gjohnson",
+                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                    }  
                 }
             )
         }
@@ -65,7 +51,6 @@ class AuthorList(APIView):
     @swagger_auto_schema(
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
-        required=["displayName","github"],
         properties={
             "displayName": openapi.Schema(type=openapi.TYPE_STRING),
             "github": openapi.Schema(type=openapi.TYPE_STRING),
@@ -73,11 +58,22 @@ class AuthorList(APIView):
             }
         ),
     responses={
-        "201": openapi.Response(
+        "200": openapi.Schema(
         description="OK",
-            )
-        }
+        type=openapi.TYPE_OBJECT,
+        properties= {
+                "id": openapi.Schema(type=openapi.TYPE_STRING),
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "host": openapi.Schema(type=openapi.TYPE_STRING),
+                "url": openapi.Schema(type=openapi.TYPE_STRING),
+                "displayName": openapi.Schema(type=openapi.TYPE_STRING),
+                "github": openapi.Schema(type=openapi.TYPE_STRING),
+                "profileImage": openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )
+    }
     )
+    
     def post(self, request, format=None):
         serializer = AuthorSerializer(data=request.data)
          # if valid user input
@@ -124,10 +120,9 @@ class AuthorDetail(APIView):
     @swagger_auto_schema(
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
-        required=["type", "id", "host", "url", "displayName", "github", "profileImage"],
         properties={
-                "type": openapi.Schema(type=openapi.TYPE_STRING),
                 "id": openapi.Schema(type=openapi.TYPE_STRING),
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
                 "host": openapi.Schema(type=openapi.TYPE_STRING),
                 "url": openapi.Schema(type=openapi.TYPE_STRING),
                 "displayName": openapi.Schema(type=openapi.TYPE_STRING),
@@ -294,14 +289,21 @@ class FollowerDetail(APIView):
         return Response(serializer_data, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(
-    request_body=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        required=[],
-        properties={}
-        ),
     responses={
         "200": openapi.Response(
         description="OK",
+        examples= {
+        "application/json":
+                    {
+                        "type":"author",
+                        "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "host":"http://127.0.0.1:5454/",
+                        "displayName":"Lara Croft",
+                        "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "github": "http://github.com/laracroft",
+                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                    }
+                }
             )
         }
     )
@@ -321,18 +323,6 @@ class FollowerDetail(APIView):
         author.followers.add(follower)  # this adds the entry to the Follower table
         return Response(status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
-    request_body=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        required=[],
-        properties={}
-        ),
-    responses={
-        "200": openapi.Response(
-        description="OK",
-            )
-        }
-    )
     
     def delete(self, request, author_id, follower_id, format=None):
         """Remove an Author as a follower of another Author"""
