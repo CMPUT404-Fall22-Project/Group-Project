@@ -50,6 +50,9 @@ class AllPostList(APIView):
             nodes = Node.objects.exclude(host=get_host())
             posts = []
             for node in nodes:
+                if node.host == "https://social-distribution-14degrees.herokuapp.com/api/":
+                    # authors.append(data[0])
+                    continue
                 posts_url =  node.host + "posts/"
                 response = requests.get(posts_url, auth=(node.username, node.password))
                 data = response.json()
@@ -61,7 +64,6 @@ class AllPostList(APIView):
                     posts.append(post)
             return posts
 
-        
         authors = Author.objects.filter(isAuthorized=True)
         posts = Post.objects.all().filter(author__in=authors, visibilty=Post.Visibility.PUBLIC) # TODO Account for non-public posts amongst followers
 

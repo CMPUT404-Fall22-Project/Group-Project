@@ -31,6 +31,10 @@ class AllAuthorList(APIView):
                 authors_url =  node.host + "authors/"
                 response = requests.get(authors_url, auth=(node.username, node.password))
                 data = response.json()
+                if node.host == "https://social-distribution-14degrees.herokuapp.com/api/":
+                    # authors.append(data[0])
+                    continue
+                    # print(data)
                 if response.status_code != 200:
                     print(f'{node.host}: {response.status_code} {response}') # print the error
                     continue
