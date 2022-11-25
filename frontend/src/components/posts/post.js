@@ -10,6 +10,8 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import Authentication from "../../global/authentication";
 import ModalTemplates from "../modals/genericModalTemplates";
 import axios from "axios";
+import CommentDialog from "./../commentDialog";
+import ScrollDialog from "../commentViewDialog";
 
 export default class PostViewComponent extends Component {
 	constructor(props) {
@@ -130,9 +132,15 @@ export class EditablePostContainer extends Component {
 				>
 					<ModeEditOutlineOutlinedIcon />
 				</IconButton>
-				<IconButton aria-label="Follow" title="Delete above post" onClick={this.tryDeletePost.bind(this)}>
+				<IconButton aria-label="Delete" title="Delete above post" onClick={this.tryDeletePost.bind(this)}>
 					<DeleteOutlineOutlinedIcon />
 				</IconButton>
+				<CommentDialog
+					postID={this.props.data.getBaseData().id}
+					authorID={Authentication.getInstance().getUser().getId()}
+					baseURL={this.props.data.getBaseData().origin}
+				/>
+				<ScrollDialog baseURL={this.props.data.getBaseData().origin} />
 			</React.Fragment>
 		);
 	}
