@@ -34,7 +34,23 @@ def add_categories(post, raw_data):
         for category in list(raw_data["categories"]):
             Category(category=category, post=post).save()
 
-#  https://www.django-rest-framework.org/tutorial/3-class-based-views/
+class AllPostList(APIView):
+    """/posts/ GET"""
+
+    def get(self, request, format=None):
+        """GET [local, remote] get all posts for all authors (paginated)"""
+
+        authors = Author.objects.filter(isAuthorized=True)
+        posts = Post.objects.all().filter(author__in=authors, visibilty=Post.Visibility.PUBLIC) # TODO Account for non-public posts amongst followers
+
+        # if request.app_session.author != author:
+        #     posts = posts.filter(unlisted=False)
+
+        posts = posts.order_by("-published")
+        posts = paginate(request, posts)
+
+        dict = {"type": "posts", "items": process_posts(posts)}
+        return Response(dict, status=status.HTTP_200_OK)
 
 
 class PostList(APIView):
