@@ -5,9 +5,7 @@ from rest_framework.views import APIView
 import requests
 from utils.model_utils import get_host
 from utils.constants import MY_CLIENT
-
 from utils.proxy import fetch_author
-
 from .models import Author, Follower
 from .serializers import AuthorSerializer
 from nodes.models import Node
@@ -66,13 +64,6 @@ class AuthorList(APIView):
         Example query: GET ://service/authors?page=10&size=5
         Gets the 5 authors, authors 45 to 49.
         """
-        http_origin = request.META.get("HTTP_ORIGIN")
-        # if origin_address==server_address, then http_origin == None
-        if http_origin and http_origin != MY_CLIENT: #TODO: MY_CLIENT check will have to be improved
-            try:
-                get_object_or_404(Node, host=http_origin)
-            except:
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
         authors = Author.objects.filter(isAuthorized=True)
         serializer = AuthorSerializer(authors,many=True)
         dict = {"type": "authors", "items": serializer.data}
