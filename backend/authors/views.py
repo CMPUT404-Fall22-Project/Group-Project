@@ -9,6 +9,7 @@ from utils.proxy import fetch_author
 from .models import Author, Follower
 from .serializers import AuthorSerializer
 from nodes.models import Node
+from rest_framework.authentication import BasicAuthentication
 
 
 class AllAuthorList(APIView):
@@ -56,6 +57,8 @@ class AllAuthorList(APIView):
 
 class AuthorList(APIView):
     """/authors/ GET, POST"""
+
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, format=None):
         """GET [local, remote]: retrieve all profiles on the server (paginated)
@@ -110,6 +113,8 @@ class AuthorDetail(APIView):
 class FollowerList(APIView):
     """/authors/<id>/followers/ GET"""
 
+    authentication_classes = [BasicAuthentication]
+    
     def get(self, request, id, format=None):
         """Get all followers of a specified Author"""
         author = get_object_or_404(Author, id=id)

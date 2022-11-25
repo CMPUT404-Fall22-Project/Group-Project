@@ -17,6 +17,7 @@ import base64
 from django.http import JsonResponse
 from nodes.models import Node
 import requests
+from rest_framework.authentication import BasicAuthentication
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
@@ -82,6 +83,8 @@ class AllPostList(APIView):
 
 class AllLocalPostList(APIView):
     """/posts/ GET"""
+
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, format=None):
         """GET [local, remote] get all posts for all authors (paginated)"""
