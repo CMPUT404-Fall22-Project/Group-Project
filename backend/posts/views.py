@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from utils.model_utils import get_scheme_and_netloc, generate_random_string
+from utils.model_utils import get_host, generate_random_string
 from utils.requests import paginate
 from rest_framework import status
 from rest_framework.response import Response
@@ -51,11 +51,11 @@ class PostList(APIView):
             data["id"] = postId
 
         if not "source" in data:
-            data["source"] = get_scheme_and_netloc() + "authors/" + authorId + "/posts/" + postId
+            data["source"] = get_host() + "authors/" + authorId + "/posts/" + postId
         if not "origin" in data:
-            data["origin"] = get_scheme_and_netloc() + "authors/" + authorId + "/posts/" + postId
+            data["origin"] = get_host() + "authors/" + authorId + "/posts/" + postId
         if not "comments" in data:
-            data["comments"] = get_scheme_and_netloc() + "authors/" + authorId + "/posts/" + postId + "/comments/"
+            data["comments"] = get_host() + "authors/" + authorId + "/posts/" + postId + "/comments/"
 
     def post(self, request, id, format=None):
         """POST [local] create a new post but generate a new id"""
