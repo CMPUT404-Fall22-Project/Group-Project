@@ -10,7 +10,6 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import Authentication from "../../global/authentication";
 import ModalTemplates from "../modals/genericModalTemplates";
 import axios from "axios";
-import {LikeButton} from '../../components/likeButton';
 
 export default class PostViewComponent extends Component {
 	constructor(props) {

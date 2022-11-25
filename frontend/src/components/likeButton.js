@@ -7,7 +7,7 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 export const LikeButton = (props) => {
 	const [liked, setLiked] = useState(false);
 	const [clicked, setClicked] = useState(false);
-	const [buttonText, setButtonText] = useState("");
+	const [buttonText, setButtonText] = useState("Like");
 	const userId = props.userId;
 	const authorId = props.authorId;
     const postId = props.postId;
@@ -18,12 +18,12 @@ export const LikeButton = (props) => {
 
 	async function handleButtonText() {
 		// Check if author already has a pending follow request from user
-		var response = await axios.get(`${authorId}/inbox/posts/${postId}/likes/`);
+		var response = await axios.get(`${authorId}/posts/${postId}/likes`);
 		for (let item of response.data.items) {
 			// Rubric states "Follow"
-			if (["Like"].includes(item.dataType)) {
+			if (["Like"].includes(item.type)) {
 				// if follow request sender is the user
-				if (userId === item.data.actor.id) {
+				if (userId === item.data.id) {
 					setButtonText("Liked");
 					return;
 				}
@@ -35,7 +35,7 @@ export const LikeButton = (props) => {
 	async function handleButtonClick() {
 		// Handles like and unlike
 		if (buttonText === "Like") {
-			var response = await axios.post(`${authorId}/inbox/posts/${postId}/likes/`, { id: userId, type: "Like" });
+			var response = await axios.post(`${authorId}/inbox/`, { id: userId, type: "like"});
 			if (response.status === 201) {
 				NotificationBar.getInstance().addNotification("Liked successfully!", NotificationBar.NT_SUCCESS);
 				setButtonText("Liked");
@@ -44,9 +44,9 @@ export const LikeButton = (props) => {
 			}
 			return;
 		}
-		// buttonText === "UnFollow"
-		// remove userId as a follower of authorId
-		var response = await axios.delete(`${authorId}/inbox/posts/${postId}/likes/${userId}`);
+
+		// remove userId as a liker of post
+		var response = await axios.delete(`${authorId}/inbox/`, {id: userId, type: "like"});
 		if (response.status === 200) {
 			setButtonText("Like");
 		} else {

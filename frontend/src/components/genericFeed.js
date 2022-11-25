@@ -9,6 +9,7 @@ import { NewPostButton } from "./posts/newPost";
 import { EditablePostContainer } from "./posts/post";
 import { FollowRequestButton } from "./sendFollowRequest";
 import {LikeButton} from './likeButton';
+import axios from "axios";
 
 export default class FeedComponent extends Component {
 	constructor(props) {
@@ -22,6 +23,7 @@ export default class FeedComponent extends Component {
 			posts: [],
 			hasAllPosts: false,
 		};
+
 		this.postSupplier = new PaginatedProvider(new GenericElementProvider(`${this.props.authorId}/posts/`));
 		this.postSupplier.listen((success, data) => {
 			if (success) {
@@ -36,7 +38,7 @@ export default class FeedComponent extends Component {
 				NotificationBar.getInstance().addNotification("Failed to load posts.", NotificationBar.NT_ERROR, 10_000);
 			}
 		});
-	}
+		}
 
 	supplyMorePosts() {
 		this.postSupplier.requestData();
@@ -83,7 +85,7 @@ export default class FeedComponent extends Component {
 						isEditableFunc={() => false}
 						data={x}
 						key={"Post#" + String(idx)} />
-						<LikeButton authorId={this.props.authorId} userId={this.state.userId} postId={this.state.posts[idx].data} />
+						<LikeButton authorId={this.props.authorId} userId={this.state.userId} postId={this.postSupplier.getData()[0][idx].id} />
 					</>
 				))}
 			</div>
