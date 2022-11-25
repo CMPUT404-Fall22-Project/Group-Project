@@ -28,8 +28,8 @@ export default function AuthorSearch() {
 	}, []);
 
 	const handleAuthors = async () => {
-		// Get all of the authors
-		var response = await axios.get(process.env.REACT_APP_HOST + `authors/`);
+		// Get all of the authors across all nodes
+		var response = await axios.get(process.env.REACT_APP_HOST + `authors/all/`);
 		const authors = response.data.items;
 		var arr = [];
 		for (let a of authors) {
