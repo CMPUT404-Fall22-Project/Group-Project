@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
 from utils.model_utils import get_host
+from utils.constants import MY_CLIENT
 
 from utils.proxy import fetch_author
 
@@ -13,13 +14,13 @@ from nodes.models import Node
 
 
 class AllAuthorList(APIView):
-    """/authors/all/ GET, POST"""
+    """/authors/all/ GET"""
 
     def get(self, request, format=None):
-        """GET [local, remote]: retrieve all profiles on the server (paginated)
+        """GET [local, remote]: retrieve all profiles across all servers, including own (paginated)
         page: how many pages
         size: how big is a page
-        Example query: GET ://service/authors?page=10&size=5
+        Example query: GET ://service/authors/all/?page=10&size=5
         Gets the 5 authors, authors 45 to 49.
         """
         def get_authors_from_remote_nodes():
@@ -28,10 +29,10 @@ class AllAuthorList(APIView):
             authors = []
             for node in nodes:
                 authors_url =  node.host + "authors/"
-                response = requests.get(authors_url) #TODO: auth=(node.username, node.password))
+                response = requests.get(authors_url, auth=(node.username, node.password))
                 data = response.json()
                 if response.status_code != 200:
-                    print(f'{node.host}: {response.status_code} {response}') # print bad response
+                    print(f'{node.host}: {response.status_code} {response}') # print the error
                     continue
                 for author in data["items"]:
                     authors.append(author)
@@ -61,6 +62,13 @@ class AuthorList(APIView):
         Example query: GET ://service/authors?page=10&size=5
         Gets the 5 authors, authors 45 to 49.
         """
+        http_origin = request.META.get("HTTP_ORIGIN")
+        # if origin_address==server_address, then http_origin == None
+        if http_origin and http_origin != MY_CLIENT: #TODO: MY_CLIENT check will have to be improved
+            try:
+                get_object_or_404(Node, host=http_origin)
+            except:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
         authors = Author.objects.filter(isAuthorized=True)
         serializer = AuthorSerializer(authors,many=True)
         dict = {"type": "authors", "items": serializer.data}
