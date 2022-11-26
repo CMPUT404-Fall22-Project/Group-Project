@@ -10,12 +10,12 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
-import Authentication from "../global/authentication";
-import Loader from "../components/loader";
-import AbstractModalProvider from "./modals/modalProvider";
-import ModalSystem from "../global/modalSystem";
+import Authentication from "../../global/authentication";
+import Loader from "../loader";
+import AbstractModalProvider from "../modals/modalProvider";
+import ModalSystem from "../../global/modalSystem";
 import AccountBoxOutlinedIcon from "@mui/icons-material/AccountBoxOutlined";
-import NotificationBar from "../global/centralNotificationBar";
+import NotificationBar from "../../global/centralNotificationBar";
 import { styled } from "@mui/material/styles";
 
 const Demo = styled("div")(({ theme }) => ({

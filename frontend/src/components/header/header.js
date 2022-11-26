@@ -9,7 +9,7 @@ import Authentication from "../../global/authentication";
 import history from "../../history";
 import NotificationBar from "../../global/centralNotificationBar";
 import AuthorSearch from "../authorSearch";
-import { FollowRequestsMenuItem } from "../acceptFollowRequest";
+import { FollowRequestsMenuItem } from "../follows/acceptFollowRequest";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {

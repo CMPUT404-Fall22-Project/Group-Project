@@ -2,8 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import "./followRequests.css";
-import Loader from "../components/loader";
-import NotificationBar from "../global/centralNotificationBar";
+import Loader from "../loader";
+import NotificationBar from "../../global/centralNotificationBar";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const theme = createTheme({
