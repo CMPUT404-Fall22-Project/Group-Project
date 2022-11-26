@@ -38,7 +38,7 @@ class Post(models.Model):
     # should be sorted newest(first) to oldest(last)
     # this is to reduce API call counts
     published = models.DateTimeField(default=timezone.now, blank=False)
-    visibilty = models.CharField(choices=Visibility.choices, max_length=7, default=Visibility.PUBLIC)
+    visibility = models.CharField(choices=Visibility.choices, max_length=7, default=Visibility.PUBLIC)
     unlisted = models.BooleanField(default=False)
 
     def __str__(self):
