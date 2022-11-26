@@ -66,7 +66,7 @@ class AllPostList(APIView):
             return posts
 
         authors = Author.objects.filter(isAuthorized=True)
-        posts = Post.objects.all().filter(author__in=authors, visibilty=Post.Visibility.PUBLIC) # TODO Account for non-public posts amongst followers
+        posts = Post.objects.all().filter(author__in=authors, visibility=Post.Visibility.PUBLIC) # TODO Account for non-public posts amongst followers
 
         json_posts = get_posts_from_remote_nodes() # TODO: combine these jsonPosts with the PythonPosts
 
@@ -90,7 +90,7 @@ class AllLocalPostList(APIView):
         """GET [local, remote] get all posts for all authors (paginated)"""
 
         authors = Author.objects.filter(isAuthorized=True)
-        posts = Post.objects.all().filter(author__in=authors, visibilty=Post.Visibility.PUBLIC) # TODO Account for non-public posts amongst followers
+        posts = Post.objects.all().filter(author__in=authors, visibility=Post.Visibility.PUBLIC) # TODO Account for non-public posts amongst followers
 
         posts = posts.order_by("-published")
         posts = paginate(request, posts)
