@@ -9,24 +9,30 @@ from .models import Author
 from .serializers import AuthorSerializer
 
 #  https://www.django-rest-framework.org/tutorial/3-class-based-views/
+
+
 class AuthorList(APIView):
     """/authors/ GET, POST"""
 
     @swagger_auto_schema(
-    responses={
-        "200": openapi.Response(
-        description="OK",
-        examples= { 
-        "application/json":
-                {
-                    "type":"author",
-                    "id":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                    "url":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                    "host":"http://127.0.0.1:5454/",
-                    "displayName":"Greg Johnson",
-                    "github": "http://github.com/gjohnson",
-                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                    }  
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                    {
+                        "type": "authors",
+                        "items": [
+                            {
+                                "type": "author",
+                                "id": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "url": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "host": "http://127.0.0.1:5454/",
+                                "displayName": "Greg Johnson",
+                                "github": "http://github.com/gjohnson",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            }]
+                    }
                 }
             )
         }
@@ -38,7 +44,8 @@ class AuthorList(APIView):
         Example query: GET ://service/authors?page=10&size=5
         Gets the 5 authors, authors 45 to 49.
         """
-        authors = Author.objects.filter(isAuthorized=True) # only get authorized authors
+        authors = Author.objects.filter(
+            isAuthorized=True)  # only get authorized authors
         serializer_arr = []
         for author in authors:
             serializer = AuthorSerializer(author)
@@ -49,37 +56,31 @@ class AuthorList(APIView):
         return Response(dict, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-    request_body=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            "displayName": openapi.Schema(type=openapi.TYPE_STRING),
-            "github": openapi.Schema(type=openapi.TYPE_STRING),
-            "profileImage": openapi.Schema(type=openapi.TYPE_STRING)
-            }
-        ),
-    responses={
-        "200": openapi.Schema(
-        description="OK",
-        type=openapi.TYPE_OBJECT,
-        properties= {
-                "id": openapi.Schema(type=openapi.TYPE_STRING),
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
                 "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "id": openapi.Schema(type=openapi.TYPE_STRING),
                 "host": openapi.Schema(type=openapi.TYPE_STRING),
-                "url": openapi.Schema(type=openapi.TYPE_STRING),
                 "displayName": openapi.Schema(type=openapi.TYPE_STRING),
+                "url": openapi.Schema(type=openapi.TYPE_STRING),
                 "github": openapi.Schema(type=openapi.TYPE_STRING),
                 "profileImage": openapi.Schema(type=openapi.TYPE_STRING),
             }
-        )
-    }
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
+            )
+        }
     )
-    
     def post(self, request, format=None):
+        """POST [local]: add an author to /authors"""
         serializer = AuthorSerializer(data=request.data)
-         # if valid user input
+        # if valid user input
         if serializer.is_valid():
             author = serializer.save()
-            return Response({"id":author.id}, status=status.HTTP_201_CREATED)
+            return Response({"id": author.id}, status=status.HTTP_201_CREATED)
         # else failed POST attempt
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,17 +89,17 @@ class AuthorDetail(APIView):
     """/authors/<id> GET, POST"""
 
     @swagger_auto_schema(
-    responses={
-        "200": openapi.Response(
-        description="OK",
-        examples={
-            "application/json":
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
                     {
-                        "type":"author",
-                        "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "host":"http://127.0.0.1:5454/",
-                        "displayName":"Lara Croft",
-                        "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "type": "author",
+                        "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "host": "http://127.0.0.1:5454/",
+                        "displayName": "Lara Croft",
+                        "url": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
                         "github": "http://github.com/laracroft",
                         "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
                     }
@@ -108,7 +109,7 @@ class AuthorDetail(APIView):
     )
     def get(self, request, id, format=None):
         """GET [local, remote]: retrieve AUTHOR_ID’s profile"""
-        
+
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=id)
         if not author.isAuthorized:
@@ -118,18 +119,23 @@ class AuthorDetail(APIView):
         return Response(serializer_data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-    request_body=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-                "id": openapi.Schema(type=openapi.TYPE_STRING),
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
                 "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "id": openapi.Schema(type=openapi.TYPE_STRING),
                 "host": openapi.Schema(type=openapi.TYPE_STRING),
-                "url": openapi.Schema(type=openapi.TYPE_STRING),
                 "displayName": openapi.Schema(type=openapi.TYPE_STRING),
+                "url": openapi.Schema(type=openapi.TYPE_STRING),
                 "github": openapi.Schema(type=openapi.TYPE_STRING),
-                "profileImage": openapi.Schema(type=openapi.TYPE_STRING)
-            },
-        )
+                "profileImage": openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
+            )
+        }
     )
     def post(self, request, id, format=None):
         """POST [local]: update AUTHOR_ID’s profile"""
@@ -147,41 +153,40 @@ class AuthorDetail(APIView):
 
 class FollowingList(APIView):
     """/authors/<id>/following/ GET"""
-    
+
     @swagger_auto_schema(
-    responses={
-        "200": openapi.Response(
-        description="OK",
-        examples= { 
-        "application/json":
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
                     {
-                        "type": "following",      
-                        "items":[
+                        "type": "following",
+                        "items": [
                             {
-                                "type":"author",
-                                "id":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "url":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "host":"http://127.0.0.1:5454/",
-                                "displayName":"Greg Johnson",
+                                "type": "author",
+                                "id": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "url": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "host": "http://127.0.0.1:5454/",
+                                "displayName": "Greg Johnson",
                                 "github": "http://github.com/gjohnson",
                                 "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
                             },
                             {
-                                "type":"author",
-                                "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "host":"http://127.0.0.1:5454/",
-                                "displayName":"Lara Croft",
-                                "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "type": "author",
+                                "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "host": "http://127.0.0.1:5454/",
+                                "displayName": "Lara Croft",
+                                "url": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
                                 "github": "http://github.com/laracroft",
                                 "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
                             }
                         ]
-                    }  
+                    }
                 }
             )
         }
     )
-
     def get(self, request, id, format=None):
         """Get all Author's that an Author is following"""
         author = get_object_or_404(Author, id=id)
@@ -195,50 +200,49 @@ class FollowingList(APIView):
             # exclude a from queryset if author is not following a
             if author not in followers_of_a:
                 authors = authors.exclude(id=a.id)
-                
+
         # authors is now a queryset of Author objects that author is following
         serializer = AuthorSerializer(authors, many=True)
         dict = {"type": "following", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
-    
+
 
 class FollowerList(APIView):
     """/authors/<id>/followers/ GET"""
-        
+
     @swagger_auto_schema(
-    responses={
-        "200": openapi.Response(
-        description="OK",
-        examples= { 
-        "application/json":
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
                     {
-                        "type": "followers",      
-                        "items":[
+                        "type": "followers",
+                        "items": [
                             {
-                                "type":"author",
-                                "id":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "url":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "host":"http://127.0.0.1:5454/",
-                                "displayName":"Greg Johnson",
+                                "type": "author",
+                                "id": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "url": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                                "host": "http://127.0.0.1:5454/",
+                                "displayName": "Greg Johnson",
                                 "github": "http://github.com/gjohnson",
                                 "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
                             },
                             {
-                                "type":"author",
-                                "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "host":"http://127.0.0.1:5454/",
-                                "displayName":"Lara Croft",
-                                "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "type": "author",
+                                "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "host": "http://127.0.0.1:5454/",
+                                "displayName": "Lara Croft",
+                                "url": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
                                 "github": "http://github.com/laracroft",
                                 "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
                             }
                         ]
-                    }     
+                    }
                 }
             )
         }
     )
-
     def get(self, request, id, format=None):
         """Get all followers of a specified Author"""
         author = get_object_or_404(Author, id=id)
@@ -254,17 +258,17 @@ class FollowerDetail(APIView):
     """/authors/<author_id>/followers/<follower_id> GET, PUT, DELETE"""
 
     @swagger_auto_schema(
-    responses={
-        "200": openapi.Response(
-        description="OK",
-        examples= {
-        "application/json":
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
                     {
-                        "type":"author",
-                        "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "host":"http://127.0.0.1:5454/",
-                        "displayName":"Lara Croft",
-                        "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "type": "author",
+                        "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "host": "http://127.0.0.1:5454/",
+                        "displayName": "Lara Croft",
+                        "url": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
                         "github": "http://github.com/laracroft",
                         "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
                     }
@@ -272,7 +276,6 @@ class FollowerDetail(APIView):
             )
         }
     )
-
     def get(self, request, author_id, follower_id, format=None):
         """Get a specific Author that is following another specific Author"""
         # ensure author exists
@@ -281,49 +284,48 @@ class FollowerDetail(APIView):
         # ensure follower is actually a follower of author
         follower: Author = get_object_or_404(followers, id=follower_id)
         # ensure both are authorized
-        for a in [author,follower]:
+        for a in [author, follower]:
             if not a.isAuthorized:
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = AuthorSerializer(follower)
         serializer_data = serializer.data
         return Response(serializer_data, status=status.HTTP_200_OK)
-    
+
     @swagger_auto_schema(
-    responses={
-        "200": openapi.Response(
-        description="OK",
-        examples= {
-        "application/json":
-                    {
-                        "type":"author",
-                        "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "host":"http://127.0.0.1:5454/",
-                        "displayName":"Lara Croft",
-                        "url":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "github": "http://github.com/laracroft",
-                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                    }
-                }
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "id": openapi.Schema(type=openapi.TYPE_STRING),
+                "host": openapi.Schema(type=openapi.TYPE_STRING),
+                "displayName": openapi.Schema(type=openapi.TYPE_STRING),
+                "url": openapi.Schema(type=openapi.TYPE_STRING),
+                "github": openapi.Schema(type=openapi.TYPE_STRING),
+                "profileImage": openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
             )
         }
     )
-
     def put(self, request, author_id, follower_id, format=None):
         """Add an Author as a follower of another Author"""
         # ensure author and follower exist and are both authorized
         author = get_object_or_404(Author, id=author_id)
         follower_id = follower_id.split("/authors/")[1]
         follower = get_object_or_404(Author, id=follower_id)
-        for a in [author,follower]:
+        for a in [author, follower]:
             if not a.isAuthorized:
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
         # prevent author from adding self as follower
         if author_id == follower_id:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        author.followers.add(follower)  # this adds the entry to the Follower table
+        # this adds the entry to the Follower table
+        author.followers.add(follower)
         return Response(status=status.HTTP_200_OK)
 
-    
     def delete(self, request, author_id, follower_id, format=None):
         """Remove an Author as a follower of another Author"""
         author = get_object_or_404(Author, id=author_id)
