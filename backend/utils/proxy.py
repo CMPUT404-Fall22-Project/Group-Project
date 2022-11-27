@@ -50,10 +50,15 @@ def assign(obj, dict):
         setattr(obj, k, v)
     return obj
 
+def get_host_from_url(url):
+    try:
+        return re.search(r".*?:\/\/.*?\/", url)[0]
+    except:
+        raise BadRequest(f"Unable to extract host from url '{url}'")
 
 def get_authorization_from_url(url):
     try:
-        rootUrl = re.search(r".*?:\/\/.*?\/", url)[0]
+        rootUrl = get_host_from_url(url)
         node = ExternalNode.objects.get(pk=rootUrl)
         return node.authorization
     except:

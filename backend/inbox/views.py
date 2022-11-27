@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLikeSerializer
 from django.http import JsonResponse
-from utils.proxy import fetch_author, get_authorization_from_url, Ref
+from utils.proxy import fetch_author, get_authorization_from_url, get_host_from_url, Ref
 from utils.requests import paginate
 from authors.models import Author, Follower
 from .models import Inbox
@@ -17,8 +17,7 @@ from requests import HTTPError
 from utils.requests import get_optionally_list_parameter_or_default
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from nodes.models import Node
-from django.contrib.auth.models import User
+from authentication.models import ExternalNode
 from rest_framework.authentication import BasicAuthentication
 
 # Inbox
@@ -137,10 +136,9 @@ def handle_follow_request(request):
     data["object"] = object
 
     # send a POST request to Inbox of the receiver Author
-    host = object["id"].split("authors")[0]
-    node = get_object_or_404(Node, host=host)
     url = object["id"] + "/inbox/"
-    response = requests.post(url, json=data) #TODO: add auth=(node.username,node.password)
+    auth = get_authorization_from_url(object["id"])
+    response = requests.post(url, json=data, headers={'Authorization': auth})
     return Response(status=response.status_code)
 
 

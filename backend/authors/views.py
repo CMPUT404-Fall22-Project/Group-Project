@@ -8,7 +8,7 @@ from utils.constants import MY_CLIENT
 from utils.proxy import fetch_author
 from .models import Author, Follower
 from .serializers import AuthorSerializer
-from nodes.models import Node
+from authentication.models import ExternalNode
 from rest_framework.authentication import BasicAuthentication
 
 
@@ -24,17 +24,13 @@ class AllAuthorList(APIView):
         """
         def get_authors_from_remote_nodes():
             """GET all authors across all remote nodes"""
-            nodes = Node.objects.exclude(host=get_host())
+            nodes = ExternalNode.objects.exclude(host=get_host())
             authors = []
             for node in nodes:
                 authors_url =  node.host + "authors/"
                 response = requests.get(authors_url, auth=(node.username, node.password))
                 data = response.json()
-                if node.host == "https://social-distribution-14degrees.herokuapp.com/api/":
-                    # authors.append(data[0])
-                    continue
-                    # print(data)
-                if response.status_code != 200:
+                if response.status_code >= 300:
                     print(f'{node.host}: {response.status_code} {response}') # print the error
                     continue
                 for author in data["items"]:

@@ -15,7 +15,7 @@ from authors.serializers import AuthorSerializer
 from inbox.views import send_to_all_followers, send_to_user
 import base64
 from django.http import JsonResponse
-from nodes.models import Node
+from authentication.models import ExternalNode
 import requests
 from rest_framework.authentication import BasicAuthentication
 
@@ -48,14 +48,11 @@ class AllPostList(APIView):
 
         def get_posts_from_remote_nodes():
             """GET all posts across all remote nodes"""
-            nodes = Node.objects.exclude(host=get_host())
+            nodes = ExternalNode.objects.exclude(host=get_host())
             posts = []
             for node in nodes:
-                if node.host == "https://social-distribution-14degrees.herokuapp.com/api/":
-                    # authors.append(data[0])
-                    continue
-                posts_url =  node.host + "posts/"
-                response = requests.get(posts_url, auth=(node.username, node.password))
+                posts_url =  node.api + "posts/"
+                response = requests.get(posts_url, headers={'Authorization': node.authorization})
                 data = response.json()
                 if response.status_code != 200:
                     print(f'{node.host}: {response.status_code} {response}') # print the error
