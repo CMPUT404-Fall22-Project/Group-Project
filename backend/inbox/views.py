@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from utils.swagger_data import SwaggerData
 from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLikeSerializer
 from posts.models import Post
 from posts.serializers import PostSerializer
@@ -56,36 +57,7 @@ class InboxList(APIView):
                 description="OK",
                 examples={
                     "application/json":
-                    {
-                        "type": "inbox",
-                        "author": "http://127.0.0.1:5454/authors/c1e3db8ccea4541a0f3d7e5c75feb3fb",
-                        "items": [
-                            {
-                                "type": "post",
-                                "title": "A Friendly post title about a post about web dev",
-                                "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
-                                "source": "http://lastplaceigotthisfrom.com/posts/yyyyy",
-                                "origin": "http://whereitcamefrom.com/posts/zzzzz",
-                                "description": "This post discusses stuff -- brief",
-                                "contentType": "text/plain",
-                                "content": "Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge",
-                                "author": {
-                                    "type": "author",
-                                    "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                    "host": "http://127.0.0.1:5454/",
-                                    "displayName": "Lara Croft",
-                                    "url": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                    "github": "http://github.com/laracroft",
-                                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                                },
-                                "categories": ["web", "tutorial"],
-                                "comments":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments",
-                                "published":"2015-03-09T13:07:04+00:00",
-                                "visibility":"FRIENDS",
-                                "unlisted":False
-                            },
-                        ]
-                    }
+                    SwaggerData.inbox_list
                 }
             )
         }
@@ -99,20 +71,14 @@ class InboxList(APIView):
         # get all of the inbox items for this author
         inbox = Inbox.objects.filter(author=author)
         serializer = InboxSerializer(inbox, many=True)
-        dictionary = {"type": "inbox",
-                      "author": author.id, "items": serializer.data}
+        dictionary = {"type": "inbox", "author": author.id, "items": serializer.data}
 
         return Response(dictionary, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            properties={
-                "type": openapi.Schema(type=openapi.TYPE_STRING),
-                "summary": openapi.Schema(type=openapi.TYPE_STRING),
-                "actor": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
-                "object": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
-            }
+            properties=SwaggerData.follow_request_body
         ),
         responses={
             "200": openapi.Response(
@@ -158,8 +124,7 @@ class InboxList(APIView):
             follower_serializer = AuthorSerializer(follower)
             data = {}
             data["type"] = "follow"
-            data["summary"] = str(follower.displayName) + \
-                " wants to follow " + author.displayName
+            data["summary"] = str(follower.displayName) + " wants to follow " + author.displayName
             data["actor"] = follower_serializer.data
             data["object"] = author_serializer.data
 

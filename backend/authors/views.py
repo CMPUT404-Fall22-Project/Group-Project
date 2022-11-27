@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-
+from utils.swagger_data import SwaggerData
 from .models import Author
 from .serializers import AuthorSerializer
 
@@ -20,19 +20,7 @@ class AuthorList(APIView):
                 description="OK",
                 examples={
                     "application/json":
-                    {
-                        "type": "authors",
-                        "items": [
-                            {
-                                "type": "author",
-                                "id": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "url": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "host": "http://127.0.0.1:5454/",
-                                "displayName": "Greg Johnson",
-                                "github": "http://github.com/gjohnson",
-                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                            }]
-                    }
+                    SwaggerData.author_list
                 }
             )
         }
@@ -44,8 +32,7 @@ class AuthorList(APIView):
         Example query: GET ://service/authors?page=10&size=5
         Gets the 5 authors, authors 45 to 49.
         """
-        authors = Author.objects.filter(
-            isAuthorized=True)  # only get authorized authors
+        authors = Author.objects.filter(isAuthorized=True)  # only get authorized authors
         serializer_arr = []
         for author in authors:
             serializer = AuthorSerializer(author)
@@ -94,15 +81,7 @@ class AuthorDetail(APIView):
                 description="OK",
                 examples={
                     "application/json":
-                    {
-                        "type": "author",
-                        "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "host": "http://127.0.0.1:5454/",
-                        "displayName": "Lara Croft",
-                        "url": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "github": "http://github.com/laracroft",
-                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                    }
+                    SwaggerData.author_detail
                 }
             )
         }
@@ -160,29 +139,7 @@ class FollowingList(APIView):
                 description="OK",
                 examples={
                     "application/json":
-                    {
-                        "type": "following",
-                        "items": [
-                            {
-                                "type": "author",
-                                "id": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "url": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "host": "http://127.0.0.1:5454/",
-                                "displayName": "Greg Johnson",
-                                "github": "http://github.com/gjohnson",
-                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                            },
-                            {
-                                "type": "author",
-                                "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "host": "http://127.0.0.1:5454/",
-                                "displayName": "Lara Croft",
-                                "url": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "github": "http://github.com/laracroft",
-                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                            }
-                        ]
-                    }
+                    SwaggerData.following_list
                 }
             )
         }
@@ -216,29 +173,7 @@ class FollowerList(APIView):
                 description="OK",
                 examples={
                     "application/json":
-                    {
-                        "type": "followers",
-                        "items": [
-                            {
-                                "type": "author",
-                                "id": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "url": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                                "host": "http://127.0.0.1:5454/",
-                                "displayName": "Greg Johnson",
-                                "github": "http://github.com/gjohnson",
-                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                            },
-                            {
-                                "type": "author",
-                                "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "host": "http://127.0.0.1:5454/",
-                                "displayName": "Lara Croft",
-                                "url": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "github": "http://github.com/laracroft",
-                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                            }
-                        ]
-                    }
+                    SwaggerData.follower_list
                 }
             )
         }
@@ -263,15 +198,7 @@ class FollowerDetail(APIView):
                 description="OK",
                 examples={
                     "application/json":
-                    {
-                        "type": "author",
-                        "id": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "host": "http://127.0.0.1:5454/",
-                        "displayName": "Lara Croft",
-                        "url": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "github": "http://github.com/laracroft",
-                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                    }
+                    SwaggerData.author_detail
                 }
             )
         }
