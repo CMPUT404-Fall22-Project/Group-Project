@@ -18,6 +18,8 @@ from utils.requests import get_optionally_list_parameter_or_default
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from nodes.models import Node
+from django.contrib.auth.models import User
+from rest_framework.authentication import BasicAuthentication
 
 # Inbox
 # The inbox is all the new posts from who you follow
@@ -121,6 +123,7 @@ def handle_follow_request(request):
     NOTE: actor is the author that is sending the Follow Request
           object is the author that is receiving the Follow Request
     """
+
     # sender is a local author
     sender_id = request.data["senderAuthorURL"].split("/authors/")[1]
     actor = get_object_or_404(Author, id=sender_id, isAuthorized=True) # actor is the sender
@@ -143,6 +146,8 @@ def handle_follow_request(request):
 
 class InboxList(APIView):
     """ URL: ://service/authors/{AUTHOR_ID}/inbox """
+
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, id, format=None):
         """GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)"""
