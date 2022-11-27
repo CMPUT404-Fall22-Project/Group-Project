@@ -37,18 +37,25 @@ export default class PaginatedProvider {
 		this._pending = true;
 		const promise = this._provider
 			.getData(Math.round(this._currentLoad / this._pageSize) + 1, this._pageSize)
-			.then((resp) => {
-				this._currentLoad += this._pageSize;
-				return resp.data.items;
-			})
+			.then((resp) => resp.data.items)
 			.then(this._saveResult.bind(this))
+			.then((data) => {
+				this._currentLoad += this._pageSize;
+				return data;
+			})
 			.then(this._notify.bind(this, true))
 			.catch((err) => {
+				console.error(err);
 				this._pending = false;
 				this._notify(false, err);
 			});
 
 		return promise;
+	}
+
+	skip(count) {
+		this._currentLoad += count;
+		return this;
 	}
 
 	getNumData() {

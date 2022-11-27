@@ -15,6 +15,7 @@ import history from "../history";
 export default function AuthorSearch() {
 	const [authorId, setAuthorId] = useState("");
 	const [authors, setAuthors] = useState([]);
+	const [autoCompleteAuthors, setAutoCompleteAuthors] = useState([]);
 	const userId = Authentication.getInstance().getUser().getId();
 
 	const [anchorEl, setAnchorEl] = useState();
@@ -28,8 +29,8 @@ export default function AuthorSearch() {
 	}, []);
 
 	const handleAuthors = async () => {
-		// Get all of the authors
-		var response = await axios.get(process.env.REACT_APP_HOST + `authors/`);
+		// Get all of the authors across all nodes
+		var response = await axios.get(process.env.REACT_APP_HOST + `authors/all/`);
 		const authors = response.data.items;
 		var arr = [];
 		for (let a of authors) {
@@ -37,7 +38,8 @@ export default function AuthorSearch() {
 		}
 		// Remove the logged in author from arr
 		arr = arr.filter((a) => a.id !== userId);
-		setAuthors(arr);
+		setAutoCompleteAuthors(arr);
+		setAuthors(authors);
 	};
 
 	const handleButtonClick = (event) => {
@@ -45,7 +47,9 @@ export default function AuthorSearch() {
 	};
 
 	const viewProfile = () => {
-		history.push({ pathname: "/authors/" + authorId.split("/authors/")[1], state: { authorId: authorId } });
+		const author = authors.find((e) => e.id == authorId);
+		history.push({ pathname: "/authors/" + authorId.split("/authors/")[1], state: { author: author } });
+		handleClose();
 	};
 
 	return (
@@ -58,7 +62,7 @@ export default function AuthorSearch() {
 					freeSolo
 					id="free-solo-2-demo"
 					disableClearable
-					options={authors}
+					options={autoCompleteAuthors}
 					style={{
 						margin: "0.25em",
 						width: "25em",

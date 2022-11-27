@@ -2,8 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import "./followRequests.css";
-import Loader from "../components/loader";
-import NotificationBar from "../global/centralNotificationBar";
+import Loader from "../loader";
+import NotificationBar from "../../global/centralNotificationBar";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const theme = createTheme({
@@ -20,30 +20,18 @@ export const FollowRequestButton = (props) => {
 	var followPending = "Request Sent...";
 	const [buttonText, setButtonText] = useState("");
 	const userId = props.userId;
-	const authorId = props.authorId;
+	const author = props.author;
+	const authorId = author.id;
 
 	useEffect(() => {
 		handleButtonText();
 	}, []);
 
 	async function handleButtonText() {
-		// Check if author already has a pending follow request from user
-		var response = await axios.get(`${authorId}/inbox/`);
-		for (let item of response.data.items) {
-			// Rubric states "Follow"
-			if (["Follow", "follow"].includes(item.dataType)) {
-				// if follow request sender is the user
-				if (userId === item.data.actor.id) {
-					setButtonText(followPending);
-					return;
-				}
-			}
-		}
 		// Check if user is already following this author
-		var response = await axios.get(`${userId}/following/`);
-		console.log(response);
+		var response = await axios.get(`${authorId}/followers/`);
 		for (let author of response.data.items) {
-			if (author.id === authorId) {
+			if (author.id === userId) {
 				setButtonText(unfollow);
 				return;
 			}
@@ -54,7 +42,10 @@ export const FollowRequestButton = (props) => {
 	async function handleButtonClick() {
 		// Handles Follow, Unfollow, and unsend
 		if (buttonText === follow) {
-			var response = await axios.post(`${authorId}/inbox/`, { id: userId, type: "follow" });
+			var response = await axios.post(process.env.REACT_APP_HOST + "/handle-follow-request/", {
+				senderAuthorURL: userId,
+				receiverAuthor: author,
+			});
 			if (response.status === 201) {
 				NotificationBar.getInstance().addNotification("Follow request sent successfully!", NotificationBar.NT_SUCCESS);
 				setButtonText(followPending);
@@ -79,12 +70,7 @@ export const FollowRequestButton = (props) => {
 	) : (
 		<div>
 			<ThemeProvider theme={theme}>
-				<Button
-					size="medium"
-					variant="contained"
-					onClick={handleButtonClick}
-					disabled={buttonText === "Request Sent..."}
-				>
+				<Button size="medium" variant="contained" onClick={handleButtonClick} disabled={buttonText === followPending}>
 					{buttonText}
 				</Button>
 			</ThemeProvider>

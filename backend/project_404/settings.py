@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'authentication.apps.AuthConfig',
     'posts.apps.PostsConfig',
     'inbox.apps.InboxConfig',
+    'nodes.apps.NodesConfig',
     'corsheaders'
 ]
 
@@ -60,6 +61,11 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+]
+
+CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:3000',
     'http://localhost:3000',
 ]

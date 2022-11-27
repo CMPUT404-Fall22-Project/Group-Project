@@ -1,26 +1,6 @@
-import { Box, Stack, TextField, Typography } from "@mui/material";
+import { Box, Chip, Stack, TextField, Typography } from "@mui/material";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import { useRef, useState } from "react";
-
-// https://blog.theashishmaurya.me/how-to-create-a-tag-input-feature-in-reactjs-and-material-ui
-
-const Tags = ({ data, handleDelete }) => {
-	return (
-		<Box
-			sx={{
-				height: "100%",
-				display: "flex",
-				justifyContent: "center",
-				alignContent: "center",
-			}}
-		>
-			<Stack direction="row" gap={1}>
-				<Typography>{data}</Typography>
-				<CancelOutlinedIcon sx={{ cursor: "pointer" }} onClick={() => handleDelete(data)} />
-			</Stack>
-		</Box>
-	);
-};
 
 export default function TagInput({ value, onChange, ...rest }) {
 	value = value || [];
@@ -30,15 +10,16 @@ export default function TagInput({ value, onChange, ...rest }) {
 	//HandleSubmit
 	const handleOnSubmit = (e) => {
 		e.preventDefault();
-		if (tagRef.current.value && !value.includes(tagRef.current.value)) {
-			onChange([...value, tagRef.current.value]);
+		const inputValue = tagRef.current.value;
+		if (inputValue && !value.includes(inputValue)) {
+			onChange([...value, inputValue]);
 			tagRef.current.value = "";
 		}
 	};
 
-	const handleDelete = (test) => {
-		const newtags = value.filter((val) => val !== test);
-		onChange(newtags);
+	const handleDelete = (idx) => {
+		value.splice(idx, 1);
+		onChange(value);
 	};
 
 	return (
@@ -53,11 +34,18 @@ export default function TagInput({ value, onChange, ...rest }) {
 					{...rest}
 					InputProps={{
 						startAdornment: (
-							<Box sx={{ margin: "0 0.2rem 0 0", display: "flex" }}>
-								{value.map((data, index) => {
-									return <Tags data={data} handleDelete={handleDelete} key={index} />;
+							<Stack direction="row" style={{ flexWrap: "wrap", marginRight: value.length ? "0.25em" : "0em" }}>
+								{value.map((label, index) => {
+									return (
+										<Chip
+											style={{ height: "100%" }}
+											label={label}
+											onDelete={handleDelete.bind(this, index)}
+											key={index}
+										/>
+									);
 								})}
-							</Box>
+							</Stack>
 						),
 					}}
 				/>

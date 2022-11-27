@@ -10,6 +10,8 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import Authentication from "../../global/authentication";
 import ModalTemplates from "../modals/genericModalTemplates";
 import axios from "axios";
+import { CommentList } from "../comments/comment";
+import { renderPublishDate } from "../../utils/renderHelpers";
 
 export default class PostViewComponent extends Component {
 	constructor(props) {
@@ -30,15 +32,6 @@ export default class PostViewComponent extends Component {
 		if (d.contentType === POST_TYPE_TEXT) {
 			return <p>{d.content}</p>;
 		}
-	}
-
-	renderDate(date) {
-		const d = new Date(date);
-		return (
-			<Typography variant="caption">
-				<i>Published at {d.toLocaleDateString() + " - " + d.toLocaleTimeString()}</i>
-			</Typography>
-		);
 	}
 
 	render() {
@@ -69,7 +62,8 @@ export default class PostViewComponent extends Component {
 					<Divider></Divider>
 					{this.renderFromChoices()}
 					<Divider></Divider>
-					{this.renderDate(this.props.data.getBaseData().published)}
+					{renderPublishDate(this.props.data.getBaseData().published)}
+					{this.props.children}
 				</Paper>
 			</div>
 		);
@@ -113,7 +107,11 @@ export class EditablePostContainer extends Component {
 				></PostEditor>
 			);
 		} else {
-			comp = <PostViewComponent data={this.props.data}></PostViewComponent>;
+			comp = (
+				<PostViewComponent data={this.props.data}>
+					<CommentList post={this.props.data}></CommentList>
+				</PostViewComponent>
+			);
 		}
 
 		if (!this.isEditable()) {
