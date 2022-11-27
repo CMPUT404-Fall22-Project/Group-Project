@@ -1,4 +1,4 @@
-import { Button, Paper, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import React, { Component } from "react";
 import Post from "../data/containers/post";
 import PaginatedProvider, { GenericElementProvider } from "../data/paginatedProvider";
@@ -43,7 +43,7 @@ export class GenericURLFeedComponenet extends Component {
 	morePostsButton() {
 		return (
 			<Button
-				style={{ marginTop: "0.5em" }}
+				style={{ marginTop: "0.5em", marginBottom: "0.5em" }}
 				disabled={this.state.hasAllPosts}
 				variant="outlined"
 				onClick={this.supplyMorePosts.bind(this)}

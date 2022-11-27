@@ -14,8 +14,10 @@ export default class MainFeed extends Component {
 	render() {
 		return (
 			<div className="feeds-body">
-				<Paper className="feeds-center" elevation={0} variant="outlined" square>
-					<FeedComponent key={this.props.authorId} {...this.props}></FeedComponent>
+				<Paper className="feeds-background" elevation={0} variant="outlined" square>
+					<div className="feeds-center" style={{ width: "30em", display: "inline-block" }}>
+						<FeedComponent key={this.props.authorId} {...this.props}></FeedComponent>
+					</div>
 				</Paper>
 			</div>
 		);
@@ -33,8 +35,10 @@ export class GenericURLFeedView extends Component {
 	render() {
 		return (
 			<div className="feeds-body">
-				<Paper className="feeds-center" elevation={0} variant="outlined" square>
-					<GenericURLFeedComponenet key={this.props.url} {...this.props}></GenericURLFeedComponenet>
+				<Paper className="feeds-background" elevation={0} variant="outlined" square>
+					<div className="feeds-center" style={{ width: "30em", display: "inline-block" }}>
+						<GenericURLFeedComponenet key={this.props.url} {...this.props}></GenericURLFeedComponenet>
+					</div>
 				</Paper>
 			</div>
 		);
