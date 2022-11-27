@@ -3,6 +3,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from utils.swagger_data import SwaggerData
 from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLikeSerializer
 from django.http import JsonResponse
 from utils.proxy import fetch_author, get_authorization_from_url, Ref
@@ -149,6 +152,17 @@ class InboxList(APIView):
 
     authentication_classes = [BasicAuthentication]
 
+    @swagger_auto_schema(
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                    SwaggerData.inbox_list
+                }
+            )
+        }
+    )
     def get(self, request, id, format=None):
         """GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)"""
         author = get_object_or_404(Author, id=id)
@@ -160,13 +174,26 @@ class InboxList(APIView):
 
         return Response(dictionary, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties=SwaggerData.follow_request_body
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
+            )
+        }
+    )
     def post(self, request, id, format=None):
         """
-        POST [local, remote]: send a post to the author
-        if the type is “post” then add that post to AUTHOR_ID's inbox
-        if the type is “follow” then add that follow is added to AUTHOR_ID's inbox to approve later
-        if the type is “like” then add that like to AUTHOR_ID's inbox
-        if the type is “comment” then add that comment to AUTHOR_ID's inbox
+        POST [local, remote]: send a post to the author.
+        *if the type is “post” then add that post to AUTHOR_ID’s inbox*
+        *if the type is “follow” then add that follow is added to AUTHOR_ID’s inbox to approve later*
+        *if the type is “like” then add that like to AUTHOR_ID’s inbox*
+        *if the type is “comment” then add that comment to AUTHOR_ID’s inbox*
+        This request_body example contains a follow request example.
+        Please see the Like, Comment, and Post objects for the other possible inbox request_body examples.
         """
         # ensure the author exists and is authorized
         author = get_object_or_404(Author, id=id)

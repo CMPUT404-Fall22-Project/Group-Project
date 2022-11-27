@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from django.db import transaction
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from django.http import HttpResponse
 from authors.models import Author
 from .models import ContentType, Post, Comment, PostLike, CommentLike, Category
@@ -18,6 +20,7 @@ from django.http import JsonResponse
 from nodes.models import Node
 import requests
 from rest_framework.authentication import BasicAuthentication
+from utils.swagger_data import SwaggerData
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
@@ -39,6 +42,18 @@ def add_categories(post, raw_data):
 
 class AllPostList(APIView):
     """/posts/all/ GET"""
+
+    @swagger_auto_schema(
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                    SwaggerData.post_list
+                }
+            )
+        }
+    )
 
     #TODO: THIS IS BAD. I JUST WANT SOMETHING TO RETURN FOR NOW.
     # The functions that process the posts require the posts to be Post objects in a queryset
@@ -86,6 +101,17 @@ class AllLocalPostList(APIView):
 
     authentication_classes = [BasicAuthentication]
 
+    @swagger_auto_schema(
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                    SwaggerData.post_list
+                }
+            )
+        }
+    )
     def get(self, request, format=None):
         """GET [local, remote] get all posts for all authors (paginated)"""
 
@@ -100,8 +126,19 @@ class AllLocalPostList(APIView):
 
 
 class PostList(APIView):
-    """Creation URL ://service/authors/{AUTHOR_ID}/posts/"""
+    """Creation URL ://service/authors/{AUTHOR_ID}/posts/""" 
 
+    @swagger_auto_schema(
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                    SwaggerData.post_list
+                }
+            )
+        }
+    )
     def get(self, request, id, format=None):
         """GET [local, remote] get the recent posts from post AUTHOR_ID (paginated)"""
         # ensure author exists and is authorized
@@ -131,6 +168,17 @@ class PostList(APIView):
         if not "comments" in data:
             data["comments"] = get_host() + "authors/" + authorId + "/posts/" + postId + "/comments/"
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties=SwaggerData.post_request_body
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
+            )
+        }
+    )
     def post(self, request, id, format=None):
         """POST [local] create a new post but generate a new id"""
         # ensure author exists and is authorized
@@ -156,6 +204,17 @@ class PostList(APIView):
 class PostImage(APIView):
     """Creation URL ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/image"""
 
+    @swagger_auto_schema(
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json": SwaggerData.post_detail_img
+                }
+            )
+        }
+    )
+
     def get(self, request, author_id, post_id):
         """GET [local, remote] get the image contents of a post, or return a 404 if the post is not an image"""
         # ensure author exists and is authorized
@@ -168,9 +227,19 @@ class PostImage(APIView):
 
 
 class PostDetail(APIView):
-    """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}
-    POST [local] update the post whose id is POST_ID (must be authenticated)"""
+    """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}"""
 
+    @swagger_auto_schema(
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                    SwaggerData.post_detail
+                }
+            )
+        }
+    )
     def get(self, request, author_id, post_id, format=None):
         """GET [local, remote] get the public post whose id is POST_ID"""
         # ensure author exists and is authorized
@@ -178,8 +247,19 @@ class PostDetail(APIView):
         data = serialize_single_post(post)
         return Response(data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties=SwaggerData.post_request_body
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
+            )
+        }
+    )
     def put(self, request, author_id, post_id, format=None):
-        """PUT [local] create a post where its id is POST_ID"""
+        """PUT [local] create a post where its id is POST_ID (must be authenticated"""
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=author_id)
 
@@ -204,14 +284,25 @@ class PostDetail(APIView):
         post.delete()
         return Response(status=status.HTTP_200_OK)
 
-############
-# COMMENTS #
-############
+##################################################################################################################
+#                                               COMMENTS                                                         #
+##################################################################################################################
 
 
 class CommentList(APIView):
     """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments"""
 
+    @swagger_auto_schema(
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                    SwaggerData.comment_list
+                }
+            )
+        }
+    )
     def get(self, request, author_id, post_id, format=None):
         """GET [local, remote] get the list of comments of the post whose id is POST_ID (paginated)"""
         # ensure author exists and is authorized
@@ -225,6 +316,17 @@ class CommentList(APIView):
         dict = {"type": "comments", "items": serialized}
         return Response(dict, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties=SwaggerData.comment_request_body
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
+            )
+        }
+    )
     def post(self, request, author_id, post_id, format=None):
         """
         POST [local] if you post an object of “type”:”comment”,
@@ -251,13 +353,24 @@ class CommentList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-#########
-# LIKED #
-#########
+##################################################################################################################
+#                                               LIKED                                                            #
+##################################################################################################################
 
 class LikedList(APIView):
     """URL: ://service/authors/{AUTHOR_ID}/liked"""
 
+    @swagger_auto_schema(
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                    SwaggerData.liked_list
+                }
+            )
+        }
+    )
     def get(self, request, author_id, format=None):
         """GET [local, remote] list what public things AUTHOR_ID liked."""
         # ensure author exists and is authorized
@@ -279,14 +392,25 @@ class LikedList(APIView):
                 arr.append(dict(data))
         return Response({"type": "liked", "items": arr}, status=status.HTTP_200_OK)
 
-##############
-# POST LIKES #
-##############
+##################################################################################################################
+#                                               POST LIKES                                                       #
+##################################################################################################################
 
 
 class PostLikeList(APIView):
     """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/likes"""
 
+    @swagger_auto_schema(
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                    SwaggerData.likes_list
+                }
+            )
+        }
+    )
     def get(self, request, author_id, post_id, format=None):
         """GET [local, remote] a list of likes from other authors on AUTHOR_ID’s post POST_ID"""
 
@@ -301,6 +425,17 @@ class PostLikeList(APIView):
         dict = {"type": "likes", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties=SwaggerData.like_request_body
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
+            )
+        }
+    )
     def post(self, request, author_id, post_id, format=None):
         "POST a like for a particular post"
         # ensure author exists and is authorized
@@ -316,15 +451,26 @@ class PostLikeList(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-#################
-# COMMENT LIKES #
-#################
+##################################################################################################################
+#                                               COMMENT LIKES                                                    #
+##################################################################################################################
 
 class CommentLikeList(APIView):
     """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments/{COMMENT_ID}/likes"""
 
+    @swagger_auto_schema(
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                    SwaggerData.likes_list
+                }
+            )
+        }
+    )
     def get(self, request, author_id, post_id, comment_id, format=None):
-        """POST a 'like' to a particular comment"""
+        """GET the likes on a particular comment"""
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=author_id)
         if not author.isAuthorized:
@@ -336,6 +482,17 @@ class CommentLikeList(APIView):
         dict = {"type": "likes", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties=SwaggerData.like_request_body
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
+            )
+        }
+    )
     def post(self, request, author_id, post_id, comment_id, format=None):
         """POST a 'like' to a particular comment"""
         # ensure author exists and is authorized
