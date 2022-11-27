@@ -17,6 +17,7 @@ from requests import HTTPError
 from utils.requests import get_optionally_list_parameter_or_default
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
+from nodes.models import Node
 
 # Inbox
 # The inbox is all the new posts from who you follow
@@ -107,7 +108,39 @@ def filter_inbox(request, author_id):
     return JsonResponse(dictionary, safe=False)
 
 
-#  https://www.django-rest-framework.org/tutorial/3-class-based-views/
+@api_view(["POST"])
+def handle_follow_request(request):
+    """
+    URL: ://service/handle_follow_request/
+
+    Creates a Follow Request object from the authorId of sender and JSON Author receiver
+    Sends a POST request to the receiver's inbox with the Follow Request object as the body
+
+    @params: request.data["senderAuthorURL"] = The URL of the Author that is sending the follow request
+             request.data["receiverAuthor"] = The JSON Author that is receiving the follow request
+    NOTE: actor is the author that is sending the Follow Request
+          object is the author that is receiving the Follow Request
+    """
+    # sender is a local author
+    sender_id = request.data["senderAuthorURL"].split("/authors/")[1]
+    actor = get_object_or_404(Author, id=sender_id, isAuthorized=True) # actor is the sender
+    object = request.data["receiverAuthor"] # object is the receiver (we already have the data)
+
+    # Generate a follow request
+    data = {}
+    data["type"] = "follow"
+    data["summary"] = str(actor.displayName) + " wants to follow " + object["displayName"]
+    data["actor"] = AuthorSerializer(actor).data
+    data["object"] = object
+
+    # send a POST request to Inbox of the receiver Author
+    host = object["id"].split("authors")[0]
+    node = get_object_or_404(Node, host=host)
+    url = object["id"] + "/inbox/"
+    response = requests.post(url, json=data) #TODO: add auth=(node.username,node.password)
+    return Response(status=response.status_code)
+
+
 class InboxList(APIView):
     """ URL: ://service/authors/{AUTHOR_ID}/inbox """
 
@@ -132,7 +165,6 @@ class InboxList(APIView):
         """
         # ensure the author exists and is authorized
         author = get_object_or_404(Author, id=id)
-
         # get the data type
         type = request.data["type"]
 
@@ -141,30 +173,11 @@ class InboxList(APIView):
             ref = Ref(data)
             inbox = author.inboxes.create(data=ref.as_ref(), dataType=type)
             return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
-        if type in ["like", "comment"]:
-            # save the data to the author's inbox
-            inbox = author.inboxes.create(data=request.data, dataType=type)
-            return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
 
-        if type == "follow":
-            # ensure the follower exists and is authorized
-            follower_id = request.data["id"]
-            follower_id = follower_id.split("/authors/")[1]
-            follower = get_object_or_404(Author, id=follower_id)
-            if not follower.isAuthorized:
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
+        # else type is "like", "comment", or "follow"
+        inbox = author.inboxes.create(data=request.data, dataType=type)
+        return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
 
-            # Create the follow request (we only need the ids of the authors)
-            author_serializer = AuthorSerializer(author)
-            follower_serializer = AuthorSerializer(follower)
-            data = {}
-            data["type"] = "follow"
-            data["summary"] = str(follower.displayName) + " wants to follow " + author.displayName
-            data["actor"] = follower_serializer.data
-            data["object"] = author_serializer.data
-
-            inbox = author.inboxes.create(data=data, dataType=data["type"])
-            return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id, format=None):
         """DELETE [local]: clear the inbox"""
