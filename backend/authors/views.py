@@ -27,12 +27,12 @@ class AllAuthorList(APIView):
             nodes = ExternalNode.objects.exclude(host=get_host())
             authors = []
             for node in nodes:
-                authors_url =  node.host + "authors/"
-                response = requests.get(authors_url, auth=(node.username, node.password))
-                data = response.json()
+                authors_url =  node.api + "authors/"
+                response = requests.get(authors_url, headers={'Authorization': node.authorization})
                 if response.status_code >= 300:
-                    print(f'{node.host}: {response.status_code} {response}') # print the error
+                    print(f'{authors_url}: HTTP{response.status_code} - {response.text}\n') # print the error
                     continue
+                data = response.json()
                 for author in data["items"]:
                     authors.append(author)
             return authors

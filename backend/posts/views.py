@@ -37,6 +37,22 @@ def add_categories(post, raw_data):
         for category in list(raw_data["categories"]):
             Category(category=category, post=post).save()
 
+def get_posts_from_remote_nodes():
+    """GET all posts across all remote nodes"""
+    nodes = ExternalNode.objects.exclude(host=get_host())
+    posts = []
+    for node in nodes:
+        posts_url =  node.api + "posts/"
+        response = requests.get(posts_url, headers={'Authorization': node.authorization})
+        if response.status_code >= 300:
+            print(f'{posts_url}: HTTP{response.status_code} - {response.text}\n') # print the error
+            continue
+        data = response.json()
+        print(data)
+        for post in data["items"]:
+            posts.append(post)
+    return posts
+
 class AllPostList(APIView):
     """/posts/all/ GET"""
 
@@ -45,23 +61,6 @@ class AllPostList(APIView):
     # The remote posts are Json objects in a regular list
     def get(self, request, format=None):
         """GET [local, remote] get all posts for all authors across all nodes (paginated)"""
-
-        def get_posts_from_remote_nodes():
-            """GET all posts across all remote nodes"""
-            nodes = ExternalNode.objects.exclude(host=get_host())
-            posts = []
-            for node in nodes:
-                posts_url =  node.api + "posts/"
-                response = requests.get(posts_url, headers={'Authorization': node.authorization})
-                data = response.json()
-                if response.status_code != 200:
-                    print(f'{node.host}: {response.status_code} {response}') # print the error
-                    continue
-                for post in data["items"]:
-                    # post = Post(post) #TODO: turn this into a Post object?
-                    posts.append(post)
-            return posts
-
         authors = Author.objects.filter(isAuthorized=True)
         posts = Post.objects.all().filter(author__in=authors, visibility=Post.Visibility.PUBLIC) # TODO Account for non-public posts amongst followers
 
@@ -80,8 +79,6 @@ class AllPostList(APIView):
 
 class AllLocalPostList(APIView):
     """/posts/ GET"""
-
-    authentication_classes = [BasicAuthentication]
 
     def get(self, request, format=None):
         """GET [local, remote] get all posts for all authors (paginated)"""
