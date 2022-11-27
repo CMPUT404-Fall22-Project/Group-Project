@@ -118,7 +118,7 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 			};
 			return (
 				<div>
-					<FollowRequestButton authorId={this.props.authorId} userId={this.state.userId} />
+					<FollowRequestButton author={this.props.author} userId={this.state.userId} />
 					<Typography variant="h4" style={styles}>
 						<i>Nothing to see here...</i>
 					</Typography>
@@ -131,7 +131,7 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 		}
 		return (
 			<div>
-				<FollowRequestButton authorId={this.props.authorId} userId={this.state.userId} />
+				<FollowRequestButton author={this.props.author} userId={this.state.userId} />
 				{this.state.posts.map((x, idx) => (
 					<EditablePostContainer
 						isEditableFunc={() => false}

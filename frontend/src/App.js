@@ -55,7 +55,9 @@ class App extends Component {
 						/>
 						<Route
 							path="/authors/:id"
-							render={(props) => <MainFeed {...props} authorId={props.location.state.authorId} />}
+							render={(props) => (
+								<MainFeed {...props} author={props.location.state.author} authorId={props.location.state.author.id} />
+							)}
 						/>
 						<Route exact path="/edit-author" render={(props) => <EditProfile {...props} />} />
 						<Route component={HTML404}></Route>
