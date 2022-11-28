@@ -8,7 +8,7 @@ from drf_yasg.utils import swagger_auto_schema
 from utils.swagger_data import SwaggerData
 from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLikeSerializer
 from django.http import JsonResponse
-from utils.proxy import fetch_author, get_authorization_from_url, Ref
+from utils.proxy import fetch_author, get_authorization_from_url, get_host_from_url, Ref
 from utils.requests import paginate
 from authors.models import Author, Follower
 from .models import Inbox
@@ -20,9 +20,10 @@ from requests import HTTPError
 from utils.requests import get_optionally_list_parameter_or_default
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from nodes.models import Node
-from django.contrib.auth.models import User
+from authentication.models import ExternalNode
 from rest_framework.authentication import BasicAuthentication
+from rest_framework.exceptions import ValidationError
+from utils.auth import authenticated
 
 # Inbox
 # The inbox is all the new posts from who you follow
@@ -82,13 +83,16 @@ def send_to_user(authorUrl, data):
 
 
 # sorry aaron, this is all i know.
-def derference_inbox(qs):
+def dereference_inbox(qs):
     items = []
     for x in qs:
-        try:
-            items.append(Ref(InboxSerializer(x).data["data"]).as_data())
-        except Http404:
-            x.delete()  # remove from the inbox...
+        if x.type != "post":
+            items.append(InboxSerializer(x).data)
+        else:
+            try:
+                items.append(Ref(InboxSerializer(x).data["data"]).as_data())
+            except Http404:
+                x.delete()  # remove from the inbox...
     return items
 
 
@@ -109,11 +113,12 @@ def filter_inbox(request, author_id):
         raise PermissionDenied("Unauthorizeed access to inbox")
     # get all of the inbox items for this author
     inbox = paginate(request, Inbox.objects.filter(author=author, dataType__in=types))
-    dictionary = {"type": "inbox", "author": author.id, "items": derference_inbox(inbox)}
+    dictionary = {"type": "inbox", "author": author.id, "items": dereference_inbox(inbox)}
     return JsonResponse(dictionary, safe=False)
 
 
 @api_view(["POST"])
+@authenticated
 def handle_follow_request(request):
     """
     URL: ://service/handle_follow_request/
@@ -140,18 +145,24 @@ def handle_follow_request(request):
     data["object"] = object
 
     # send a POST request to Inbox of the receiver Author
-    host = object["id"].split("authors")[0]
-    node = get_object_or_404(Node, host=host)
     url = object["id"] + "/inbox/"
-    response = requests.post(url, json=data) #TODO: add auth=(node.username,node.password)
+    auth = get_authorization_from_url(object["id"])
+    response = requests.post(url, json=data, headers={'Authorization': auth})
     return Response(status=response.status_code)
 
+def mandatory_field(data, field, errs):
+    if not field in data:
+        errs[field] = "This field is required."
+
+def validate_incoming_inbox_data(data):
+    errs = {}
+    mandatory_field(data, "type", errs)
+    mandatory_field(data, "id", errs)
+    if len(errs) > 0:
+        raise ValidationError(errs, code=400)
 
 class InboxList(APIView):
     """ URL: ://service/authors/{AUTHOR_ID}/inbox """
-
-    authentication_classes = [BasicAuthentication]
-
     @swagger_auto_schema(
         responses={
             "200": openapi.Response(
@@ -170,7 +181,7 @@ class InboxList(APIView):
             raise PermissionDenied("Unauthorizeed access to inbox")
         # get all of the inbox items for this author
         inbox = paginate(request, Inbox.objects.filter(author=author))
-        dictionary = {"type": "inbox", "author": author.id, "items": derference_inbox(inbox)}
+        dictionary = {"type": "inbox", "author": author.id, "items": dereference_inbox(inbox)}
 
         return Response(dictionary, status=status.HTTP_200_OK)
 
@@ -185,6 +196,7 @@ class InboxList(APIView):
             )
         }
     )
+    @authenticated
     def post(self, request, id, format=None):
         """
         POST [local, remote]: send a post to the author.
@@ -201,6 +213,7 @@ class InboxList(APIView):
         type = request.data["type"]
 
         if type == "post":
+            validate_incoming_inbox_data(request.data)
             data = request.data
             ref = Ref(data)
             inbox = author.inboxes.create(data=ref.as_ref(), dataType=type)
@@ -210,7 +223,7 @@ class InboxList(APIView):
         inbox = author.inboxes.create(data=request.data, dataType=type)
         return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
 
-
+    @authenticated
     def delete(self, request, id, format=None):
         """DELETE [local]: clear the inbox"""
         # ensure author exists and is authorized
@@ -225,7 +238,7 @@ class InboxList(APIView):
 
 
 class InboxDetail(APIView):
-
+    @authenticated
     def delete(self, request, author_id, inbox_id, format=None):
         """Delete from inbox by id"""
         # ensure author exists and is authorized

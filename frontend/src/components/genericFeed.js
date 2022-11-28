@@ -1,4 +1,4 @@
-import { Button, Paper, Typography } from "@mui/material";
+import { Backdrop, Button, Typography } from "@mui/material";
 import React, { Component } from "react";
 import Post from "../data/containers/post";
 import PaginatedProvider, { GenericElementProvider } from "../data/paginatedProvider";
@@ -8,6 +8,7 @@ import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlin
 import { NewPostButton } from "./posts/newPost";
 import { EditablePostContainer } from "./posts/post";
 import { FollowRequestButton } from "./follows/sendFollowRequest";
+import Loader from "./loader";
 
 export class GenericURLFeedComponenet extends Component {
 	constructor(props) {
@@ -15,24 +16,37 @@ export class GenericURLFeedComponenet extends Component {
 		this.state = {
 			posts: [],
 			hasAllPosts: false,
+			loading: true,
+			loadingMorePosts: false,
 		};
 		this.postSupplier = new PaginatedProvider(new GenericElementProvider(this.props.url));
 		this.postSupplier.listen((success, data) => {
 			if (success) {
-				const formatted = data.map((x) => Post.parseDatabase(x));
+				const formatted = [];
+				for (const d of data) {
+					try {
+						formatted.push(Post.parseDatabase(d));
+					} catch (e) {
+						console.error(e);
+					}
+				}
 				this.setState((prevState) => {
 					return {
 						posts: [...prevState.posts, ...formatted],
 						hasAllPosts: data.length === 0,
+						loading: false,
+						loadingMorePosts: false,
 					};
 				});
 			} else {
 				NotificationBar.getInstance().addNotification("Failed to load posts.", NotificationBar.NT_ERROR, 10_000);
+				this.setState({ loading: false, loadingMorePosts: false });
 			}
 		});
 	}
 
 	supplyMorePosts() {
+		this.setState({ loadingMorePosts: true });
 		this.postSupplier.requestData();
 	}
 
@@ -41,19 +55,34 @@ export class GenericURLFeedComponenet extends Component {
 	}
 
 	morePostsButton() {
+		var text = "Load more posts...";
+		if (this.state.hasAllPosts) {
+			text = "All posts loaded!";
+		}
+		if (this.state.loadingMorePosts) {
+			text = "Loading...";
+		}
 		return (
 			<Button
-				style={{ marginTop: "0.5em" }}
-				disabled={this.state.hasAllPosts}
+				style={{ marginTop: "0.5em", marginBottom: "0.5em" }}
+				disabled={this.state.hasAllPosts || this.state.loadingMorePosts}
 				variant="outlined"
 				onClick={this.supplyMorePosts.bind(this)}
 			>
-				{this.state.hasAllPosts ? "All posts loaded!" : "Load more posts..."}
+				{text}
 			</Button>
 		);
 	}
 
 	render() {
+		if (this.state.loading) {
+			return (
+				<div>
+					<i>Loading...</i>
+					<Loader></Loader>
+				</div>
+			);
+		}
 		return (
 			<div>
 				{this.state.posts.map((x, idx) => (
@@ -80,6 +109,8 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 			userId: user.getId(),
 			posts: [],
 			hasAllPosts: false,
+			loading: true,
+			loadingMorePosts: false,
 		};
 		this.postSupplier = new PaginatedProvider(new GenericElementProvider(`${this.props.authorId}/posts/`));
 		this.postSupplier.listen((success, data) => {
@@ -89,15 +120,26 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 					return {
 						posts: [...prevState.posts, ...formatted],
 						hasAllPosts: data.length === 0,
+						loading: false,
+						loadingMorePosts: false,
 					};
 				});
 			} else {
 				NotificationBar.getInstance().addNotification("Failed to load posts.", NotificationBar.NT_ERROR, 10_000);
+				this.setState({ loading: false, loadingMorePosts: false });
 			}
 		});
 	}
 
 	render() {
+		if (this.state.loading) {
+			return (
+				<div>
+					<i>Loading...</i>
+					<Loader></Loader>
+				</div>
+			);
+		}
 		if (this.state.isCurrentUser) {
 			return (
 				<div>

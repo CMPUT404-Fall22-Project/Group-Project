@@ -51,14 +51,14 @@ export default function SignUpPage() {
 	const [error, setError] = useState("");
 	const [posted, setPosted] = useState("");
 	const [success, setSuccess] = useState("");
+	const [profileImage, setProfileImage] = useState("");
 
 	const postUser = () => {
 		const data = {
 			author_data: {
 				displayName: displayName,
 				github: githubURL,
-				profileImage:
-					"https://user-images.githubusercontent.com/71047780/198223700-cf5b87b1-6318-4419-b1cf-4ceee56281eb.png",
+				profileImage: profileImage,
 			},
 			user_data: {
 				username: username,
@@ -83,7 +83,7 @@ export default function SignUpPage() {
 	const handleSignUp = (e) => {
 		e.preventDefault();
 
-		if (!username || !displayName || !githubURL || !password || !passwordConfirm || password !== passwordConfirm) {
+		if (!username || !displayName || !profileImage || !githubURL || !password || !passwordConfirm || password !== passwordConfirm) {
 			setError(1);
 			return;
 		}
@@ -193,6 +193,19 @@ export default function SignUpPage() {
 								label="Display Name"
 								onChange={(e) => setDisplayName(e.target.value)}
 								{...checkError(displayName, false)}
+							/>
+						</Grid>
+						<Grid item xs={12}>
+							<TextField
+								autoComplete="profileImage"
+								name="profileImage"
+								variant="outlined"
+								required
+								fullWidth
+								id="profileImage"
+								label="Profile image URL"
+								onChange={(e) => setProfileImage(e.target.value)}
+								{...checkError(profileImage, false)}
 							/>
 						</Grid>
 						<Grid item xs={12}>

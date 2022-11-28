@@ -17,10 +17,10 @@ from authors.serializers import AuthorSerializer
 from inbox.views import send_to_all_followers, send_to_user
 import base64
 from django.http import JsonResponse
-from nodes.models import Node
+from authentication.models import ExternalNode
 import requests
-from rest_framework.authentication import BasicAuthentication
 from utils.swagger_data import SwaggerData
+from utils.auth import authenticated
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
@@ -39,6 +39,24 @@ def add_categories(post, raw_data):
             category.delete()
         for category in list(raw_data["categories"]):
             Category(category=category, post=post).save()
+
+def get_posts_from_remote_nodes():
+    """GET all posts across all remote nodes"""
+    nodes = ExternalNode.objects.exclude(host=get_host())
+    posts = []
+    for node in nodes:
+        posts_url =  node.api + "posts/"
+        response = requests.get(posts_url, headers={'Authorization': node.authorization})
+        if response.status_code >= 300:
+            print(f'posts/all -> {posts_url}: HTTP{response.status_code} - {response.text}\n') # print the error
+            continue
+        data = response.json()
+        if isinstance(data, list):
+            posts.extend(data)
+        else:
+            for post in data["items"]:
+                posts.append(post)
+    return posts
 
 class AllPostList(APIView):
     """/posts/all/ GET"""
@@ -60,26 +78,6 @@ class AllPostList(APIView):
     # The remote posts are Json objects in a regular list
     def get(self, request, format=None):
         """GET [local, remote] get all posts for all authors across all nodes (paginated)"""
-
-        def get_posts_from_remote_nodes():
-            """GET all posts across all remote nodes"""
-            nodes = Node.objects.exclude(host=get_host())
-            posts = []
-            for node in nodes:
-                if node.host == "https://social-distribution-14degrees.herokuapp.com/api/":
-                    # authors.append(data[0])
-                    continue
-                posts_url =  node.host + "posts/"
-                response = requests.get(posts_url, auth=(node.username, node.password))
-                data = response.json()
-                if response.status_code != 200:
-                    print(f'{node.host}: {response.status_code} {response}') # print the error
-                    continue
-                for post in data["items"]:
-                    # post = Post(post) #TODO: turn this into a Post object?
-                    posts.append(post)
-            return posts
-
         authors = Author.objects.filter(isAuthorized=True)
         posts = Post.objects.all().filter(author__in=authors, visibility=Post.Visibility.PUBLIC) # TODO Account for non-public posts amongst followers
 
@@ -98,8 +96,6 @@ class AllPostList(APIView):
 
 class AllLocalPostList(APIView):
     """/posts/ GET"""
-
-    authentication_classes = [BasicAuthentication]
 
     @swagger_auto_schema(
         responses={
@@ -179,6 +175,7 @@ class PostList(APIView):
             )
         }
     )
+    @authenticated
     def post(self, request, id, format=None):
         """POST [local] create a new post but generate a new id"""
         # ensure author exists and is authorized
@@ -258,6 +255,7 @@ class PostDetail(APIView):
             )
         }
     )
+    @authenticated
     def put(self, request, author_id, post_id, format=None):
         """PUT [local] create a post where its id is POST_ID (must be authenticated"""
         # ensure author exists and is authorized
@@ -273,6 +271,7 @@ class PostDetail(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @authenticated
     def delete(self, request, author_id, post_id, format=None):
         """DELETE [local] remove the post whose id is POST_ID"""
         # ensure author exists and is authorized
@@ -327,6 +326,7 @@ class CommentList(APIView):
             )
         }
     )
+    @authenticated
     def post(self, request, author_id, post_id, format=None):
         """
         POST [local] if you post an object of “type”:”comment”,
@@ -436,6 +436,7 @@ class PostLikeList(APIView):
             )
         }
     )
+    @authenticated
     def post(self, request, author_id, post_id, format=None):
         "POST a like for a particular post"
         # ensure author exists and is authorized
@@ -493,6 +494,7 @@ class CommentLikeList(APIView):
             )
         }
     )
+    @authenticated
     def post(self, request, author_id, post_id, comment_id, format=None):
         """POST a 'like' to a particular comment"""
         # ensure author exists and is authorized
@@ -508,6 +510,7 @@ class CommentLikeList(APIView):
 
 
 @api_view(["POST"])
+@authenticated
 @transaction.atomic
 def add_new_comment(request, author_id, post_id):
     post_owner = get_object_or_404(Author, id=author_id)

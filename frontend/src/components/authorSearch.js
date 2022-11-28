@@ -33,7 +33,11 @@ export default function AuthorSearch() {
 		var response = await axios.get(process.env.REACT_APP_HOST + `authors/all/`);
 		const authors = response.data.items;
 		var arr = [];
-		for (let a of authors) {
+		for (const a of authors) {
+			if (!a.displayName || !a.id) {
+				console.error("Bad API response: missing displayName or id " + JSON.stringify(a));
+				continue;
+			}
 			arr.push({ label: a.displayName, id: a.id });
 		}
 		// Remove the logged in author from arr
@@ -63,6 +67,7 @@ export default function AuthorSearch() {
 					id="free-solo-2-demo"
 					disableClearable
 					options={autoCompleteAuthors}
+					getOptionLabel={(x) => x.label}
 					style={{
 						margin: "0.25em",
 						width: "25em",

@@ -5,6 +5,7 @@ import "./followRequests.css";
 import Loader from "../loader";
 import NotificationBar from "../../global/centralNotificationBar";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { proxiedAxios } from "../../utils/proxy";
 
 const theme = createTheme({
 	palette: {
@@ -29,7 +30,7 @@ export const FollowRequestButton = (props) => {
 
 	async function handleButtonText() {
 		// Check if user is already following this author
-		var response = await axios.get(`${authorId}/followers/`);
+		var response = await proxiedAxios({ url: `${authorId}/followers/`, method: "get" });
 		for (let author of response.data.items) {
 			if (author.id === userId) {
 				setButtonText(unfollow);
@@ -56,12 +57,12 @@ export const FollowRequestButton = (props) => {
 		}
 		// buttonText === "UnFollow"
 		// remove userId as a follower of authorId
-		var response = await axios.delete(`${authorId}/followers/${userId}`);
-		if (response.status === 200) {
-			setButtonText(follow);
-		} else {
-			NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
-		}
+		// var response = await axios.delete(`${authorId}/followers/${userId}`);
+		// if (response.status === 200) {
+		// 	setButtonText(follow);
+		// } else {
+		// 	NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
+		// }
 	}
 
 	// prompt loader until buttonText is rendered
@@ -70,7 +71,12 @@ export const FollowRequestButton = (props) => {
 	) : (
 		<div>
 			<ThemeProvider theme={theme}>
-				<Button size="medium" variant="contained" onClick={handleButtonClick} disabled={buttonText === followPending}>
+				<Button
+					size="medium"
+					variant="contained"
+					onClick={handleButtonClick}
+					disabled={buttonText === followPending || buttonText === unfollow}
+				>
 					{buttonText}
 				</Button>
 			</ThemeProvider>

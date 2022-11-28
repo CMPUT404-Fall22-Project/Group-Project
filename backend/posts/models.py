@@ -26,8 +26,6 @@ class Post(models.Model):
     type = models.CharField(max_length=4, default="post", editable=False)
     title = models.CharField(max_length=255, null=False)
     id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4, editable=False)
-    source = models.URLField()
-    origin = models.URLField()
     description = models.CharField(max_length=255)
     contentType = models.CharField(choices=ContentType.choices, null=False,
                                    max_length=255, default=ContentType.TEXT_PLAIN)

@@ -17,5 +17,6 @@ class Session(models.Model):
 
 
 class ExternalNode(models.Model):
-    url = models.CharField(primary_key=True, max_length=255, null=False)
+    host = models.CharField(primary_key=True, max_length=255, null=False)
+    api = models.CharField(max_length=255, null=False)
     authorization = models.CharField(max_length=255, null=False)

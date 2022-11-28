@@ -11,8 +11,8 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from utils.swagger_data import SwaggerData
 from .serializers import AuthorSerializer
-from nodes.models import Node
-from rest_framework.authentication import BasicAuthentication
+from authentication.models import ExternalNode
+from utils.auth import authenticated
 
 
 class AllAuthorList(APIView):
@@ -38,21 +38,21 @@ class AllAuthorList(APIView):
         """
         def get_authors_from_remote_nodes():
             """GET all authors across all remote nodes"""
-            nodes = Node.objects.exclude(host=get_host())
+            nodes = ExternalNode.objects.exclude(host=get_host())
             authors = []
             for node in nodes:
-                authors_url =  node.host + "authors/"
-                response = requests.get(authors_url, auth=(node.username, node.password))
+                authors_url =  node.api + "authors/"
+                response = requests.get(authors_url, headers={'Authorization': node.authorization})
+                if response.status_code >= 300:
+                    print(f'authors/all -> {authors_url}: HTTP{response.status_code} - {response.text}\n') # print the error
+                    continue
+                
                 data = response.json()
-                if node.host == "https://social-distribution-14degrees.herokuapp.com/api/":
-                    # authors.append(data[0])
-                    continue
-                    # print(data)
-                if response.status_code != 200:
-                    print(f'{node.host}: {response.status_code} {response}') # print the error
-                    continue
-                for author in data["items"]:
-                    authors.append(author)
+                if isinstance(data, list):
+                    authors.extend(data)
+                else:
+                    for author in data["items"]:
+                        authors.append(author)
             return authors
 
         # Get local authors
@@ -71,9 +71,6 @@ class AllAuthorList(APIView):
 
 class AuthorList(APIView):
     """/authors/ GET, POST"""
-
-    authentication_classes = [BasicAuthentication]
-
     @swagger_auto_schema(
         responses={
             "200": openapi.Response(
@@ -117,6 +114,7 @@ class AuthorList(APIView):
             )
         }
     )
+    @authenticated
     def post(self, request, format=None):
         """POST [local]: add an author to /authors"""
         serializer = AuthorSerializer(data=request.data)
@@ -172,6 +170,7 @@ class AuthorDetail(APIView):
             )
         }
     )
+    @authenticated
     def post(self, request, id, format=None):
         """POST [local]: update AUTHOR_ID’s profile"""
         author = get_object_or_404(Author, id=id)
@@ -188,9 +187,6 @@ class AuthorDetail(APIView):
 
 class FollowerList(APIView):
     """/authors/<id>/followers/ GET"""
-
-    authentication_classes = [BasicAuthentication]
-
     @swagger_auto_schema(
         responses={
             "200": openapi.Response(
@@ -265,12 +261,14 @@ class FollowerDetail(APIView):
         }
     )
 
+    @authenticated
     def put(self, request, author_id, follower_id, format=None):
         """Add an Author as a follower of another Author"""
         Follower(author=get_object_or_404(Author, pk=author_id),
                  follower=follower_id).save()  # this adds the entry to the Follower table
         return Response(status=status.HTTP_200_OK)
 
+    @authenticated
     def delete(self, request, author_id, follower_id, format=None):
         """Remove an Author as a follower of another Author"""
         follower = get_object_or_404(Follower, author=get_object_or_404(Author, pk=author_id), follower=follower_id)

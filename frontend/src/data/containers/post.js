@@ -4,6 +4,7 @@ import PaginatedProvider, { GenericElementProvider } from "../paginatedProvider"
 import Author from "./author";
 import DataContainer from "./container";
 import Comment from "./comment";
+import { isUrlLocal } from "../../utils/local";
 
 export default class Post extends DataContainer {
 	static TYPE = "post";
@@ -61,7 +62,7 @@ export default class Post extends DataContainer {
 	}
 
 	isLocalPost() {
-		return this._baseData.origin.startsWith(process.env.REACT_APP_HOST);
+		return isUrlLocal(this._baseData.origin);
 	}
 
 	encodeDatabase() {

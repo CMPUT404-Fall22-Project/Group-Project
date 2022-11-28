@@ -55,9 +55,22 @@ class App extends Component {
 						/>
 						<Route
 							path="/authors/:id"
-							render={(props) => (
-								<MainFeed {...props} author={props.location.state.author} authorId={props.location.state.author.id} />
-							)}
+							render={(props) => {
+								if (!props.location.state) {
+									history.push("/");
+									setTimeout(() => {
+										NotificationBar.getInstance().addNotification(
+											"Sorry, we couldn't load that data right now. Please try again later.",
+											NotificationBar.NT_WARNING
+										);
+									}, 0);
+
+									return <HTML404 {...props}></HTML404>;
+								}
+								return (
+									<MainFeed {...props} author={props.location.state.author} authorId={props.location.state.author.id} />
+								);
+							}}
 						/>
 						<Route exact path="/edit-author" render={(props) => <EditProfile {...props} />} />
 						<Route component={HTML404}></Route>

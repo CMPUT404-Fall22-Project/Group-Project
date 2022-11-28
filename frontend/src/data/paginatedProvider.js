@@ -1,13 +1,14 @@
-import axios from "axios";
+import { proxiedAxios } from "../utils/proxy";
 
 export default class PaginatedProvider {
-	constructor(innerProvider, pageSize = 5) {
+	constructor(innerProvider, arrayName = "items", pageSize = 5) {
 		this._provider = innerProvider;
 		this._currentLoad = 0;
 		this._pageSize = pageSize;
 		this._pending = false;
+		this._arrayName = arrayName;
 		this._callbacks = [];
-		this._posts = [];
+		this._data = [];
 	}
 
 	listen(callback) {
@@ -21,7 +22,7 @@ export default class PaginatedProvider {
 	}
 
 	_saveResult(inputData) {
-		this._posts.push(inputData);
+		this._data.push(inputData);
 		this._pending = false;
 		return inputData;
 	}
@@ -37,7 +38,7 @@ export default class PaginatedProvider {
 		this._pending = true;
 		const promise = this._provider
 			.getData(Math.round(this._currentLoad / this._pageSize) + 1, this._pageSize)
-			.then((resp) => resp.data.items)
+			.then((resp) => resp.data[this._arrayName])
 			.then(this._saveResult.bind(this))
 			.then((data) => {
 				this._currentLoad += this._pageSize;
@@ -59,11 +60,11 @@ export default class PaginatedProvider {
 	}
 
 	getNumData() {
-		return this._posts.length;
+		return this._data.length;
 	}
 
 	getData() {
-		return [...this._posts];
+		return [...this._data];
 	}
 }
 
@@ -80,7 +81,7 @@ export class GenericElementProvider extends AbstractElementProvider {
 	}
 
 	getData(pageIndex, count) {
-		return axios({
+		return proxiedAxios({
 			method: "get",
 			url: this._dataUrl,
 			params: {

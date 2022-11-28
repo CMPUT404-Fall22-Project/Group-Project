@@ -58,7 +58,6 @@ def user_exists_db(id):
     except User.DoesNotExist:
         return False
 
-
 @api_view(["GET"])
 def user_exists(request, id):
     return JsonResponse({"value": user_exists_db(id)}, safe=False)
