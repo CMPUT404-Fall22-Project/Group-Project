@@ -112,7 +112,7 @@ def filter_inbox(request, author_id):
     if request.app_session.author != author:
         raise PermissionDenied("Unauthorizeed access to inbox")
     # get all of the inbox items for this author
-    inbox = paginate(request, Inbox.objects.filter(author=author, dataType__in=types))
+    inbox = paginate(request, Inbox.objects.filter(author=author, dataType__in=types).order_by("-id"))
     dictionary = {"type": "inbox", "author": author.id, "items": dereference_inbox(inbox)}
     return JsonResponse(dictionary, safe=False)
 
