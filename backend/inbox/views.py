@@ -20,6 +20,7 @@ from django.http import Http404
 from authentication.models import ExternalNode
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.exceptions import ValidationError
+from utils.auth import authenticated
 
 # Inbox
 # The inbox is all the new posts from who you follow
@@ -114,6 +115,7 @@ def filter_inbox(request, author_id):
 
 
 @api_view(["POST"])
+@authenticated
 def handle_follow_request(request):
     """
     URL: ://service/handle_follow_request/
@@ -159,8 +161,6 @@ def validate_incoming_inbox_data(data):
 class InboxList(APIView):
     """ URL: ://service/authors/{AUTHOR_ID}/inbox """
 
-    authentication_classes = [BasicAuthentication]
-
     def get(self, request, id, format=None):
         """GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)"""
         author = get_object_or_404(Author, id=id)
@@ -172,6 +172,7 @@ class InboxList(APIView):
 
         return Response(dictionary, status=status.HTTP_200_OK)
 
+    @authenticated
     def post(self, request, id, format=None):
         """
         POST [local, remote]: send a post to the author
@@ -196,7 +197,7 @@ class InboxList(APIView):
         inbox = author.inboxes.create(data=request.data, dataType=type)
         return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
 
-
+    @authenticated
     def delete(self, request, id, format=None):
         """DELETE [local]: clear the inbox"""
         # ensure author exists and is authorized
@@ -211,7 +212,7 @@ class InboxList(APIView):
 
 
 class InboxDetail(APIView):
-
+    @authenticated
     def delete(self, request, author_id, inbox_id, format=None):
         """Delete from inbox by id"""
         # ensure author exists and is authorized

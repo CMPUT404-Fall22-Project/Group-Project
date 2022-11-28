@@ -17,7 +17,7 @@ import base64
 from django.http import JsonResponse
 from authentication.models import ExternalNode
 import requests
-from rest_framework.authentication import BasicAuthentication
+from utils.auth import authenticated
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
@@ -127,6 +127,7 @@ class PostList(APIView):
         if not "comments" in data:
             data["comments"] = get_host() + "authors/" + authorId + "/posts/" + postId + "/comments/"
 
+    @authenticated
     def post(self, request, id, format=None):
         """POST [local] create a new post but generate a new id"""
         # ensure author exists and is authorized
@@ -174,6 +175,7 @@ class PostDetail(APIView):
         data = serialize_single_post(post)
         return Response(data, status=status.HTTP_200_OK)
 
+    @authenticated
     def put(self, request, author_id, post_id, format=None):
         """PUT [local] create a post where its id is POST_ID"""
         # ensure author exists and is authorized
@@ -189,6 +191,7 @@ class PostDetail(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @authenticated
     def delete(self, request, author_id, post_id, format=None):
         """DELETE [local] remove the post whose id is POST_ID"""
         # ensure author exists and is authorized
@@ -221,6 +224,7 @@ class CommentList(APIView):
         dict = {"type": "comments", "items": serialized}
         return Response(dict, status=status.HTTP_200_OK)
 
+    @authenticated
     def post(self, request, author_id, post_id, format=None):
         """
         POST [local] if you post an object of “type”:”comment”,
@@ -297,6 +301,7 @@ class PostLikeList(APIView):
         dict = {"type": "likes", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
 
+    @authenticated
     def post(self, request, author_id, post_id, format=None):
         "POST a like for a particular post"
         # ensure author exists and is authorized
@@ -332,6 +337,7 @@ class CommentLikeList(APIView):
         dict = {"type": "likes", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
 
+    @authenticated
     def post(self, request, author_id, post_id, comment_id, format=None):
         """POST a 'like' to a particular comment"""
         # ensure author exists and is authorized
@@ -347,6 +353,7 @@ class CommentLikeList(APIView):
 
 
 @api_view(["POST"])
+@authenticated
 @transaction.atomic
 def add_new_comment(request, author_id, post_id):
     post_owner = get_object_or_404(Author, id=author_id)

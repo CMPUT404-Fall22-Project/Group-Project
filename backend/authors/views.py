@@ -9,7 +9,7 @@ from utils.proxy import fetch_author
 from .models import Author, Follower
 from .serializers import AuthorSerializer
 from authentication.models import ExternalNode
-from rest_framework.authentication import BasicAuthentication
+from utils.auth import authenticated
 
 
 class AllAuthorList(APIView):
@@ -58,8 +58,6 @@ class AllAuthorList(APIView):
 class AuthorList(APIView):
     """/authors/ GET, POST"""
 
-    authentication_classes = [BasicAuthentication]
-
     def get(self, request, format=None):
         """GET [local, remote]: retrieve all profiles on the server (paginated)
         page: how many pages
@@ -72,6 +70,7 @@ class AuthorList(APIView):
         dict = {"type": "authors", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
 
+    @authenticated
     def post(self, request, format=None):
         serializer = AuthorSerializer(data=request.data)
         # if valid user input
@@ -96,6 +95,7 @@ class AuthorDetail(APIView):
         serializer_data = serializer.data
         return Response(serializer_data, status=status.HTTP_200_OK)
 
+    @authenticated
     def post(self, request, id, format=None):
         """POST [local]: update AUTHOR_ID’s profile"""
         author = get_object_or_404(Author, id=id)
@@ -112,8 +112,6 @@ class AuthorDetail(APIView):
 
 class FollowerList(APIView):
     """/authors/<id>/followers/ GET"""
-
-    authentication_classes = [BasicAuthentication]
     
     def get(self, request, id, format=None):
         """Get all followers of a specified Author"""
@@ -147,12 +145,14 @@ class FollowerDetail(APIView):
             return Response({"isFollowing": True, "isAccepted": followObj.isAccepted}, status=status.HTTP_200_OK)
         return Response({"isFollowing": False, "isAccepted": False}, status=status.HTTP_200_OK)
 
+    @authenticated
     def put(self, request, author_id, follower_id, format=None):
         """Add an Author as a follower of another Author"""
         Follower(author=get_object_or_404(Author, pk=author_id),
                  follower=follower_id).save()  # this adds the entry to the Follower table
         return Response(status=status.HTTP_200_OK)
 
+    @authenticated
     def delete(self, request, author_id, follower_id, format=None):
         """Remove an Author as a follower of another Author"""
         follower = get_object_or_404(Follower, author=get_object_or_404(Author, pk=author_id), follower=follower_id)

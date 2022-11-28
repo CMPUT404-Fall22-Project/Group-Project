@@ -1,10 +1,9 @@
 
 from authentication.models import Session, ExternalNode
 from django.http import HttpResponseBadRequest
+from django.core.exceptions import PermissionDenied
 
 skip_paths = ["/swagger", "redoc/"]
-
-allowed_paths = ["/sessions/", "/users/", "/admin/"]
 
 
 class AuthMiddleware:
@@ -18,7 +17,6 @@ class AuthMiddleware:
 
         request.app_session = None
 
-        authorized = False
         auth_error = HttpResponseBadRequest("Unauthorized", status=401)
         if "Authorization" in request.headers:
             auth = request.headers["Authorization"]
@@ -30,22 +28,19 @@ class AuthMiddleware:
                 try:
                     sess = Session.objects.get(pk=token)
                     request.app_session = sess
-                    authorized = True
                 except:
                     auth_error = HttpResponseBadRequest("Bad token", status=403)
             elif split_auth[0].lower() == "basic":
                 user_pass = split_auth[1]
                 try:
                     ExternalNode.object.get(authorization=user_pass)
-                    authorized = True
                 except:
                     auth_error = HttpResponseBadRequest("Bad username or password", status=403)
 
-        if not authorized:
-            allowed = any([request.path_info.startswith(x) for x in allowed_paths])
-            if not allowed:
-                resp = auth_error
-                resp["WWW-Authenticate"] = "Basic, Token"
-                return resp
+        resp = self.get_response(request)
+        if(resp.status_code == 599):
+            auth_error["WWW-Authenticate"] = "Basic, Token"
+            return auth_error
+                
 
-        return self.get_response(request)
+        return resp
