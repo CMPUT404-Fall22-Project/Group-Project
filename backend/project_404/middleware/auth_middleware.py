@@ -31,9 +31,8 @@ class AuthMiddleware:
                 except:
                     auth_error = HttpResponseBadRequest("Bad token", status=403)
             elif split_auth[0].lower() == "basic":
-                user_pass = split_auth[1]
                 try:
-                    ExternalNode.object.get(authorization=user_pass)
+                    ExternalNode.object.get(authorization=auth)
                 except:
                     auth_error = HttpResponseBadRequest("Bad username or password", status=403)
 
