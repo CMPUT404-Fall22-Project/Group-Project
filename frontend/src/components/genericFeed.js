@@ -8,9 +8,10 @@ import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlin
 import { NewPostButton } from "./posts/newPost";
 import { EditablePostContainer } from "./posts/post";
 import { FollowRequestButton } from "./sendFollowRequest";
-import {LikeButton} from './likeButton';
-import axios from "axios";
+import {LikesMenuItem} from "./viewLikes";
+import {LikeButton} from "./likeButton";
 
+const DEFAULT_HEIGHT = "56px";
 export default class FeedComponent extends Component {
 	constructor(props) {
 		super(props);
@@ -22,7 +23,11 @@ export default class FeedComponent extends Component {
 			userId: user.getId(),
 			posts: [],
 			hasAllPosts: false,
+			renderChild: null,
+			height: DEFAULT_HEIGHT,
+			userData: Authentication.getInstance().getUserSafe(),
 		};
+		
 
 		this.postSupplier = new PaginatedProvider(new GenericElementProvider(`${this.props.authorId}/posts/`));
 		this.postSupplier.listen((success, data) => {
@@ -46,6 +51,10 @@ export default class FeedComponent extends Component {
 
 	componentDidMount() {
 		this.supplyMorePosts();
+	}
+
+	handleProfileClose() {
+		this.setState({ profileMenuAnchor: null });
 	}
 
 	render() {
@@ -86,6 +95,11 @@ export default class FeedComponent extends Component {
 						data={x}
 						key={"Post#" + String(idx)} />
 						<LikeButton authorId={this.props.authorId} userId={this.state.userId} postId={this.postSupplier.getData()[0][idx].id} />
+						<LikesMenuItem
+							key="follow-requests"
+							variant="outlined"
+							onClick={() => this.handleProfileClose()}
+						></LikesMenuItem>
 					</>
 				))}
 			</div>
