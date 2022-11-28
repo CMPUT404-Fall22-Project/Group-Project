@@ -186,42 +186,6 @@ class AuthorDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class FollowingList(APIView):
-    """/authors/<id>/following/ GET"""
-
-    authentication_classes = [BasicAuthentication]
-
-    @swagger_auto_schema(
-        responses={
-            "200": openapi.Response(
-                description="OK",
-                examples={
-                    "application/json":
-                    SwaggerData.following_list
-                }
-            )
-        }
-    )
-    def get(self, request, id, format=None):
-        """Get all Author's that an Author is following"""
-        author = get_object_or_404(Author, id=id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        # exclude the current author from authors
-        authors = Author.objects.filter(isAuthorized=True).exclude(id=id)
-
-        for a in authors:
-            followers_of_a = a.followers.all()
-            # exclude a from queryset if author is not following a
-            if author not in followers_of_a:
-                authors = authors.exclude(id=a.id)
-
-        # authors is now a queryset of Author objects that author is following
-        serializer = AuthorSerializer(authors, many=True)
-        dict = {"type": "following", "items": serializer.data}
-        return Response(dict, status=status.HTTP_200_OK)
-
-
 class FollowerList(APIView):
     """/authors/<id>/followers/ GET"""
 
