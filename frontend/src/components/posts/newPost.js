@@ -206,7 +206,7 @@ export default class NewPost extends Component {
 			};
 			this.sendPostRequest(data2, url, method)
 				.then((id) => {
-					data.content += `\n![](${url}${id}/image)`;
+					data.content += `\n\n![](${url}${id}/image)`;
 					this.sendPostRequest(data, url, method)
 						.then(this.handleComplete.bind(this))
 						.catch(this.handleError.bind(this));

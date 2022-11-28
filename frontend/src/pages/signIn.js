@@ -127,7 +127,14 @@ const SignInPage = () => {
 							{...checkError(password)}
 							onChange={(e) => setPassword(e.target.value)}
 						/>
-						<Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+						<Button
+							type="submit"
+							fullWidth
+							variant="contained"
+							color="primary"
+							className={classes.submit}
+							style={{ marginTop: "1em" }}
+						>
 							Sign In
 						</Button>
 						<Grid container>
