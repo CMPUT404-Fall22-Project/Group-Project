@@ -57,6 +57,14 @@ class App extends Component {
 							path="/authors/:id"
 							render={(props) => {
 								if (!props.location.state) {
+									history.push("/");
+									setTimeout(() => {
+										NotificationBar.getInstance().addNotification(
+											"Sorry, we couldn't load that data right now. Please try again later.",
+											NotificationBar.NT_WARNING
+										);
+									}, 0);
+
 									return <HTML404 {...props}></HTML404>;
 								}
 								return (

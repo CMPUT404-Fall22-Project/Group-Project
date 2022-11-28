@@ -1,14 +1,11 @@
 import * as React from "react";
-import Card from "@mui/material/Card";
-import CardHeader from "@mui/material/CardHeader";
-import CardActions from "@mui/material/CardActions";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import axios from "axios";
 import Authentication from "../global/authentication";
 import { Typography } from "@mui/material";
+import history from "../history";
 
 // https://mui.com/material-ui/react-card/, Material UI, 2022-10-27
 // TODO: add follow functionality
@@ -29,10 +26,19 @@ const AuthorCardComponenet = ({ data }) => {
 			});
 	};
 
+	const authorId = data.getId().split("/").pop();
+
+	const clickProfile = (e) => {
+		e.preventDefault();
+		history.push({ pathname: "/authors/" + authorId, state: { author: data.encodeDatabase() } });
+	};
+
 	return (
 		<div style={{ display: "flex", justifyContent: "space-between" }}>
 			<div style={{ display: "inherit" }}>
-				<Avatar alt="Profile Picture" src={data.getProfileImageUrl()}></Avatar>
+				<a href={"/authors/" + authorId} onClick={clickProfile}>
+					<Avatar alt="Profile Picture" src={data.getProfileImageUrl()}></Avatar>
+				</a>
 
 				<Typography style={{ marginLeft: "0.5em" }}>{data.getUsername()}</Typography>
 			</div>
