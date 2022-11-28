@@ -1,4 +1,4 @@
-import axios from "axios";
+import { proxiedAxios } from "../utils/proxy";
 
 export default class PaginatedProvider {
 	constructor(innerProvider, arrayName = "items", pageSize = 5) {
@@ -81,7 +81,7 @@ export class GenericElementProvider extends AbstractElementProvider {
 	}
 
 	getData(pageIndex, count) {
-		return axios({
+		return proxiedAxios({
 			method: "get",
 			url: this._dataUrl,
 			params: {

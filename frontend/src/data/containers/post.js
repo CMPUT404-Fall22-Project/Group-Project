@@ -25,7 +25,7 @@ export default class Post extends DataContainer {
 
 		this._baseData.commentsSrc = this._baseData.commentsSrc.map((x) => Comment.parseDatabase(x));
 
-		this.commentSupplier = new PaginatedProvider(new GenericElementProvider(this._baseData.comments), "comments");
+		this.commentSupplier = new PaginatedProvider(new GenericElementProvider(this._baseData.comments));
 		this.commentSupplier.skip(this._baseData.commentsSrc.length);
 		this.commentSupplier.listen((success, data) => {
 			if (success) {

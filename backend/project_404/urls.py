@@ -18,6 +18,7 @@ from django.urls import include, path, re_path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
+from .views import proxy_request
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -40,7 +41,6 @@ urlpatterns = [
     path('', include("authentication.urls"), name='sessions'),
     path('', include("authors.urls"), name='authors'),
     path('', include("posts.urls"), name='posts'),
-    path('', include("inbox.urls"), name='inbox')
-
-
+    path('', include("inbox.urls"), name='inbox'),
+    path('proxy/', proxy_request, name="handle_follow_request")
 ]
