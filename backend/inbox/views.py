@@ -19,6 +19,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from authentication.models import ExternalNode
 from rest_framework.authentication import BasicAuthentication
+from rest_framework.exceptions import ValidationError
 
 # Inbox
 # The inbox is all the new posts from who you follow
@@ -78,13 +79,16 @@ def send_to_user(authorUrl, data):
 
 
 # sorry aaron, this is all i know.
-def derference_inbox(qs):
+def dereference_inbox(qs):
     items = []
     for x in qs:
-        try:
-            items.append(Ref(InboxSerializer(x).data["data"]).as_data())
-        except Http404:
-            x.delete()  # remove from the inbox...
+        if x.type != "post":
+            items.append(InboxSerializer(x).data)
+        else:
+            try:
+                items.append(Ref(InboxSerializer(x).data["data"]).as_data())
+            except Http404:
+                x.delete()  # remove from the inbox...
     return items
 
 
@@ -105,7 +109,7 @@ def filter_inbox(request, author_id):
         raise PermissionDenied("Unauthorizeed access to inbox")
     # get all of the inbox items for this author
     inbox = paginate(request, Inbox.objects.filter(author=author, dataType__in=types))
-    dictionary = {"type": "inbox", "author": author.id, "items": derference_inbox(inbox)}
+    dictionary = {"type": "inbox", "author": author.id, "items": dereference_inbox(inbox)}
     return JsonResponse(dictionary, safe=False)
 
 
@@ -141,6 +145,16 @@ def handle_follow_request(request):
     response = requests.post(url, json=data, headers={'Authorization': auth})
     return Response(status=response.status_code)
 
+def mandatory_field(data, field, errs):
+    if not field in data:
+        errs[field] = "This field is required."
+
+def validate_incoming_inbox_data(data):
+    errs = {}
+    mandatory_field(data, "type", errs)
+    mandatory_field(data, "id", errs)
+    if len(errs) > 0:
+        raise ValidationError(errs, code=400)
 
 class InboxList(APIView):
     """ URL: ://service/authors/{AUTHOR_ID}/inbox """
@@ -154,7 +168,7 @@ class InboxList(APIView):
             raise PermissionDenied("Unauthorizeed access to inbox")
         # get all of the inbox items for this author
         inbox = paginate(request, Inbox.objects.filter(author=author))
-        dictionary = {"type": "inbox", "author": author.id, "items": derference_inbox(inbox)}
+        dictionary = {"type": "inbox", "author": author.id, "items": dereference_inbox(inbox)}
 
         return Response(dictionary, status=status.HTTP_200_OK)
 
@@ -172,6 +186,7 @@ class InboxList(APIView):
         type = request.data["type"]
 
         if type == "post":
+            validate_incoming_inbox_data(request.data)
             data = request.data
             ref = Ref(data)
             inbox = author.inboxes.create(data=ref.as_ref(), dataType=type)

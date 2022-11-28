@@ -30,11 +30,15 @@ class AllAuthorList(APIView):
                 authors_url =  node.api + "authors/"
                 response = requests.get(authors_url, headers={'Authorization': node.authorization})
                 if response.status_code >= 300:
-                    print(f'{authors_url}: HTTP{response.status_code} - {response.text}\n') # print the error
+                    print(f'authors/all -> {authors_url}: HTTP{response.status_code} - {response.text}\n') # print the error
                     continue
+                
                 data = response.json()
-                for author in data["items"]:
-                    authors.append(author)
+                if isinstance(data, list):
+                    authors.extend(data)
+                else:
+                    for author in data["items"]:
+                        authors.append(author)
             return authors
 
         # Get local authors

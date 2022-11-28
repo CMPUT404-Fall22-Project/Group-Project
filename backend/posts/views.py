@@ -45,12 +45,14 @@ def get_posts_from_remote_nodes():
         posts_url =  node.api + "posts/"
         response = requests.get(posts_url, headers={'Authorization': node.authorization})
         if response.status_code >= 300:
-            print(f'{posts_url}: HTTP{response.status_code} - {response.text}\n') # print the error
+            print(f'posts/all -> {posts_url}: HTTP{response.status_code} - {response.text}\n') # print the error
             continue
         data = response.json()
-        print(data)
-        for post in data["items"]:
-            posts.append(post)
+        if isinstance(data, list):
+            posts.extend(data)
+        else:
+            for post in data["items"]:
+                posts.append(post)
     return posts
 
 class AllPostList(APIView):

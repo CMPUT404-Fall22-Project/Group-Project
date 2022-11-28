@@ -102,7 +102,14 @@ export class AppHeader extends Component {
 				></FollowRequestsMenuItem>
 			);
 			elements.push(
-				<MenuItem key="edit-profile" variant="outlined" onClick={() => history.push("/edit-author")}>
+				<MenuItem
+					key="edit-profile"
+					variant="outlined"
+					onClick={() => {
+						this.handleProfileClose();
+						history.push("/edit-author");
+					}}
+				>
 					Edit Profile...
 				</MenuItem>
 			);

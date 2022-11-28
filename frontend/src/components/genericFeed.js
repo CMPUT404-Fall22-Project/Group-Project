@@ -19,7 +19,14 @@ export class GenericURLFeedComponenet extends Component {
 		this.postSupplier = new PaginatedProvider(new GenericElementProvider(this.props.url));
 		this.postSupplier.listen((success, data) => {
 			if (success) {
-				const formatted = data.map((x) => Post.parseDatabase(x));
+				const formatted = [];
+				for (const d of data) {
+					try {
+						formatted.push(Post.parseDatabase(d));
+					} catch (e) {
+						console.error(e);
+					}
+				}
 				this.setState((prevState) => {
 					return {
 						posts: [...prevState.posts, ...formatted],
