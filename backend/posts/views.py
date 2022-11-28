@@ -192,7 +192,8 @@ class PostList(APIView):
             post = serializer.save(id=d["id"])
             add_categories(post, d)
             # add the post to the inbox of each of the author's followers
-            send_to_all_followers(author, post)
+            if not post.unlisted:
+                send_to_all_followers(author, post)
             return Response({"id": post.id}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

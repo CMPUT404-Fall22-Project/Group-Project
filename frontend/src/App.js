@@ -50,6 +50,13 @@ class App extends Component {
 						{!auth.isLoggedIn() ? <Route render={(props) => <SignInPage {...props} />} /> : null}
 						<Route exact path="/" render={(props) => <MainFeed {...props} authorId={auth.getUser().getId()} />} />
 						<Route
+							exact
+							path="/inbox/"
+							render={(props) => (
+								<GenericURLFeedView {...props} url={auth.getUser().getId() + "/inbox/filter/?types[]=post"} />
+							)}
+						/>
+						<Route
 							path="/posts/all/"
 							render={(props) => <GenericURLFeedView {...props} url={process.env.REACT_APP_HOST + "posts/all/"} />}
 						/>

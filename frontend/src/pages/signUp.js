@@ -45,13 +45,15 @@ export default function SignUpPage() {
 
 	const [username, setUsername] = useState("");
 	const [displayName, setDisplayName] = useState("");
-	const [githubURL, setUrl] = useState("");
+	const [githubURL, setUrl] = useState("https://github.com/");
 	const [password, setPassword] = useState("");
 	const [passwordConfirm, setPasswordConfirm] = useState("");
 	const [error, setError] = useState("");
 	const [posted, setPosted] = useState("");
 	const [success, setSuccess] = useState("");
-	const [profileImage, setProfileImage] = useState("");
+	const [profileImage, setProfileImage] = useState(
+		"https://user-images.githubusercontent.com/71047780/198223700-cf5b87b1-6318-4419-b1cf-4ceee56281eb.png"
+	);
 
 	const postUser = () => {
 		const data = {
@@ -83,7 +85,15 @@ export default function SignUpPage() {
 	const handleSignUp = (e) => {
 		e.preventDefault();
 
-		if (!username || !displayName || !profileImage || !githubURL || !password || !passwordConfirm || password !== passwordConfirm) {
+		if (
+			!username ||
+			!displayName ||
+			!profileImage ||
+			!githubURL ||
+			!password ||
+			!passwordConfirm ||
+			password !== passwordConfirm
+		) {
 			setError(1);
 			return;
 		}
@@ -178,6 +188,7 @@ export default function SignUpPage() {
 								id="username"
 								label="Username"
 								onChange={(e) => setUsername(e.target.value)}
+								defaultValue={username}
 								autoFocus
 								{...checkError(username, false)}
 							/>
@@ -192,6 +203,7 @@ export default function SignUpPage() {
 								id="displayName"
 								label="Display Name"
 								onChange={(e) => setDisplayName(e.target.value)}
+								defaultValue={displayName}
 								{...checkError(displayName, false)}
 							/>
 						</Grid>
@@ -205,6 +217,7 @@ export default function SignUpPage() {
 								id="profileImage"
 								label="Profile image URL"
 								onChange={(e) => setProfileImage(e.target.value)}
+								defaultValue={profileImage}
 								{...checkError(profileImage, false)}
 							/>
 						</Grid>
@@ -217,6 +230,7 @@ export default function SignUpPage() {
 								label="Github URL"
 								name="githubURL"
 								onChange={(e) => setUrl(e.target.value)}
+								defaultValue={githubURL}
 								{...checkError(githubURL, false)}
 							/>
 						</Grid>
@@ -231,6 +245,7 @@ export default function SignUpPage() {
 								id="password"
 								autoComplete="current-password"
 								onChange={(e) => setPassword(e.target.value)}
+								defaultValue={password}
 								{...checkError(password, true)}
 							/>
 						</Grid>
@@ -245,11 +260,19 @@ export default function SignUpPage() {
 								id="passwordConfirm"
 								autoComplete="current-password"
 								onChange={(e) => setPasswordConfirm(e.target.value)}
+								defaultValue={passwordConfirm}
 								{...checkError(passwordConfirm, true)}
 							/>
 						</Grid>
 					</Grid>
-					<Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+					<Button
+						type="submit"
+						fullWidth
+						variant="contained"
+						color="primary"
+						className={classes.submit}
+						style={{ marginTop: "1em" }}
+					>
 						Sign Up
 					</Button>
 					<Grid container justify="flex-end">

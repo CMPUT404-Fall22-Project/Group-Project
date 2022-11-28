@@ -43,11 +43,15 @@ export const FollowRequestButton = (props) => {
 	async function handleButtonClick() {
 		// Handles Follow, Unfollow, and unsend
 		if (buttonText === follow) {
-			var response = await axios.post(process.env.REACT_APP_HOST + "/handle-follow-request/", {
-				senderAuthorURL: userId,
-				receiverAuthor: author,
+			var response = await axios({
+				url: process.env.REACT_APP_HOST + "handle-follow-request/",
+				method: "post",
+				data: {
+					senderAuthorURL: userId,
+					receiverAuthor: author,
+				},
 			});
-			if (response.status === 201) {
+			if (response.status <= 201) {
 				NotificationBar.getInstance().addNotification("Follow request sent successfully!", NotificationBar.NT_SUCCESS);
 				setButtonText(followPending);
 			} else {
