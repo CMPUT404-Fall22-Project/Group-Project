@@ -43,7 +43,7 @@ export const FollowRequestButton = (props) => {
 	async function handleButtonClick() {
 		// Handles Follow, Unfollow, and unsend
 		if (buttonText === follow) {
-			var response = await axios.post(process.env.REACT_APP_HOST + "/handle-follow-request/", {
+			var response = await axios.post(process.env.REACT_APP_HOST + "handle-follow-request/", {
 				senderAuthorURL: userId,
 				receiverAuthor: author,
 			});
