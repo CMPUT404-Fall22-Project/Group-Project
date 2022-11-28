@@ -1,7 +1,6 @@
 
 from authentication.models import Session, ExternalNode
 from django.http import HttpResponseBadRequest
-from django.core.exceptions import PermissionDenied
 
 skip_paths = ["/swagger", "redoc/"]
 
