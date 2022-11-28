@@ -53,7 +53,7 @@ class App extends Component {
 							exact
 							path="/inbox/"
 							render={(props) => (
-								<GenericURLFeedView {...props} url={auth.getUser().getId() + "/inbox/filter/?types[]=posts"} />
+								<GenericURLFeedView {...props} url={auth.getUser().getId() + "/inbox/filter/?types[]=post"} />
 							)}
 						/>
 						<Route

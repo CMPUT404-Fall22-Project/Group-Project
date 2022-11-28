@@ -86,8 +86,8 @@ def send_to_user(authorUrl, data):
 def dereference_inbox(qs):
     items = []
     for x in qs:
-        if x.type != "post":
-            items.append(InboxSerializer(x).data)
+        if x.dataType != "post":
+            items.append(InboxSerializer(x).data["data"])
         else:
             try:
                 items.append(Ref(InboxSerializer(x).data["data"]).as_data())
@@ -148,6 +148,8 @@ def handle_follow_request(request):
     url = object["id"] + "/inbox/"
     auth = get_authorization_from_url(object["id"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
+    if response.status_code > 202:
+        return Response(response.text, status=response.status_code)
     return Response(status=response.status_code)
 
 def mandatory_field(data, field, errs):
