@@ -3,6 +3,7 @@ from django.utils import timezone
 from utils.model_utils import generate_random_string
 from authors.models import Author
 from django.utils.translation import gettext_lazy as _
+import uuid
 
 
 class ContentType(models.TextChoices):
@@ -24,7 +25,9 @@ class Post(models.Model):
 
     type = models.CharField(max_length=4, default="post", editable=False)
     title = models.CharField(max_length=255, null=False)
-    id = models.CharField(primary_key=True, editable=False, max_length=255, default=generate_random_string)
+    id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4, editable=False)
+    source = models.URLField()
+    origin = models.URLField()
     description = models.CharField(max_length=255)
     contentType = models.CharField(choices=ContentType.choices, null=False,
                                    max_length=255, default=ContentType.TEXT_PLAIN)
@@ -56,7 +59,7 @@ class Category(models.Model):
 
 class Comment(models.Model):
 
-    id = models.CharField(primary_key=True, editable=False, max_length=255, default=generate_random_string)
+    id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4, editable=False)
     type = models.CharField(max_length=7, default="comment", editable=False)
     # the author that commented
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="comments")
@@ -70,6 +73,7 @@ class Comment(models.Model):
 
 class PostLike(models.Model):
 
+    id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4, editable=False)
     type = models.CharField(max_length=4, default="like", editable=False)
     # the author that clicked 'like'
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="post_likes")
@@ -79,6 +83,7 @@ class PostLike(models.Model):
 
 class CommentLike(models.Model):
 
+    id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4, editable=False)
     type = models.CharField(max_length=4, default="like", editable=False)
     # the author that clicked 'like'
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="comment_likes")
