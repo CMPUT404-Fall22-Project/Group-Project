@@ -87,16 +87,21 @@ def dereference_inbox(qs):
     items = []
     for x in qs:
         if x.dataType != "post":
-            items.append(InboxSerializer(x).data["data"])
+            data = InboxSerializer(x).data["data"]
+            data["inboxId"] = x.id
+            items.append(data)
         else:
             try:
-                items.append(Ref(InboxSerializer(x).data["data"]).as_data())
+                data = Ref(InboxSerializer(x).data["data"]).as_data()
+                data["inboxId"] = x.id
+                items.append(data)
             except Http404:
                 x.delete()  # remove from the inbox...
     return items
 
 
 @api_view(["GET"])
+@authenticated
 def filter_inbox(request, author_id):
     """
     URL: ://service/authors/{AUTHOR_ID}/inbox/filter/
@@ -176,6 +181,7 @@ class InboxList(APIView):
             )
         }
     )
+    @authenticated
     def get(self, request, id, format=None):
         """GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)"""
         author = get_object_or_404(Author, id=id)
