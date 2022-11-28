@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+import django_on_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,7 @@ SECRET_KEY = 'django-insecure-lu#8z^)^8sz@imlk3y^=&ecfh48qjv8^tv75h2o3b12g0ejb1m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost','127.0.0.1','team-sixteen.herokuapp.com','https://team-sixteen-social-scene.herokuapp.com']
 
 # Load example data by default
 SWAGGER_SETTINGS = {
@@ -48,6 +50,7 @@ INSTALLED_APPS = [
     'authentication.apps.AuthConfig',
     'posts.apps.PostsConfig',
     'inbox.apps.InboxConfig',
+    'nodes.apps.NodesConfig',
     'corsheaders'
 ]
 
@@ -65,6 +68,12 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+    'https://team-sixteen-social-scene.herokuapp.com'
+]
+
+CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:3000',
     'http://localhost:3000',
 ]
@@ -100,14 +109,11 @@ DATABASES = {
     'default': {
 
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'project_404',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
+        'NAME': 'd33i3u5nmo14v0',
+        'USER': 'nvxkcevadalctq',
+        'PASSWORD': '6c86e0c9f84a15d87e4d1316a1f80dae9ede5d9581634a75cee5110721aa5187',
+        'HOST': 'ec2-54-147-36-107.compute-1.amazonaws.com',
         'PORT': 5432,
-        'TEST': {
-            'NAME': 'project_404_test',
-        }
 
     }
 
@@ -148,7 +154,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+django_on_heroku.settings(locals())
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
