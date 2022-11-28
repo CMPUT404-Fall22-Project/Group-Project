@@ -16,7 +16,7 @@ def get_int_parameter_or_default(request, param_name, _default, use_post=False):
         return _default
 
 
-def get_any_parameter_or_default(request, param_name, _defualt, use_post=False):
+def get_any_parameter_or_default(request, param_name, _default, use_post=False):
     """
         Accesses the request data to find a parameter of any type.
     """
@@ -94,11 +94,14 @@ def get_bool_parameter_or_default(request, param_name, _default, use_post=False)
         return _default
 
 
-def paginate(request, query):
-    page = get_int_parameter_or_default(request, "page", None)
-    count = get_int_parameter_or_default(request, "size", None)
+def paginate_values(page, count, query):
     if page is None or count is None:
         return query
-    page = page - 1
     off = count * page
     return query[off:off+count]
+
+
+def paginate(request, query):
+    page = get_int_parameter_or_default(request, "page", 1) - 1
+    count = get_int_parameter_or_default(request, "size", 1e9)
+    return paginate_values(page, count, query)

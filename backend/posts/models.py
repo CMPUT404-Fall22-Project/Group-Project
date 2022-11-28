@@ -8,11 +8,12 @@ import uuid
 
 class ContentType(models.TextChoices):
     # for HTML you will want to strip tags before displaying
-    TEXT_MARKDOWN = "text/markdown", _("markdown") # common mark
-    TEXT_PLAIN = "text/plain", _("text/plain") # UTF-8
+    TEXT_MARKDOWN = "text/markdown", _("markdown")  # common mark
+    TEXT_PLAIN = "text/plain", _("text/plain")  # UTF-8
     APPLICATION = "application/base64", _("application")
-    PNG = "image/png;base64", _("png") # this is an embedded png -- images are POSTS. So you might have a user make 2 posts if a post includes an image!
-    JPEG = "image/jpeg;base64", ("jpeg") # this is an embedded jpeg
+    # this is an embedded png -- images are POSTS. So you might have a user make 2 posts if a post includes an image!
+    PNG = "image/png;base64", _("png")
+    JPEG = "image/jpeg;base64", ("jpeg")  # this is an embedded jpeg
 
 
 class Post(models.Model):
@@ -25,10 +26,9 @@ class Post(models.Model):
     type = models.CharField(max_length=4, default="post", editable=False)
     title = models.CharField(max_length=255, null=False)
     id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4, editable=False)
-    source = models.URLField()
-    origin = models.URLField()
     description = models.CharField(max_length=255)
-    contentType = models.CharField(choices=ContentType.choices, null=False, max_length=255,default=ContentType.TEXT_PLAIN)
+    contentType = models.CharField(choices=ContentType.choices, null=False,
+                                   max_length=255, default=ContentType.TEXT_PLAIN)
     content = models.TextField(null=True)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     # categories (see Models below)
@@ -39,22 +39,22 @@ class Post(models.Model):
     # should be sorted newest(first) to oldest(last)
     # this is to reduce API call counts
     published = models.DateTimeField(default=timezone.now, blank=False)
-    visibilty = models.CharField(choices=Visibility.choices, max_length=7,default=Visibility.PUBLIC)
+    visibility = models.CharField(choices=Visibility.choices, max_length=7, default=Visibility.PUBLIC)
     unlisted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
 
-    
+
 class Category(models.Model):
 
-    category = models.CharField(max_length=255) # TODO: Do we know what all of the potential categories are?
+    category = models.CharField(max_length=255)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = (('category', 'post'))
 
-        
+
 class Comment(models.Model):
 
     id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4, editable=False)
@@ -63,11 +63,11 @@ class Comment(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="comments")
     # the Post that was commented on
     post = models.ForeignKey(Post, related_name="comments", on_delete=models.CASCADE)
-    contentType = models.CharField(choices=ContentType.choices, null=False, max_length=255, default=ContentType.TEXT_PLAIN)
+    contentType = models.CharField(choices=ContentType.choices, null=False,
+                                   max_length=255, default=ContentType.TEXT_PLAIN)
     content = models.TextField()
     published = models.DateTimeField(default=timezone.now, blank=False)
 
-    
 
 class PostLike(models.Model):
 
@@ -78,7 +78,7 @@ class PostLike(models.Model):
     # the Post that was liked
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
 
-    
+
 class CommentLike(models.Model):
 
     id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4, editable=False)

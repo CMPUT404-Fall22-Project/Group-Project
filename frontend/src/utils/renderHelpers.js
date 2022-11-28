@@ -1,4 +1,5 @@
 import React from "react";
+import { Typography } from "@mui/material";
 
 export function iconText(text, icon, padding = "0.5em", iconSize = "medium", overrideStyles = {}) {
 	return (
@@ -21,5 +22,14 @@ export function iconText(text, icon, padding = "0.5em", iconSize = "medium", ove
 			})}
 			{text}
 		</span>
+	);
+}
+
+export function renderPublishDate(date) {
+	const d = new Date(date);
+	return (
+		<Typography variant="caption">
+			<i>Published at {d.toLocaleDateString() + " - " + d.toLocaleTimeString()}</i>
+		</Typography>
 	);
 }
