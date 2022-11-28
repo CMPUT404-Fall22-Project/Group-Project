@@ -10,6 +10,7 @@ import history from "../../history";
 import NotificationBar from "../../global/centralNotificationBar";
 import AuthorSearch from "../authorSearch";
 import { FollowRequestsMenuItem } from "../follows/acceptFollowRequest";
+import QuickLinks from "../quickLinks";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {
@@ -143,6 +144,7 @@ export class AppHeader extends Component {
 								{APPLICATION_NAME}
 							</span>
 						</Link>
+						<QuickLinks></QuickLinks>
 					</div>
 				</div>
 				{this.state.renderChild ? this.state.renderChild() : null}
