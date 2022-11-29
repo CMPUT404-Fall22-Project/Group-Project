@@ -21,6 +21,7 @@ from authentication.models import ExternalNode
 import requests
 from utils.swagger_data import SwaggerData
 from utils.auth import authenticated
+from authentication.models import Session
 
 # Be aware that Posts can be images that need base64 decoding.
 # posts can also hyperlink to images that are public
@@ -141,7 +142,7 @@ class PostList(APIView):
         author = get_object_or_404(Author, id=id)
         posts = Post.objects.all().filter(author=id)
 
-        if request.app_session and request.app_session.author != author:
+        if not request.app_session or not isinstance(request.app_session, Session) or request.app_session.author != author:
             posts = posts.filter(unlisted=False)
 
         posts = posts.order_by("-published")
