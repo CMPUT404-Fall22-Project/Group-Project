@@ -46,7 +46,7 @@ class Ref:
 
 
 def assign(obj, dict):
-    for k, v in dict:
+    for k, v in dict.items():
         setattr(obj, k, v)
     return obj
 
