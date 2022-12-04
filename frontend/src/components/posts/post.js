@@ -12,6 +12,11 @@ import ModalTemplates from "../modals/genericModalTemplates";
 import axios from "axios";
 import CommentDialog from "./../commentDialog";
 import ScrollDialog from "../commentViewDialog";
+import { CommentList } from "../comments/comment";
+import { renderPublishDate } from "../../utils/renderHelpers";
+import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
+import NotificationBar from "../../global/centralNotificationBar";
+import { tryStringifyObject } from "../../utils/stringify";
 
 export default class PostViewComponent extends Component {
 	constructor(props) {
@@ -34,13 +39,26 @@ export default class PostViewComponent extends Component {
 		}
 	}
 
-	renderDate(date) {
-		const d = new Date(date);
-		return (
-			<Typography variant="caption">
-				<i>Published at {d.toLocaleDateString() + " - " + d.toLocaleTimeString()}</i>
-			</Typography>
-		);
+	handleCopyLink() {
+		const data = this.props.data.getBaseData();
+		var url = "";
+		if (data.contentType.startsWith("image")) {
+			url = data.id + "/image";
+		} else {
+			var u = new URL(data.id);
+			url = window.location.host + u.pathname;
+		}
+		navigator.clipboard
+			.writeText(url)
+			.then(() => {
+				NotificationBar.getInstance().addNotification("Link copied to clipboard", NotificationBar.NT_SUCCESS);
+			})
+			.catch((err) => {
+				NotificationBar.getInstance().addNotification(
+					"Failed to copy link: " + tryStringifyObject(err),
+					NotificationBar.NT_ERROR
+				);
+			});
 	}
 
 	render() {
@@ -64,6 +82,11 @@ export default class PostViewComponent extends Component {
 					<AuthorCardComponenet data={this.props.data.getAuthor()}></AuthorCardComponenet>
 					<Typography variant="h5">
 						<i>{this.props.data.getBaseData().title}</i>
+						{this.props.data.isLocalPost() && this.props.data.getBaseData().contentType.startsWith("image") ? (
+							<IconButton aria-label="Options" title="Copy URL..." onClick={this.handleCopyLink.bind(this)}>
+								<LinkOutlinedIcon />
+							</IconButton>
+						) : null}
 					</Typography>
 					<Typography variant="caption">
 						<i>{this.props.data.getBaseData().description}</i>
@@ -71,7 +94,8 @@ export default class PostViewComponent extends Component {
 					<Divider></Divider>
 					{this.renderFromChoices()}
 					<Divider></Divider>
-					{this.renderDate(this.props.data.getBaseData().published)}
+					{renderPublishDate(this.props.data.getBaseData().published)}
+					{this.props.children}
 				</Paper>
 			</div>
 		);
@@ -115,7 +139,11 @@ export class EditablePostContainer extends Component {
 				></PostEditor>
 			);
 		} else {
-			comp = <PostViewComponent data={this.props.data}></PostViewComponent>;
+			comp = (
+				<PostViewComponent data={this.props.data}>
+					<CommentList post={this.props.data}></CommentList>
+				</PostViewComponent>
+			);
 		}
 
 		if (!this.isEditable()) {

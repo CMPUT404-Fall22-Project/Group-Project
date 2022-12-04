@@ -13,6 +13,7 @@ import { useState } from "react";
 import background from "../static/back.webp";
 import Authentication from "../global/authentication";
 import NotificationBar from "../global/centralNotificationBar";
+import { tryStringifyObject } from "../utils/stringify";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -60,7 +61,11 @@ const SignInPage = () => {
 		Authentication.getInstance()
 			.authenticate(username, password)
 			.catch((request) => {
-				NotificationBar.getInstance().addNotification(request.response.data, NotificationBar.NT_ERROR, 15_000);
+				NotificationBar.getInstance().addNotification(
+					tryStringifyObject(request.response.data),
+					NotificationBar.NT_ERROR,
+					15_000
+				);
 			});
 	};
 
@@ -122,7 +127,14 @@ const SignInPage = () => {
 							{...checkError(password)}
 							onChange={(e) => setPassword(e.target.value)}
 						/>
-						<Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+						<Button
+							type="submit"
+							fullWidth
+							variant="contained"
+							color="primary"
+							className={classes.submit}
+							style={{ marginTop: "1em" }}
+						>
 							Sign In
 						</Button>
 						<Grid container>

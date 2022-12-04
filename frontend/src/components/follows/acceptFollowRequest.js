@@ -10,12 +10,12 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
-import Authentication from "../global/authentication";
-import Loader from "../components/loader";
-import AbstractModalProvider from "./modals/modalProvider";
-import ModalSystem from "../global/modalSystem";
+import Authentication from "../../global/authentication";
+import Loader from "../loader";
+import AbstractModalProvider from "../modals/modalProvider";
+import ModalSystem from "../../global/modalSystem";
 import AccountBoxOutlinedIcon from "@mui/icons-material/AccountBoxOutlined";
-import NotificationBar from "../global/centralNotificationBar";
+import NotificationBar from "../../global/centralNotificationBar";
 import { styled } from "@mui/material/styles";
 
 const Demo = styled("div")(({ theme }) => ({
@@ -76,31 +76,20 @@ export function FollowRequests() {
 	const handleFollowRequests = async () => {
 		// Get all followers
 		response = await axios.get(`${userId}/followers/`);
-		console.log(response);
-		const followerIds = [];
-		for (let follower of response.data.items) {
-			followerIds.push(follower.id);
-		}
+		const followerIds = response.data.items.map((x) => x.id);
 		setFollowerIds(followerIds);
 
 		// Get all follow requests
 		var response = await axios.get(`${userId}/inbox/`);
-		console.log(response);
-		const followRequests = [];
-		for (let item of response.data.items) {
-			// Rubric states "Follow"
-			if (["Follow", "follow"].includes(item.dataType)) {
-				followRequests.push(item);
-			}
-		}
+		const followRequests = response.data.items.filter((x) => x.type.toLowerCase() === "follow");
 		setFollowRequests(followRequests);
 		setIsLoaded(true);
 	};
 
 	async function handleAcceptButton(followRequest) {
 		// PUT the Author with id === followerId as a follower of Author with id === userId
-		var followerId = followRequest.data.actor.id;
-		const firstName = followRequest.data.summary.split(" ")[0];
+		var followerId = followRequest.actor.id;
+		const firstName = followRequest.summary.split(" ")[0];
 		var response = await axios.put(`${userId}/followers/${followerId}`);
 		console.log(response);
 		if (response.status !== 200) {
@@ -108,7 +97,7 @@ export function FollowRequests() {
 			return;
 		}
 		// delete the accepted follow request
-		var response = await axios.delete(`${userId}/inbox/${followRequest.id}`);
+		var response = await axios.delete(`${userId}/inbox/${followRequest.inboxId}`);
 		console.log(response);
 		setFollowRequests(followRequests.filter((e) => e != followRequest));
 		NotificationBar.getInstance().addNotification(
@@ -150,9 +139,9 @@ export function FollowRequests() {
 									}
 								>
 									<ListItemAvatar>
-										<Avatar alt="actor" src={followRequest.data.actor.profileImage}></Avatar>
+										<Avatar alt="actor" src={followRequest.actor.profileImage}></Avatar>
 									</ListItemAvatar>
-									<ListItemText primary={followRequest.data.summary} key={followRequest.data.actor.id} />
+									<ListItemText primary={followRequest.summary} key={followRequest.actor.id} />
 								</ListItem>
 							))}
 						</List>

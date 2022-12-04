@@ -9,7 +9,8 @@ import Authentication from "../../global/authentication";
 import history from "../../history";
 import NotificationBar from "../../global/centralNotificationBar";
 import AuthorSearch from "../authorSearch";
-import { FollowRequestsMenuItem } from "../acceptFollowRequest";
+import { FollowRequestsMenuItem } from "../follows/acceptFollowRequest";
+import QuickLinks from "../quickLinks";
 
 const DEFAULT_HEIGHT = "56px";
 export class AppHeader extends Component {
@@ -83,19 +84,16 @@ export class AppHeader extends Component {
 		Authentication.getInstance()
 			.logout()
 			.then(() => {
-				history.push("/");
-				NotificationBar.getInstance().addNotification("Successfully logged out", NotificationBar.NT_SUCCESS);
-				this.handleProfileClose();
+				setTimeout(() => {
+					history.push("/");
+					NotificationBar.getInstance().addNotification("Successfully logged out", NotificationBar.NT_SUCCESS);
+					this.handleProfileClose();
+				}, 0);
 			});
 	}
 
 	generateMenuItems(auth) {
-		const elements = [
-			<MenuItem key="logout" disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
-				Logout
-			</MenuItem>,
-		];
-		var rest = null;
+		const elements = [];
 		if (auth.isLoggedIn()) {
 			elements.push(
 				<FollowRequestsMenuItem
@@ -105,11 +103,24 @@ export class AppHeader extends Component {
 				></FollowRequestsMenuItem>
 			);
 			elements.push(
-				<MenuItem key="edit-profile" variant="outlined" onClick={() => history.push("/edit-author")}>
+				<MenuItem
+					key="edit-profile"
+					variant="outlined"
+					onClick={() => {
+						this.handleProfileClose();
+						history.push("/edit-author");
+					}}
+				>
 					Edit Profile...
 				</MenuItem>
 			);
+			elements.push(<Divider key="menuDivider1"></Divider>);
 		}
+		elements.push(
+			<MenuItem key="logout" disabled={!auth.isLoggedIn()} variant="outlined" onClick={this.logout.bind(this)}>
+				Logout
+			</MenuItem>
+		);
 		return elements;
 	}
 
@@ -133,6 +144,7 @@ export class AppHeader extends Component {
 								{APPLICATION_NAME}
 							</span>
 						</Link>
+						<QuickLinks></QuickLinks>
 					</div>
 				</div>
 				{this.state.renderChild ? this.state.renderChild() : null}

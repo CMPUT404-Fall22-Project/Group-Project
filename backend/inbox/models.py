@@ -1,8 +1,5 @@
-from random import choices
 from django.db import models
 from authors.models import Author
-from enum import Enum
-from django.shortcuts import get_object_or_404
 
 
 # Likes, Comments, Public Posts, Friends Only posts, Private posts are all sent to the inbox of the author.
@@ -18,20 +15,18 @@ class Inbox(models.Model):
     FOLLOW = "follow"
     LIKE = "like"
     COMMENT = "comment"
-    CHOICES = [(POST,POST),(FOLLOW,FOLLOW),(LIKE,LIKE),(COMMENT,COMMENT)]
+    CHOICES = [(POST, POST), (FOLLOW, FOLLOW), (LIKE, LIKE), (COMMENT, COMMENT)]
 
     type = models.CharField(max_length=5, default="inbox", editable=False)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE,related_name="inboxes")
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="inboxes")
     dataType = models.CharField(choices=CHOICES, max_length=7)
-    data = models.JSONField() # https://www.youtube.com/watch?v=LbdUpY1I1zg&t=789s&ab_channel=PrettyPrinted
+    data = models.JSONField()  # https://www.youtube.com/watch?v=LbdUpY1I1zg&t=789s&ab_channel=PrettyPrinted
 
-    
     def __str__(self):
         """Returns the displayName of the inbox's Author"""
         return self.author.displayName
 
-        
-    def set_data_and_dataType(self,data):
+    def set_data_and_dataType(self, data):
         """
         Sets self.dataType=data.type, self.data=data, and then saves
         @params - data: a Post, Follow, Like, or Comment

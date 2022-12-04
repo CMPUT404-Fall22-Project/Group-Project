@@ -3,7 +3,6 @@ import axios from "axios";
 import { Box, Grid, Button, TextField } from "@mui/material";
 import Authentication from "../global/authentication";
 import NotificationBar from "../global/centralNotificationBar";
-import history from "../history";
 
 export default function EditProfile() {
 	// Used main ideas from https://www.youtube.com/watch?v=GBbGEuZdyRg&list=PL1oBBulPlvs84AmRmT-_3dGz4KHYuINsj&index=18
@@ -22,7 +21,7 @@ export default function EditProfile() {
 			setAuthor(res.data);
 		};
 		loadAuthor();
-	}, []);
+	}, [userID]);
 
 	const HandleAuthor = (auth) => {
 		// Fill's text field with the author's stored data
@@ -89,7 +88,7 @@ export default function EditProfile() {
 							fullWidth
 							id="profileImage"
 							value={profileImage}
-							label="Profile image"
+							label="Profile Image"
 							onChange={(e) => HandleAuthor(e)}
 						/>
 					</Grid>

@@ -1,7 +1,9 @@
 from django.urls import path
-from .views import InboxList, InboxDetail
+from .views import InboxList, InboxDetail, filter_inbox, handle_follow_request
 
 urlpatterns = [
     path("authors/<id>/inbox/", InboxList.as_view(), name="inbox_list"),
-    path("authors/<author_id>/inbox/<inbox_id>", InboxDetail.as_view(), name="inbox_detail")
+    path("authors/<author_id>/inbox/<inbox_id>", InboxDetail.as_view(), name="inbox_detail"),
+    path("authors/<author_id>/inbox/filter/", filter_inbox, name="inbox_filter"),
+    path("handle-follow-request/", handle_follow_request, name="handle_follow_request")
 ]

@@ -42,10 +42,6 @@ export default class NewPost extends Component {
 				unlisted: d.unlisted || false,
 				author: d.author || Authentication.getInstance().getUser().copy(),
 			},
-			extras: {
-				source: d.source || undefined,
-				origin: d.origin || undefined,
-			},
 		};
 	}
 
@@ -135,6 +131,7 @@ export default class NewPost extends Component {
 						label=""
 						value={this.state.post.content}
 						onChange={this.handleChangeGeneric.bind(this)}
+						error={!this.state.post.content}
 					/>
 					{imgComponent}
 				</React.Fragment>
@@ -176,7 +173,7 @@ export default class NewPost extends Component {
 		if (!id) {
 			return { url: Authentication.getInstance().getUser().getUrl() + "/posts/", method: "post" };
 		}
-		return { url: Authentication.getInstance().getUser().getUrl() + "/posts/" + id, method: "put" };
+		return { url: id, method: "put" };
 	}
 
 	handleError(err) {
@@ -209,7 +206,7 @@ export default class NewPost extends Component {
 			};
 			this.sendPostRequest(data2, url, method)
 				.then((id) => {
-					data.content += `\n![](${url}${id}/image)`;
+					data.content += `\n\n![](${url}${id}/image)`;
 					this.sendPostRequest(data, url, method)
 						.then(this.handleComplete.bind(this))
 						.catch(this.handleError.bind(this));
@@ -221,12 +218,12 @@ export default class NewPost extends Component {
 	}
 
 	handlePost() {
-		if (!this.state.post.title) {
+		if (!this.state.post.title || !this.state.post.description) {
+			NotificationBar.getInstance().addNotification("Please fill out all required fields.", NotificationBar.NT_ERROR);
 			return;
 		}
 		const data = {
 			...this.state.post,
-			...this.state.extras,
 		};
 		if (this.state.type === POST_CONSTANTS.POST_TYPE_PNG) {
 			if (this.state.imageData === null) {
@@ -236,6 +233,10 @@ export default class NewPost extends Component {
 			data.content = this.state.imageData;
 			this.handleImagePost(data);
 		} else {
+			if (!this.state.post.content) {
+				NotificationBar.getInstance().addNotification("Please fill out all required fields.", NotificationBar.NT_ERROR);
+				return;
+			}
 			this.handleTextPost(data);
 		}
 	}
