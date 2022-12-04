@@ -16,7 +16,7 @@ export default function CommentListItem(props) {
 				return (
 					<ListItem alignItems="flex-start" key={comment.id}>
 						<ListItemAvatar>
-							<Avatar alt="Remy Sharp" src={author.profileImage} />
+							<Avatar src={author.profileImage} />
 						</ListItemAvatar>
 						<ListItemText
 							primary={author.displayName}
@@ -25,7 +25,7 @@ export default function CommentListItem(props) {
 									<Typography sx={{ display: "inline" }} component="span" variant="body2" color="text.primary">
 										{date.toLocaleDateString() + " - " + date.toLocaleTimeString()}
 									</Typography>
-									{" — " + comment.content}
+									{" — " + comment.comment}
 								</React.Fragment>
 							}
 						/>

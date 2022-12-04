@@ -8,8 +8,10 @@ import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import CommentsListDialog from "./commentsListDialog";
 
+// https://mui.com/material-ui/react-dialog/
+
 const ScrollDialog = (props) => {
-	const { baseURL } = props;
+	const { baseURL, comments } = props;
 
 	const [open, setOpen] = React.useState(false);
 	const [scroll, setScroll] = React.useState("paper");
@@ -35,7 +37,7 @@ const ScrollDialog = (props) => {
 
 	return (
 		<span>
-			<IconButton aria-label="Comment" title="Comment on above post" onClick={handleClickOpen("body")}>
+			<IconButton aria-label="Comment" title="View comments on above post" onClick={handleClickOpen("body")}>
 				<CommentIcon />
 			</IconButton>
 			<Dialog
@@ -50,7 +52,7 @@ const ScrollDialog = (props) => {
 					<Box sx={{ width: "100%", bgcolor: "background.paper" }}>
 						<nav aria-label="main mailbox folders">
 							<List>
-								<CommentsListDialog baseURL={baseURL}></CommentsListDialog>
+								<CommentsListDialog baseURL={baseURL} comments={comments}></CommentsListDialog>
 							</List>
 						</nav>
 					</Box>

@@ -139,11 +139,7 @@ export class EditablePostContainer extends Component {
 				></PostEditor>
 			);
 		} else {
-			comp = (
-				<PostViewComponent data={this.props.data}>
-					<CommentList post={this.props.data}></CommentList>
-				</PostViewComponent>
-			);
+			comp = <PostViewComponent data={this.props.data}></PostViewComponent>;
 		}
 
 		if (!this.isEditable()) {
@@ -168,7 +164,7 @@ export class EditablePostContainer extends Component {
 					authorID={Authentication.getInstance().getUser().getId()}
 					baseURL={this.props.data.getBaseData().origin}
 				/>
-				<ScrollDialog baseURL={this.props.data.getBaseData().origin} />
+				<ScrollDialog baseURL={this.props.data.getBaseData().origin} comments={this.props.data.getComments()} />
 			</React.Fragment>
 		);
 	}
