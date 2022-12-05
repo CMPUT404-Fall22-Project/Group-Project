@@ -12,6 +12,7 @@ from utils.proxy import fetch_author, get_authorization_from_url, get_host_from_
 from utils.requests import paginate
 from authors.models import Author, Follower
 from .models import Inbox
+from posts.models import Like, Comment, Post
 from .serializers import InboxSerializer
 from authors.serializers import AuthorSerializer
 from utils.process_models import serialize_single_post, serialize_single_comment
@@ -180,13 +181,12 @@ def handle_like(request):
     data["summary"] = str(actor.displayName) + " likes your post"
     data["type"] = "Like"
     data["actor"] = AuthorSerializer(actor).data
-    data["object"] = request.data["object"] # this object is the postId
+    data["object"] = request.data["object"] # this is the post or comment url
 
     # send a POST request to Inbox of the receiver Author
     url = receiver_author["url"] + "/inbox/"
     auth = get_authorization_from_url(receiver_author["url"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
-    # response = requests.post(url, json=data)
     if response.status_code > 202:
         return Response(response.text, status=response.status_code)
     # add the object to the Author's likes
@@ -254,9 +254,9 @@ class InboxList(APIView):
         Please see the Like, Comment, and Post objects for the other possible inbox request_body examples.
         """
         # ensure the author exists and is authorized
-        author = get_object_or_404(Author, id=id)
+        author = get_object_or_404(Author, id=id, isAuthorized=True)
         # get the data type
-        type = request.data["type"]
+        type: str = request.data["type"]
 
         if type == "post":
             validate_incoming_inbox_data(request.data)
@@ -264,6 +264,24 @@ class InboxList(APIView):
             ref = Ref(data)
             inbox = author.inboxes.create(data=ref.as_ref(), dataType=type)
             return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
+
+
+        if type.lower() == "like":
+            # We will create and save a Like object instead of an Inbox object
+            context = request.data["@context"]
+            object = request.data["object"]
+
+            # We need to determine if this is a Post Like or a Comment Like
+            post = None
+            comment = None
+            # one of post/comment will remain None and the other will be set to the Post or Comment object
+            if "comments" in object:
+                comment = get_object_or_404(Comment, id=object.split("comments/")[-1])
+            else:
+                post = get_object_or_404(Post, id=object.split("posts/")[-1])
+            
+            like = Like.objects.create(author=author, context=context, object=object, post=post, comment=comment)
+            return Response({"id": like.id}, status=status.HTTP_201_CREATED)
 
         # else type is "like", "comment", or "follow"
         inbox = author.inboxes.create(data=request.data, dataType=type)
