@@ -377,19 +377,14 @@ class LikedList(APIView):
         """GET [local, remote] list what public things AUTHOR_ID liked."""
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=author_id, isAuthorized=True)
-        # get all of the author's post likes
-        post_likes = author.post_likes.all()
-        serializer1 = LikeSerializer(post_likes, many=True)
-        # add all of the author's comment likes
-        comment_likes = author.comment_likes.all()
-        serializer2 = LikeSerializer(comment_likes, many=True)
-
+        # get everything the author has liked (Posts and Comments)
+        likes = author.likes.all()
+        likes = LikeSerializer(likes, many=True).data
         arr = []
-        for serializer in [serializer1.data, serializer2.data]:
-            for data in serializer:
-                data["@context"] = data["context"]
-                del data["context"]
-                arr.append(dict(data))
+        for like in likes:
+            like["@context"] = like["context"]
+            del like["context"]
+            arr.append(dict(like))
         return Response({"type": "liked", "items": arr}, status=status.HTTP_200_OK)
 
 ##################################################################################################################
