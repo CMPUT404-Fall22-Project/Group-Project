@@ -17,7 +17,7 @@ const theme = createTheme({
 
 export const LikeButton = (props) => {
 	var like = "Like";
-	var unlike = "Unlike";
+	// var unlike = "Unlike";
 	const [buttonText, setButtonText] = useState("");
 	const userId = props.userId;
 	const author = props.author;
@@ -56,18 +56,18 @@ export const LikeButton = (props) => {
 				NotificationBar.getInstance().addNotification("Liked successfully!", NotificationBar.NT_SUCCESS);
 				setButtonText("Liked");
 			} else {
-				NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
+				NotificationBar.getInstance().addNotification(handleLikeResponse.err, NotificationBar.NT_ERROR);
 			}
 			return;
 		}
 
 		// remove userId as a liker of post
-		var response = await axios.delete(`${authorId}/inbox/`, { id: userId, type: "like" });
-		if (response.status === 200) {
-			setButtonText("Like");
-		} else {
-			NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
-		}
+		// var response = await axios.delete(`${authorId}/inbox/`, { id: userId, type: "like" });
+		// if (response.status === 200) {
+		// 	setButtonText("Like");
+		// } else {
+		// 	NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
+		// }
 	}
 
 	return !buttonText ? (
@@ -79,7 +79,7 @@ export const LikeButton = (props) => {
 					size="medium"
 					variant="contained"
 					onClick={handleButtonClick}
-					disabled={buttonText === "Request Sent..."}
+					// disabled={buttonText === "Request Sent..."}
 				>
 					{buttonText}
 				</Button>
