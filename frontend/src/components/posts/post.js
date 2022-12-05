@@ -69,7 +69,7 @@ export default class PostViewComponent extends Component {
 			>
 				<Paper
 					variant="outlined"
-					style={{
+					style={{ 
 						width: "90%",
 						margin: "auto",
 						display: "flex",
@@ -161,6 +161,7 @@ export class EditablePostContainer extends Component {
 				<IconButton aria-label="Follow" title="Delete above post" onClick={this.tryDeletePost.bind(this)}>
 					<DeleteOutlineOutlinedIcon />
 				</IconButton>
+
 			</React.Fragment>
 		);
 	}
