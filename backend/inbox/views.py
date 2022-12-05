@@ -180,17 +180,19 @@ def handle_like(request):
     data["@context"] = request.META.get('HTTP_REFERER')
     data["summary"] = str(actor.displayName) + " likes your post"
     data["type"] = "Like"
-    data["actor"] = AuthorSerializer(actor).data
+    author = AuthorSerializer(actor).data
+    data["author"] = author
     data["object"] = request.data["object"] # this is the post or comment url
 
     # send a POST request to Inbox of the receiver Author
     url = receiver_author["url"] + "/inbox/"
     auth = get_authorization_from_url(receiver_author["url"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
+    # response = requests.post(url, json=data)
     if response.status_code > 202:
         return Response(response.text, status=response.status_code)
     # add the object to the Author's likes
-    actor.likes.create(context=data["@context"], object=data["object"])
+    Like.objects.create(author=author["id"], context=data["@context"], object=data["object"])
     return Response(status=response.status_code)
 
 
@@ -270,6 +272,7 @@ class InboxList(APIView):
             # We will create and save a Like object instead of an Inbox object
             context = request.data["@context"]
             object = request.data["object"]
+            author = request.data["author"]["id"]
 
             # We need to determine if this is a Post Like or a Comment Like
             post = None
