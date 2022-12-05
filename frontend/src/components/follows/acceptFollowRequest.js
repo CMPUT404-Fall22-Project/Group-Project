@@ -107,7 +107,7 @@ export function FollowRequests() {
 	}
 
 	async function handleRejectButton(followRequest) {
-		var response = await axios.delete(`${userId}/inbox/${followRequest.id}`);
+		var response = await axios.delete(`${userId}/inbox/${followRequest.inboxId}`);
 		console.log(response);
 		if (response.status === 200) {
 			setFollowRequests(followRequests.filter((e) => e != followRequest));
