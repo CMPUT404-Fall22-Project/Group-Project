@@ -95,17 +95,16 @@ export class GenericURLFeedComponenet extends Component {
 							key={"Post#" + String(idx)}
 						></EditablePostContainer>
 						<LikeButton
-							authorId={this.props.authorId}
+							authorId={x.getBaseData().getAuthor().getId()}
 							userId={this.state.userId}
-							postId={this.postSupplier.getData()[0][idx].id}
+							postId={x.getBaseData().id}
 						/>
 						<LikesMenuItem
-							key="follow-requests"
+							key="likes"
 							variant="outlined"
-							onClick={() => this.handleProfileClose()}
-							authorId={this.props.authorId}
+							authorId={x.getBaseData().getAuthor().getId()}
 							userId={this.state.userId}
-							postId={this.postSupplier.getData()[0][idx].id}
+							postId={x.getBaseData().id}
 						></LikesMenuItem>
 					</div>
 				))}
@@ -157,10 +156,6 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 		this.supplyMorePosts();
 	}
 
-	handleProfileClose() {
-		this.setState({ profileMenuAnchor: null });
-	}
-
 	render() {
 		if (this.state.loading) {
 			return (
@@ -176,7 +171,17 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 					<NewPostButton></NewPostButton>
 					<br></br>
 					{this.state.posts.map((x, idx) => (
-						<EditablePostContainer data={x} key={"Post#" + String(idx)}></EditablePostContainer>
+						<div>
+							<EditablePostContainer data={x} key={"Post#" + String(idx)}></EditablePostContainer>
+							<LikeButton authorId={x.getAuthor().getId()} userId={this.state.userId} postId={x.getBaseData().id} />
+							<LikesMenuItem
+								key="likes"
+								variant="outlined"
+								authorId={x.getAuthor().getId()}
+								userId={this.state.userId}
+								postId={x.getBaseData().id}
+							></LikesMenuItem>
+						</div>
 					))}
 					<br></br>
 					{this.morePostsButton()}
@@ -207,18 +212,13 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 				{this.state.posts.map((x, idx) => (
 					<div>
 						<EditablePostContainer isEditableFunc={() => false} data={x} key={"Post#" + String(idx)} />
-						<LikeButton
-							authorId={this.props.authorId}
-							userId={this.state.userId}
-							postId={this.postSupplier.getData()[0][idx].id}
-						/>
+						<LikeButton authorId={x.getAuthor().getId()} userId={this.state.userId} postId={x.getBaseData().id} />
 						<LikesMenuItem
-							key="follow-requests"
+							key="likes"
 							variant="outlined"
-							onClick={() => this.handleProfileClose()}
-							authorId={this.props.authorId}
+							authorId={x.getAuthor().getId()}
 							userId={this.state.userId}
-							postId={this.postSupplier.getData()[0][idx].id}
+							postId={x.getBaseData().id}
 						></LikesMenuItem>
 					</div>
 				))}
