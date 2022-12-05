@@ -73,9 +73,6 @@ export default function AuthorSearch() {
 						width: "25em",
 					}}
 					size="small"
-					sx={{
-						paddingLeft: "1em", // or whatever the desired gap.
-					}}
 					renderInput={(params) => (
 						<TextField
 							{...params}
@@ -89,7 +86,7 @@ export default function AuthorSearch() {
 								type: "search",
 							}}
 							sx={{
-								paddingLeft: "0.25em", // or whatever the desired gap.
+								paddingLeft: "0.25em",
 							}}
 						/>
 					)}
