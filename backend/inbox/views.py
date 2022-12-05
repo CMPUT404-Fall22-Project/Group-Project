@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from utils.proxy import fetch_author, get_authorization_from_url, get_host_from_url, Ref
 from utils.requests import paginate
 from authors.models import Author, Follower
+from posts.models import PostLike
 from .models import Inbox
 from .serializers import InboxSerializer
 from authors.serializers import AuthorSerializer
@@ -154,6 +155,7 @@ def handle_follow_request(request):
     auth = get_authorization_from_url(object["id"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
     if response.status_code > 202:
+
         return Response(response.text, status=response.status_code)
     return Response(status=response.status_code)
 
@@ -192,6 +194,8 @@ def handle_like(request):
     response = requests.post(url, json=data, headers={'Authorization': auth})
     if response.status_code > 202:
         return Response(response.text, status=response.status_code)
+    # add the object to the Author's likes
+    actor.post_likes.create(context=data["@context"], object=data["object"])
     return Response(status=response.status_code)
 
 
