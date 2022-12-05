@@ -9,17 +9,17 @@ import ListItem from "@mui/material/ListItem";
 
 export default function CommentListItem(props) {
 	const displayComments = (props) => {
-		const { comments, author } = props;
+		const { comments } = props;
 		if (comments.length > 0) {
 			return comments.map((comment) => {
 				const date = new Date(comment.published);
 				return (
 					<ListItem alignItems="flex-start" key={comment.id}>
 						<ListItemAvatar>
-							<Avatar src={author.profileImage} />
+							<Avatar src={comment.author.profileImage} />
 						</ListItemAvatar>
 						<ListItemText
-							primary={author.displayName}
+							primary={comment.author.displayName}
 							secondary={
 								<React.Fragment>
 									<Typography sx={{ display: "inline" }} component="span" variant="body2" color="text.primary">

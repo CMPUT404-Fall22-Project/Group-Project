@@ -26,11 +26,10 @@ const CommentDialog = (props) => {
 	};
 
 	const addComment = () => {
-		var comment = { author_id: authorID, post_id: postID, content: commentText };
-
+		var comment = { authorId: authorID, content: commentText, contentType: "text/plain" };
 		axios({
 			method: "post",
-			url: baseURL + "/comments",
+			url: baseURL + "/comments/new/",
 			data: comment,
 		});
 
