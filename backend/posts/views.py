@@ -376,10 +376,7 @@ class LikedList(APIView):
     def get(self, request, author_id, format=None):
         """GET [local, remote] list what public things AUTHOR_ID liked."""
         # ensure author exists and is authorized
-        author = get_object_or_404(Author, id=author_id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
+        author = get_object_or_404(Author, id=author_id, isAuthorized=True)
         # get all of the author's post likes
         post_likes = author.post_likes.all()
         serializer1 = PostLikeSerializer(post_likes, many=True)
@@ -387,10 +384,11 @@ class LikedList(APIView):
         comment_likes = author.comment_likes.all()
         serializer2 = CommentLikeSerializer(comment_likes, many=True)
 
-        # TODO: Figure out how to properly combine two serializers
         arr = []
         for serializer in [serializer1.data, serializer2.data]:
             for data in serializer:
+                data["@context"] = data["context"]
+                del data["context"]
                 arr.append(dict(data))
         return Response({"type": "liked", "items": arr}, status=status.HTTP_200_OK)
 
