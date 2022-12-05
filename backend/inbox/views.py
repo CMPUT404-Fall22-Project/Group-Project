@@ -186,10 +186,11 @@ def handle_like(request):
     url = receiver_author["url"] + "/inbox/"
     auth = get_authorization_from_url(receiver_author["url"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
+    # response = requests.post(url, json=data)
     if response.status_code > 202:
         return Response(response.text, status=response.status_code)
     # add the object to the Author's likes
-    actor.post_likes.create(context=data["@context"], object=data["object"])
+    actor.likes.create(context=data["@context"], object=data["object"])
     return Response(status=response.status_code)
 
 
