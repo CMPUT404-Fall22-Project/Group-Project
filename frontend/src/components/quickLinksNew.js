@@ -8,11 +8,11 @@ import history from "../history";
 
 // https://mui.com/material-ui/react-menu/
 // https://stackoverflow.com/a/69910433
-const options = ["Public Posts", "My Inbox", "My Posts"];
+const options = ["My Posts", "My Inbox", "Public Posts"];
 
 export default function ViewPostTypes() {
 	const [anchorEl, setAnchorEl] = React.useState(null);
-	const [selectedIndex, setSelectedIndex] = React.useState(1);
+	const [selectedIndex, setSelectedIndex] = React.useState(0);
 	const open = Boolean(anchorEl);
 	const handleClickListItem = (event) => {
 		setAnchorEl(event.currentTarget);
@@ -22,11 +22,11 @@ export default function ViewPostTypes() {
 		setSelectedIndex(index);
 		setAnchorEl(null);
 		if (index === 0) {
-			history.push({ pathname: "/posts/all/" });
+			history.push({ pathname: "/" });
 		} else if (index === 1) {
 			history.push({ pathname: "/inbox/" });
 		} else if (index === 2) {
-			history.push({ pathname: "/" });
+			history.push({ pathname: "/posts/all/" });
 		}
 	};
 
