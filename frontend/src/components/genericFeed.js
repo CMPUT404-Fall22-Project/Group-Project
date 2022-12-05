@@ -1,4 +1,4 @@
-import { Backdrop, Button, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import React, { Component } from "react";
 import Post from "../data/containers/post";
 import PaginatedProvider, { GenericElementProvider } from "../data/paginatedProvider";
@@ -8,6 +8,8 @@ import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlin
 import { NewPostButton } from "./posts/newPost";
 import { EditablePostContainer } from "./posts/post";
 import { FollowRequestButton } from "./follows/sendFollowRequest";
+import { LikesMenuItem } from "./viewLike";
+import { LikeButton } from "./likeButton";
 import Loader from "./loader";
 
 export class GenericURLFeedComponenet extends Component {
@@ -86,11 +88,25 @@ export class GenericURLFeedComponenet extends Component {
 		return (
 			<div>
 				{this.state.posts.map((x, idx) => (
-					<EditablePostContainer
-						isEditableFunc={() => false}
-						data={x}
-						key={"Post#" + String(idx)}
-					></EditablePostContainer>
+					<div>
+						<EditablePostContainer
+							isEditableFunc={() => false}
+							data={x}
+							key={"Post#" + String(idx)}
+						></EditablePostContainer>
+						<LikeButton
+							authorId={x.getBaseData().getAuthor().getId()}
+							userId={this.state.userId}
+							postId={x.getBaseData().id}
+						/>
+						<LikesMenuItem
+							key="likes"
+							variant="outlined"
+							authorId={x.getBaseData().getAuthor().getId()}
+							userId={this.state.userId}
+							postId={x.getBaseData().id}
+						></LikesMenuItem>
+					</div>
 				))}
 				{this.morePostsButton()}
 			</div>
@@ -112,6 +128,7 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 			loading: true,
 			loadingMorePosts: false,
 		};
+
 		this.postSupplier = new PaginatedProvider(new GenericElementProvider(`${this.props.authorId}/posts/`));
 		this.postSupplier.listen((success, data) => {
 			if (success) {
@@ -131,6 +148,14 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 		});
 	}
 
+	supplyMorePosts() {
+		this.postSupplier.requestData();
+	}
+
+	componentDidMount() {
+		this.supplyMorePosts();
+	}
+
 	render() {
 		if (this.state.loading) {
 			return (
@@ -146,7 +171,17 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 					<NewPostButton></NewPostButton>
 					<br></br>
 					{this.state.posts.map((x, idx) => (
-						<EditablePostContainer data={x} key={"Post#" + String(idx)}></EditablePostContainer>
+						<div>
+							<EditablePostContainer data={x} key={"Post#" + String(idx)}></EditablePostContainer>
+							<LikeButton authorId={x.getAuthor().getId()} userId={this.state.userId} postId={x.getBaseData().id} />
+							<LikesMenuItem
+								key="likes"
+								variant="outlined"
+								authorId={x.getAuthor().getId()}
+								userId={this.state.userId}
+								postId={x.getBaseData().id}
+							></LikesMenuItem>
+						</div>
 					))}
 					<br></br>
 					{this.morePostsButton()}
@@ -175,11 +210,17 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 			<div>
 				<FollowRequestButton author={this.props.author} userId={this.state.userId} />
 				{this.state.posts.map((x, idx) => (
-					<EditablePostContainer
-						isEditableFunc={() => false}
-						data={x}
-						key={"Post#" + String(idx)}
-					></EditablePostContainer>
+					<div>
+						<EditablePostContainer isEditableFunc={() => false} data={x} key={"Post#" + String(idx)} />
+						<LikeButton authorId={x.getAuthor().getId()} userId={this.state.userId} postId={x.getBaseData().id} />
+						<LikesMenuItem
+							key="likes"
+							variant="outlined"
+							authorId={x.getAuthor().getId()}
+							userId={this.state.userId}
+							postId={x.getBaseData().id}
+						></LikesMenuItem>
+					</div>
 				))}
 				{this.morePostsButton()}
 			</div>
