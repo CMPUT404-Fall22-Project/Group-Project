@@ -51,7 +51,7 @@ export const LikeButton = (props) => {
 				object: postId,
 			});
 			if (handleLikeResponse.status <= 201) {
-				NotificationBar.getInstance().addNotification("Liked successfully!", NotificationBar.NT_SUCCESS);
+				NotificationBar.getInstance().addNotification("Liked!", NotificationBar.NT_SUCCESS);
 				setButtonText(liked);
 			} else {
 				NotificationBar.getInstance().addNotification(handleLikeResponse.err, NotificationBar.NT_ERROR);
