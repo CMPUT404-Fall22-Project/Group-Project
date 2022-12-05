@@ -123,7 +123,7 @@ class AllLocalPostList(APIView):
 
 
 class PostList(APIView):
-    """Creation URL ://service/authors/{AUTHOR_ID}/posts/""" 
+    """Creation URL ://service/authors/{id}/posts/""" 
 
     @swagger_auto_schema(
         responses={
@@ -377,11 +377,14 @@ class LikedList(APIView):
         """GET [local, remote] list what public things AUTHOR_ID liked."""
         # ensure author exists and is authorized
         author = get_object_or_404(Author, id=author_id, isAuthorized=True)
+        author = AuthorSerializer(author).data
         # get everything the author has liked (Posts and Comments)
-        likes = author.likes.all()
+        likes = Like.objects.filter(author=author["id"])
         likes = LikeSerializer(likes, many=True).data
         arr = []
         for like in likes:
+            like["summary"] = f"{author['displayName']} Likes your post"
+            like["author"] = author
             like["@context"] = like["context"]
             del like["context"]
             arr.append(dict(like))
@@ -393,7 +396,7 @@ class LikedList(APIView):
 
 
 class PostLikeList(APIView):
-    """URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/likes"""
+    """URL: ://service/authors/{author_id}/posts/{post_id}/likes"""
 
     @swagger_auto_schema(
         responses={
@@ -409,42 +412,16 @@ class PostLikeList(APIView):
     def get(self, request, author_id, post_id, format=None):
         """GET [local, remote] a list of likes from other authors on AUTHOR_ID’s post POST_ID"""
 
-        # ensure author exists and is authorized
-        author = get_object_or_404(Author, id=author_id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
+        get_object_or_404(Author, id=author_id, isAuthorized=True)
         post = get_object_or_404(Post, id=post_id)
         likes = post.likes.all()
-        serializer = LikeSerializer(likes, many=True)
-        dict = {"type": "likes", "items": serializer.data}
+        likes = LikeSerializer(likes, many=True).data
+        for like in likes:
+            like["@context"] = like["context"]
+            del like["context"]
+        dict = {"type": "likes", "items": likes}
         return Response(dict, status=status.HTTP_200_OK)
-
-    @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties=SwaggerData.like_request_body
-        ),
-        responses={
-            "200": openapi.Response(
-                description="OK",
-            )
-        }
-    )
-    @authenticated
-    def post(self, request, author_id, post_id, format=None):
-        "POST a like for a particular post"
-        # ensure author exists and is authorized
-        author = get_object_or_404(Author, id=author_id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        # ensure the post and comment exist
-        post = get_object_or_404(Post, id=post_id)
-        # save a new like for this post
-        like = post.likes.create(author=post.author)
-        # add the like to the inbox of the post's author and all of their followers
-        send_to_all_followers(post.author, like)
-        return Response(status=status.HTTP_201_CREATED)
+      
 
 
 ##################################################################################################################
@@ -468,15 +445,14 @@ class CommentLikeList(APIView):
     def get(self, request, author_id, post_id, comment_id, format=None):
         """GET the likes on a particular comment"""
         # ensure author exists and is authorized
-        author = get_object_or_404(Author, id=author_id)
-        if not author.isAuthorized:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        author = get_object_or_404(Author, id=author_id,isAuthorized=True)
         # get the comment we're looking for
         comment = get_object_or_404(Comment, id=comment_id)
         comment_likes = comment.likes.all()
         serializer = LikeSerializer(comment_likes, many=True)
         dict = {"type": "likes", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
+
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
