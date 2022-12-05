@@ -157,6 +157,46 @@ def handle_follow_request(request):
         return Response(response.text, status=response.status_code)
     return Response(status=response.status_code)
 
+
+@api_view(["POST"])
+@authenticated
+def handle_like(request):
+    """
+    URL: ://service/handle-like/
+
+    Creates a Like object from the authorId of sender and JSON Author receiver
+    Sends a POST request to the receiver's inbox with the Like object as the body
+
+    @params: request.data["senderAuthorURL"] = The URL of the Author that is sending the follow request
+             request.data["receiverAuthor"] = The JSON Author that is receiving the follow request
+    NOTE: @context: the url on which the like occured
+          object:   the object that was liked.
+          data["object"]: the id of the object that was liked
+    """
+
+    # sender is a local author
+    sender_id = request.data["senderAuthorURL"].split("/authors/")[1]
+    actor = get_object_or_404(Author, id=sender_id, isAuthorized=True) # actor is the sender
+    object = request.data["receiverAuthor"] # object is the receiver (we already have the data)
+
+    # Generate like object
+    data = {}
+    data["@context"] = request.META.get('HTTP_REFERER')
+    data["summary"] = str(actor.displayName) + " likes your post"
+    data["type"] = "Like"
+    data["actor"] = AuthorSerializer(actor).data
+    data["object"] = request.data["postId"] # this object is the postId
+
+    # send a POST request to Inbox of the receiver Author
+    url = object["id"] + "/inbox/"
+    auth = get_authorization_from_url(object["id"])
+    response = requests.post(url, json=data, headers={'Authorization': auth})
+    if response.status_code > 202:
+        return Response(response.text, status=response.status_code)
+    return Response(status=response.status_code)
+
+
+
 def mandatory_field(data, field, errs):
     if not field in data:
         errs[field] = "This field is required."
