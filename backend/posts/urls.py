@@ -15,7 +15,6 @@ urlpatterns = [
     path("authors/<author_id>/posts/<post_id>/comments/new/", add_new_comment, name="comment_list"),
     # likes
     path("authors/<author_id>/liked/", LikedList.as_view(), name="liked_list"),
-    path("authors/<author_id>/posts/<post_id>/likes", PostLikeList.as_view(), name="post_like_list"),
-    path("authors/<author_id>/posts/<post_id>/comments/<comment_id>/likes",
-         CommentLikeList.as_view(), name="comment_like_list"),
+    path("authors/<author_id>/posts/<post_id>/likes/", PostLikeList.as_view(), name="post_like_list"),
+    path("authors/<author_id>/posts/<post_id>/comments/<comment_id>/likes/", CommentLikeList.as_view(), name="comment_like_list"),
 ]
