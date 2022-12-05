@@ -408,7 +408,15 @@ export class NewPostButton extends Component {
 				></NewPost>
 			);
 		} else {
-			return <Button onClick={() => this.setState({ isOpen: true })}>Create new post</Button>;
+			return (
+				<Button
+					variant="contained"
+					style={{ width: "45em", marginTop: "1.5em" }}
+					onClick={() => this.setState({ isOpen: true })}
+				>
+					Create a new post
+				</Button>
+			);
 		}
 	}
 }
