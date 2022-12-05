@@ -47,9 +47,12 @@ export const LikeButton = (props) => {
 	async function handleButtonClick() {
 		// Handles like and unlike
 		if (buttonText === "Like") {
-			var response2 = await axios.post(`${authorId}/inbox/`, { id: userId, post: postId, type: "like" });
-			//var response2 = await axios.post(`${authorId}/posts/${postId}/likes`, { 'id': userId, type: "like", param: "something", why: 12});
-			if (response2.status === 201 /* && response.status === 201*/) {
+			var handleLikeResponse = await axios.post(process.env.REACT_APP_HOST + "handle-like/", {
+				senderAuthorURL: userId,
+				receiverAuthor: author,
+				object: postId,
+			});
+			if (handleLikeResponse.status <= 201) {
 				NotificationBar.getInstance().addNotification("Liked successfully!", NotificationBar.NT_SUCCESS);
 				setButtonText("Liked");
 			} else {
