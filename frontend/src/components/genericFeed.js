@@ -94,11 +94,7 @@ export class GenericURLFeedComponenet extends Component {
 							data={x}
 							key={"Post#" + String(idx)}
 						></EditablePostContainer>
-						<LikeButton
-							authorId={x.getBaseData().getAuthor().getId()}
-							userId={this.state.userId}
-							postId={x.getBaseData().id}
-						/>
+						<LikeButton author={x.getBaseData().getAuthor()} userId={this.state.userId} postId={x.getBaseData().id} />
 						<LikesMenuItem
 							key="likes"
 							variant="outlined"
@@ -173,7 +169,7 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 					{this.state.posts.map((x, idx) => (
 						<div>
 							<EditablePostContainer data={x} key={"Post#" + String(idx)}></EditablePostContainer>
-							<LikeButton authorId={x.getAuthor().getId()} userId={this.state.userId} postId={x.getBaseData().id} />
+							<LikeButton author={x.getAuthor()} userId={this.state.userId} postId={x.getBaseData().id} />
 							<LikesMenuItem
 								key="likes"
 								variant="outlined"
@@ -212,7 +208,7 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 				{this.state.posts.map((x, idx) => (
 					<div>
 						<EditablePostContainer isEditableFunc={() => false} data={x} key={"Post#" + String(idx)} />
-						<LikeButton authorId={x.getAuthor().getId()} userId={this.state.userId} postId={x.getBaseData().id} />
+						<LikeButton author={x.getAuthor()} userId={this.state.userId} postId={x.getBaseData().id} />
 						<LikesMenuItem
 							key="likes"
 							variant="outlined"

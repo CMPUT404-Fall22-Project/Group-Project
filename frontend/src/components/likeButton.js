@@ -20,8 +20,9 @@ export const LikeButton = (props) => {
 	var unlike = "Unlike";
 	const [buttonText, setButtonText] = useState("");
 	const userId = props.userId;
-	const authorId = props.authorId;
-    const postId = props.postId;
+	const author = props.author;
+	const authorId = props.author.id;
+	const postId = props.postId;
 
 	useEffect(() => {
 		handleButtonText();
@@ -46,9 +47,9 @@ export const LikeButton = (props) => {
 	async function handleButtonClick() {
 		// Handles like and unlike
 		if (buttonText === "Like") {
-			var response2 = await axios.post(`${authorId}/inbox/`, {id: userId, post: postId, type: "like"});
+			var response2 = await axios.post(`${authorId}/inbox/`, { id: userId, post: postId, type: "like" });
 			//var response2 = await axios.post(`${authorId}/posts/${postId}/likes`, { 'id': userId, type: "like", param: "something", why: 12});
-			if (response2.status === 201/* && response.status === 201*/) {
+			if (response2.status === 201 /* && response.status === 201*/) {
 				NotificationBar.getInstance().addNotification("Liked successfully!", NotificationBar.NT_SUCCESS);
 				setButtonText("Liked");
 			} else {
@@ -58,7 +59,7 @@ export const LikeButton = (props) => {
 		}
 
 		// remove userId as a liker of post
-		var response = await axios.delete(`${authorId}/inbox/`, {id: userId, type: "like"});
+		var response = await axios.delete(`${authorId}/inbox/`, { id: userId, type: "like" });
 		if (response.status === 200) {
 			setButtonText("Like");
 		} else {
@@ -67,8 +68,8 @@ export const LikeButton = (props) => {
 	}
 
 	return !buttonText ? (
-			<Loader />
-		) : (
+		<Loader />
+	) : (
 		<div>
 			<ThemeProvider theme={theme}>
 				<Button
