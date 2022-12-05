@@ -79,7 +79,7 @@ function Likes(props) {
 
 	const handleLikes = async () => {
 		// Get all likes
-		var response = await axios.get(`${authorId}/inbox/`);
+		var response = await axios.get(`${postId}/likes/`);
 		console.log(response);
 		const likes = [];
 		for (let item of response.data.items) {
