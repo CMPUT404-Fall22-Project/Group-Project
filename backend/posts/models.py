@@ -75,8 +75,8 @@ class Like(models.Model):
     # summary (let serializer do it)
     id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4, editable=False)
     type = models.CharField(max_length=4, default="like", editable=False)
-    # the author that clicked 'like'
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="likes")
+    # the id of the author that clicked 'like'
+    author = models.URLField()
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes", null=True)
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="likes", null=True)
     # the Post or Comment that liked this
