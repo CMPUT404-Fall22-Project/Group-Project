@@ -11,8 +11,8 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from django.http import HttpResponse
 from authors.models import Author
-from .models import ContentType, Post, Comment, PostLike, CommentLike, Category
-from .serializers import PostSerializer, CommentSerializer, PostLikeSerializer, CommentLikeSerializer
+from .models import ContentType, Post, Comment, Like, Category
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from authors.serializers import AuthorSerializer
 from inbox.views import send_to_all_followers, send_to_user
 import base64
@@ -379,10 +379,10 @@ class LikedList(APIView):
         author = get_object_or_404(Author, id=author_id, isAuthorized=True)
         # get all of the author's post likes
         post_likes = author.post_likes.all()
-        serializer1 = PostLikeSerializer(post_likes, many=True)
+        serializer1 = LikeSerializer(post_likes, many=True)
         # add all of the author's comment likes
         comment_likes = author.comment_likes.all()
-        serializer2 = CommentLikeSerializer(comment_likes, many=True)
+        serializer2 = LikeSerializer(comment_likes, many=True)
 
         arr = []
         for serializer in [serializer1.data, serializer2.data]:
@@ -421,7 +421,7 @@ class PostLikeList(APIView):
 
         post = get_object_or_404(Post, id=post_id)
         likes = post.likes.all()
-        serializer = PostLikeSerializer(likes, many=True)
+        serializer = LikeSerializer(likes, many=True)
         dict = {"type": "likes", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
 
@@ -479,7 +479,7 @@ class CommentLikeList(APIView):
         # get the comment we're looking for
         comment = get_object_or_404(Comment, id=comment_id)
         comment_likes = comment.likes.all()
-        serializer = CommentLikeSerializer(comment_likes, many=True)
+        serializer = LikeSerializer(comment_likes, many=True)
         dict = {"type": "likes", "items": serializer.data}
         return Response(dict, status=status.HTTP_200_OK)
 

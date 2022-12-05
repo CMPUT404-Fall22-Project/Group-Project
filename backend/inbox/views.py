@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from utils.swagger_data import SwaggerData
-from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLikeSerializer
+from posts.serializers import CommentSerializer, LikeSerializer
 from django.http import JsonResponse
 from utils.proxy import fetch_author, get_authorization_from_url, get_host_from_url, Ref
 from utils.requests import paginate
@@ -46,13 +46,8 @@ def serialize_data(data):
         serialized = serialize_single_comment(data)
         serialized["type"] = data.type
     else:
-        if hasattr(data, "comment"):
-            serialized = CommentLikeSerializer(data).data
-            serialized["type"] = "comment"
-        else:
-            serialized = PostLikeSerializer(data).data
-            serialized["type"] = "like"
-    return serialized
+        serialized = LikeSerializer(data).data
+        serialized["type"] = "like"
 
 
 def send_to_all_followers(author: Author, data):
