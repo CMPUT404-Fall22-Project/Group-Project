@@ -8,7 +8,7 @@ import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlin
 import { NewPostButton } from "./posts/newPost";
 import { EditablePostContainer } from "./posts/post";
 import { FollowRequestButton } from "./sendFollowRequest";
-import {LikesMenuItem} from "./viewLikes";
+import {LikesMenuItem} from "./viewLike";
 import {LikeButton} from "./likeButton";
 
 const DEFAULT_HEIGHT = "56px";
@@ -94,12 +94,18 @@ export default class FeedComponent extends Component {
 						isEditableFunc={() => false}
 						data={x}
 						key={"Post#" + String(idx)} />
-						<LikeButton authorId={this.props.authorId} userId={this.state.userId} postId={this.postSupplier.getData()[0][idx].id} />
-						<LikesMenuItem
-							key="follow-requests"
-							variant="outlined"
-							onClick={() => this.handleProfileClose()}
-						></LikesMenuItem>
+					<LikeButton 
+						authorId={this.props.authorId} 
+						userId={this.state.userId} 
+						postId={this.postSupplier.getData()[0][idx].id} />
+					<LikesMenuItem
+						key="follow-requests"
+						variant="outlined"
+						onClick={() => this.handleProfileClose()}
+						authorId={this.props.authorId} 
+						userId={this.state.userId} 
+						postId={this.postSupplier.getData()[0][idx].id}
+					></LikesMenuItem>
 					</>
 				))}
 			</div>

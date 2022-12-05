@@ -3,11 +3,22 @@ import axios from "axios";
 import cn from "classnames";
 import NotificationBar from "../global/centralNotificationBar";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import Loader from "../components/loader";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Button } from "@mui/material";
+
+const theme = createTheme({
+	palette: {
+		primary: {
+			main: "#3366ff",
+		},
+	},
+});
 
 export const LikeButton = (props) => {
-	const [liked, setLiked] = useState(false);
-	const [clicked, setClicked] = useState(false);
-	const [buttonText, setButtonText] = useState("Like");
+	var like = "Like";
+	var unlike = "Unlike";
+	const [buttonText, setButtonText] = useState("");
 	const userId = props.userId;
 	const authorId = props.authorId;
     const postId = props.postId;
@@ -18,12 +29,12 @@ export const LikeButton = (props) => {
 
 	async function handleButtonText() {
 		// Check if author already has a pending follow request from user
-		var response = await axios.get(`${authorId}/posts/${postId}/likes`);
+		var response = await axios.get(`${authorId}/inbox/`);
 		for (let item of response.data.items) {
 			// Rubric states "Follow"
-			if (["Like"].includes(item.type)) {
+			if (["like"].includes(item.dataType)) {
 				// if follow request sender is the user
-				if (userId === item.data.id) {
+				if (userId === item.data.id && item.data.post === postId) {
 					setButtonText("Liked");
 					return;
 				}
@@ -35,8 +46,9 @@ export const LikeButton = (props) => {
 	async function handleButtonClick() {
 		// Handles like and unlike
 		if (buttonText === "Like") {
-			var response = await axios.post(`${authorId}/inbox/`, { id: userId, type: "like"});
-			if (response.status === 201) {
+			var response2 = await axios.post(`${authorId}/inbox/`, {id: userId, post: postId, type: "like"});
+			//var response2 = await axios.post(`${authorId}/posts/${postId}/likes`, { 'id': userId, type: "like", param: "something", why: 12});
+			if (response2.status === 201/* && response.status === 201*/) {
 				NotificationBar.getInstance().addNotification("Liked successfully!", NotificationBar.NT_SUCCESS);
 				setButtonText("Liked");
 			} else {
@@ -54,24 +66,20 @@ export const LikeButton = (props) => {
 		}
 	}
 
-	return (
-		<button
-			onClick={() => {
-				setLiked(!liked);
-				setClicked(true);
-				handleButtonClick()
-			}}
-			onAnimationEnd={() => setClicked(false)}
-			className={cn("like-button-wrapper", {
-				liked,
-				clicked,
-			})}
-		>
-			<div className="like-button">
-				<ThumbUpIcon />
-				<span>Like</span>
-				<span className={cn("suffix", { liked })}>d</span>
-			</div>
-		</button>
+	return !buttonText ? (
+			<Loader />
+		) : (
+		<div>
+			<ThemeProvider theme={theme}>
+				<Button
+					size="medium"
+					variant="contained"
+					onClick={handleButtonClick}
+					disabled={buttonText === "Request Sent..."}
+				>
+					{buttonText}
+				</Button>
+			</ThemeProvider>
+		</div>
 	);
 };
