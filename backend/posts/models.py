@@ -77,5 +77,7 @@ class Like(models.Model):
     type = models.CharField(max_length=4, default="like", editable=False)
     # the author that clicked 'like'
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="likes")
-    # the Post that was liked (may not be in our db)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes", null=True)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="likes", null=True)
+    # the Post or Comment that liked this
     object = models.URLField()
