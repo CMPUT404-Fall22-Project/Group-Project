@@ -80,9 +80,18 @@ function Likes(props) {
 	const handleLikes = async () => {
 		// Get all likes
 		var response = await axios.get(`${postId}/likes/`);
-		const likes = [];
+		const authors = [];
 		for (let like of response.data.items) {
-			likes.push({ id: like.author.id, displayName: like.author.displayName, profileImage: like.author.profileImage });
+			authors.push(like.author);
+		}
+		var likes = [];
+		for (let author of authors) {
+			var response = await axios.get(`${author}`);
+			likes.push({
+				id: response.data.id,
+				displayName: response.data.displayName,
+				profileImage: response.data.profileImage,
+			});
 		}
 		setLikes(likes);
 		setIsLoaded(true);
