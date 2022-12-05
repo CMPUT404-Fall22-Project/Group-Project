@@ -143,7 +143,17 @@ export class EditablePostContainer extends Component {
 		}
 
 		if (!this.isEditable()) {
-			return comp;
+			return (
+				<div>
+					{comp}
+					<CommentDialog
+						postID={this.props.data.getBaseData().id}
+						authorID={Authentication.getInstance().getUser().getId()}
+						baseURL={this.props.data.getBaseData().origin}
+					/>
+					<ScrollDialog baseURL={this.props.data.getBaseData().origin} comments={this.props.data.getComments()} />
+				</div>
+			);
 		}
 
 		return (
