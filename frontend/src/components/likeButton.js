@@ -21,7 +21,7 @@ export const LikeButton = (props) => {
 	const [buttonText, setButtonText] = useState("");
 	const userId = props.userId;
 	const author = props.author;
-	const authorId = props.author.id;
+	const authorId = props.author.getId();
 	const postId = props.postId;
 
 	useEffect(() => {
@@ -49,7 +49,7 @@ export const LikeButton = (props) => {
 		if (buttonText === "Like") {
 			var handleLikeResponse = await axios.post(process.env.REACT_APP_HOST + "handle-like/", {
 				senderAuthorURL: userId,
-				receiverAuthor: author,
+				receiverAuthor: { url: author.getId(), displayName: author.getUsername() },
 				object: postId,
 			});
 			if (handleLikeResponse.status <= 201) {

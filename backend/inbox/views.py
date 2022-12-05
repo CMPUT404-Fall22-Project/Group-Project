@@ -173,11 +173,10 @@ def handle_like(request):
           object:   the object that was liked.
           data["object"]: the id of the object that was liked
     """
-
     # sender is a local author
     sender_id = request.data["senderAuthorURL"].split("/authors/")[1]
     actor = get_object_or_404(Author, id=sender_id, isAuthorized=True) # actor is the sender
-    object = request.data["receiverAuthor"] # object is the receiver (we already have the data)
+    receiver_author = request.data["receiverAuthor"]
 
     # Generate like object
     data = {}
@@ -185,11 +184,11 @@ def handle_like(request):
     data["summary"] = str(actor.displayName) + " likes your post"
     data["type"] = "Like"
     data["actor"] = AuthorSerializer(actor).data
-    data["object"] = request.data["postId"] # this object is the postId
+    data["object"] = request.data["object"] # this object is the postId
 
     # send a POST request to Inbox of the receiver Author
-    url = object["id"] + "/inbox/"
-    auth = get_authorization_from_url(object["id"])
+    url = receiver_author["url"] + "/inbox/"
+    auth = get_authorization_from_url(receiver_author["url"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
     if response.status_code > 202:
         return Response(response.text, status=response.status_code)
