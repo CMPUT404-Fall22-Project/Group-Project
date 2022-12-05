@@ -14,7 +14,7 @@ const theme = createTheme({
 		},
 	},
 });
- 
+
 export const FollowRequestButton = (props) => {
 	var follow = "Follow";
 	var unfollow = "UnFollow";
