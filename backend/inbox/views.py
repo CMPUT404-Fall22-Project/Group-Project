@@ -6,12 +6,13 @@ from rest_framework.decorators import api_view
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from utils.swagger_data import SwaggerData
-from posts.serializers import CommentSerializer, CommentLikeSerializer, PostLikeSerializer
+from posts.serializers import CommentSerializer, LikeSerializer
 from django.http import JsonResponse
 from utils.proxy import fetch_author, get_authorization_from_url, get_host_from_url, Ref
 from utils.requests import paginate
 from authors.models import Author, Follower
 from .models import Inbox
+from posts.models import Like, Comment, Post
 from .serializers import InboxSerializer
 from authors.serializers import AuthorSerializer
 from utils.process_models import serialize_single_post, serialize_single_comment
@@ -45,13 +46,8 @@ def serialize_data(data):
         serialized = serialize_single_comment(data)
         serialized["type"] = data.type
     else:
-        if hasattr(data, "comment"):
-            serialized = CommentLikeSerializer(data).data
-            serialized["type"] = "comment"
-        else:
-            serialized = PostLikeSerializer(data).data
-            serialized["type"] = "like"
-    return serialized
+        serialized = LikeSerializer(data).data
+        serialized["type"] = "like"
 
 
 def send_to_all_followers(author: Author, data):
@@ -154,8 +150,52 @@ def handle_follow_request(request):
     auth = get_authorization_from_url(object["id"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
     if response.status_code > 202:
+
         return Response(response.text, status=response.status_code)
     return Response(status=response.status_code)
+
+
+@api_view(["POST"])
+@authenticated
+def handle_like(request):
+    """
+    URL: ://service/handle-like/
+
+    Creates a Like object from the authorId of sender and JSON Author receiver
+    Sends a POST request to the receiver's inbox with the Like object as the body
+
+    @params: request.data["senderAuthorURL"] = The URL of the Author that is sending the follow request
+             request.data["receiverAuthor"] = The JSON Author that is receiving the follow request
+    NOTE: @context: the url on which the like occured
+          object:   the object that was liked.
+          data["object"]: the id of the object that was liked
+    """
+    # sender is a local author
+    sender_id = request.data["senderAuthorURL"].split("/authors/")[1]
+    actor = get_object_or_404(Author, id=sender_id, isAuthorized=True) # actor is the sender
+    receiver_author = request.data["receiverAuthor"]
+
+    # Generate like object
+    data = {}
+    data["@context"] = request.META.get('HTTP_REFERER')
+    data["summary"] = str(actor.displayName) + " likes your post"
+    data["type"] = "Like"
+    author = AuthorSerializer(actor).data
+    data["author"] = author
+    data["object"] = request.data["object"] # this is the post or comment url
+
+    # send a POST request to Inbox of the receiver Author
+    url = receiver_author["url"] + "/inbox/"
+    auth = get_authorization_from_url(receiver_author["url"])
+    response = requests.post(url, json=data, headers={'Authorization': auth})
+    # response = requests.post(url, json=data)
+    if response.status_code > 202:
+        return Response(response.text, status=response.status_code)
+    # add the object to the Author's likes
+    Like.objects.create(author=author["id"], context=data["@context"], object=data["object"])
+    return Response(status=response.status_code)
+
+
 
 def mandatory_field(data, field, errs):
     if not field in data:
@@ -216,9 +256,9 @@ class InboxList(APIView):
         Please see the Like, Comment, and Post objects for the other possible inbox request_body examples.
         """
         # ensure the author exists and is authorized
-        author = get_object_or_404(Author, id=id)
+        author = get_object_or_404(Author, id=id, isAuthorized=True)
         # get the data type
-        type = request.data["type"]
+        type: str = request.data["type"]
 
         if type == "post":
             validate_incoming_inbox_data(request.data)
@@ -226,6 +266,25 @@ class InboxList(APIView):
             ref = Ref(data)
             inbox = author.inboxes.create(data=ref.as_ref(), dataType=type)
             return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
+
+
+        if type.lower() == "like":
+            # We will create and save a Like object instead of an Inbox object
+            context = request.data["@context"]
+            object = request.data["object"]
+            author = request.data["author"]["id"]
+
+            # We need to determine if this is a Post Like or a Comment Like
+            post = None
+            comment = None
+            # one of post/comment will remain None and the other will be set to the Post or Comment object
+            if "comments" in object:
+                comment = get_object_or_404(Comment, id=object.split("comments/")[-1])
+            else:
+                post = get_object_or_404(Post, id=object.split("posts/")[-1])
+            
+            like = Like.objects.create(author=author, context=context, object=object, post=post, comment=comment)
+            return Response({"id": like.id}, status=status.HTTP_201_CREATED)
 
         # else type is "like", "comment", or "follow"
         inbox = author.inboxes.create(data=request.data, dataType=type)
