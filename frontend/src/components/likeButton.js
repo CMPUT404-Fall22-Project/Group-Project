@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import cn from "classnames";
+import NotificationBar from "../global/centralNotificationBar";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import Loader from "../components/loader";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Button } from "@mui/material";
 
-export const LikeButton = () => {
-	const [liked, setLiked] = useState(null);
-	const [clicked, setClicked] = useState(false);
+const theme = createTheme({
+	palette: {
+		primary: {
+			main: "#3366ff",
+		},
+	},
+});
 
 export const LikeButton = (props) => {
 	var like = "Like";

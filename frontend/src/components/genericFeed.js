@@ -8,6 +8,8 @@ import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlin
 import { NewPostButton } from "./posts/newPost";
 import { EditablePostContainer } from "./posts/post";
 import { FollowRequestButton } from "./follows/sendFollowRequest";
+import { LikesMenuItem } from "./viewLike";
+import { LikeButton } from "./likeButton";
 import Loader from "./loader";
 
 export class GenericURLFeedComponenet extends Component {
