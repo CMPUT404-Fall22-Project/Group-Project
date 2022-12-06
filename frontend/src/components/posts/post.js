@@ -17,6 +17,8 @@ import { renderPublishDate } from "../../utils/renderHelpers";
 import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import NotificationBar from "../../global/centralNotificationBar";
 import { tryStringifyObject } from "../../utils/stringify";
+import ShareIcon from "@mui/icons-material/Share";
+import SharePostDialog from "../sharePostDialog";
 
 export default class PostViewComponent extends Component {
 	constructor(props) {
@@ -118,11 +120,13 @@ export class EditablePostContainer extends Component {
 	}
 
 	tryDeletePost() {
-		ModalTemplates.confirm("Delete Post?", "Are you sure you want to delete this post?").then(() => {
-			axios({
-				method: "delete",
-				url: this.props.data.getBaseData().origin,
-			}).then(() => window.location.reload());
+		ModalTemplates.confirm("Delete Post?", "Are you sure you want to delete this post?").then((result) => {
+			if (result === ModalTemplates.RESULT_SUCCESS) {
+				axios({
+					method: "delete",
+					url: this.props.data.getBaseData().origin,
+				}).then(() => window.location.reload());
+			}
 		});
 	}
 
@@ -152,6 +156,10 @@ export class EditablePostContainer extends Component {
 						baseURL={this.props.data.getBaseData().origin}
 					/>
 					<ScrollDialog baseURL={this.props.data.getBaseData().origin} comments={this.props.data.getComments()} />
+					<SharePostDialog
+						post={this.props.data.getBaseData()}
+						author={Authentication.getInstance().getUser().getId()}
+					/>
 				</div>
 			);
 		}
@@ -175,6 +183,7 @@ export class EditablePostContainer extends Component {
 					baseURL={this.props.data.getBaseData().origin}
 				/>
 				<ScrollDialog baseURL={this.props.data.getBaseData().origin} comments={this.props.data.getComments()} />
+				<SharePostDialog post={this.props.data.getBaseData()} author={Authentication.getInstance().getUser().getId()} />
 			</React.Fragment>
 		);
 	}
