@@ -17,6 +17,7 @@ import { renderPublishDate } from "../../utils/renderHelpers";
 import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import NotificationBar from "../../global/centralNotificationBar";
 import { tryStringifyObject } from "../../utils/stringify";
+import { LikeButton } from "../likeButton";
 
 export default class PostViewComponent extends Component {
 	constructor(props) {
@@ -146,6 +147,11 @@ export class EditablePostContainer extends Component {
 			return (
 				<div>
 					{comp}
+					<LikeButton
+						author={this.props.data.getBaseData().author}
+						userId={Authentication.getInstance().getUser().getId()}
+						postId={this.props.data.getBaseData().id}
+					/>
 					<CommentDialog
 						postID={this.props.data.getBaseData().id}
 						authorID={Authentication.getInstance().getUser().getId()}
@@ -169,6 +175,11 @@ export class EditablePostContainer extends Component {
 				<IconButton aria-label="Delete" title="Delete above post" onClick={this.tryDeletePost.bind(this)}>
 					<DeleteOutlineOutlinedIcon />
 				</IconButton>
+				<LikeButton
+					author={this.props.data.getBaseData().author}
+					userId={Authentication.getInstance().getUser().getId()}
+					postId={this.props.data.getBaseData().id}
+				/>
 				<CommentDialog
 					postID={this.props.data.getBaseData().id}
 					authorID={Authentication.getInstance().getUser().getId()}
