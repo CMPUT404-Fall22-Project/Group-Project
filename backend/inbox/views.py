@@ -19,7 +19,7 @@ from utils.process_models import serialize_single_post, serialize_single_comment
 import requests
 from requests import HTTPError
 from utils.requests import get_optionally_list_parameter_or_default
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.http import Http404
 from authentication.models import ExternalNode
 from rest_framework.authentication import BasicAuthentication
@@ -288,8 +288,14 @@ class InboxList(APIView):
             like = Like.objects.create(author=author_id, context=context, object=object, post=post, comment=comment)
 
         # save an inbox version of the 'like', 'follow' or 'comment'
-        inbox = author.inboxes.create(data=request.data, dataType=type)
-        return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
+        try:
+            # avoid duplicate entries
+            Inbox.objects.get(author=author, data=request.data, dataType=type)
+        except Inbox.DoesNotExist:
+            inbox = author.inboxes.create(data=request.data, dataType=type)
+            return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
+        # if object already exists
+        return Response(status=status.HTTP_200_OK)
 
     @authenticated
     def delete(self, request, id, format=None):
