@@ -17,8 +17,8 @@ const theme = createTheme({
 
 export const FollowRequestButton = (props) => {
 	var follow = "Follow";
-	var unfollow = "UnFollow";
 	var followPending = "Request Sent...";
+	var following = "Following";
 	const [buttonText, setButtonText] = useState("");
 	const userId = props.userId;
 	const author = props.author;
@@ -33,7 +33,7 @@ export const FollowRequestButton = (props) => {
 		var response = await proxiedAxios({ url: `${authorId}/followers/`, method: "get" });
 		for (let author of response.data.items) {
 			if (author.id === userId) {
-				setButtonText(unfollow);
+				setButtonText(following);
 				return;
 			}
 		}
@@ -41,7 +41,7 @@ export const FollowRequestButton = (props) => {
 	}
 
 	async function handleButtonClick() {
-		// Handles Follow, Unfollow, and unsend
+		// Sends a follow request
 		if (buttonText === follow) {
 			var response = await axios({
 				url: process.env.REACT_APP_HOST + "handle-follow-request/",
@@ -59,14 +59,6 @@ export const FollowRequestButton = (props) => {
 			}
 			return;
 		}
-		// buttonText === "UnFollow"
-		// remove userId as a follower of authorId
-		// var response = await axios.delete(`${authorId}/followers/${userId}`);
-		// if (response.status === 200) {
-		// 	setButtonText(follow);
-		// } else {
-		// 	NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
-		// }
 	}
 
 	// prompt loader until buttonText is rendered
@@ -75,12 +67,7 @@ export const FollowRequestButton = (props) => {
 	) : (
 		<div>
 			<ThemeProvider theme={theme}>
-				<Button
-					size="medium"
-					variant="contained"
-					onClick={handleButtonClick}
-					disabled={buttonText === followPending || buttonText === unfollow}
-				>
+				<Button size="medium" variant="contained" onClick={handleButtonClick} disabled={buttonText !== follow}>
 					{buttonText}
 				</Button>
 			</ThemeProvider>
