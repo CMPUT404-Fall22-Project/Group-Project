@@ -8,7 +8,7 @@ import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlin
 import { NewPostButton } from "./posts/newPost";
 import { EditablePostContainer } from "./posts/post";
 import { FollowRequestButton } from "./follows/sendFollowRequest";
-import { LikesMenuItem } from "./viewLike";
+// import { LikesMenuItem } from "./viewLike";
 // import { LikeButton } from "./likeButton";
 import Loader from "./loader";
 
@@ -95,13 +95,13 @@ export class GenericURLFeedComponenet extends Component {
 							key={"Post#" + String(idx)}
 						></EditablePostContainer>
 						{/* <LikeButton author={x.getBaseData().getAuthor()} userId={this.state.userId} postId={x.getBaseData().id} /> */}
-						<LikesMenuItem
+						{/* <LikesMenuItem
 							key="likes"
 							variant="outlined"
 							authorId={x.getBaseData().getAuthor().getId()}
 							userId={this.state.userId}
 							postId={x.getBaseData().id}
-						></LikesMenuItem>
+						></LikesMenuItem> */}
 					</div>
 				))}
 				{this.morePostsButton()}
@@ -161,13 +161,13 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 						<div>
 							<EditablePostContainer data={x} key={"Post#" + String(idx)}></EditablePostContainer>
 							{/* <LikeButton author={x.getAuthor()} userId={this.state.userId} postId={x.getBaseData().id} /> */}
-							<LikesMenuItem
+							{/* <LikesMenuItem
 								key="likes"
 								variant="outlined"
 								authorId={x.getAuthor().getId()}
 								userId={this.state.userId}
 								postId={x.getBaseData().id}
-							></LikesMenuItem>
+							></LikesMenuItem> */}
 						</div>
 					))}
 					<br></br>
@@ -200,13 +200,13 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 					<div>
 						<EditablePostContainer isEditableFunc={() => false} data={x} key={"Post#" + String(idx)} />
 						{/* <LikeButton author={x.getAuthor()} userId={this.state.userId} postId={x.getBaseData().id} /> */}
-						<LikesMenuItem
+						{/* <LikesMenuItem
 							key="likes"
 							variant="outlined"
 							authorId={x.getAuthor().getId()}
 							userId={this.state.userId}
 							postId={x.getBaseData().id}
-						></LikesMenuItem>
+						></LikesMenuItem> */}
 					</div>
 				))}
 				{this.morePostsButton()}
