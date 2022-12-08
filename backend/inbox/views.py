@@ -48,6 +48,7 @@ def serialize_data(data):
     else:
         serialized = LikeSerializer(data).data
         serialized["type"] = "like"
+    return serialized
 
 
 def send_to_all_followers(author: Author, data):
@@ -269,7 +270,7 @@ class InboxList(APIView):
 
 
         if type.lower() == "like":
-            # We will create and save a Like object instead of an Inbox object
+
             context = request.data["@context"]
             object = request.data["object"]
             author = request.data["author"]["id"]
@@ -283,10 +284,10 @@ class InboxList(APIView):
             else:
                 post = get_object_or_404(Post, id=object.split("posts/")[-1])
             
+            # save the like object to the db
             like = Like.objects.create(author=author, context=context, object=object, post=post, comment=comment)
-            return Response({"id": like.id}, status=status.HTTP_201_CREATED)
 
-        # else type is "like", "comment", or "follow"
+        # save an inbox version of the 'like', 'follow' or 'comment'
         inbox = author.inboxes.create(data=request.data, dataType=type)
         return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
 
