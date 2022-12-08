@@ -39,7 +39,9 @@ export const LikesMenuItem = ({ onClick, ...props }) => {
 					});
 				}}
 			>
-				Likes
+				<Button variant="outlined" size="small">
+					View All Likes
+				</Button>
 			</MenuItem>
 		</React.Fragment>
 	);
