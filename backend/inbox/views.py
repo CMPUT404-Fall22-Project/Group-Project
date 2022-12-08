@@ -273,7 +273,7 @@ class InboxList(APIView):
 
             context = request.data["@context"]
             object = request.data["object"]
-            author = request.data["author"]["id"]
+            author_id = request.data["author"]["id"]
 
             # We need to determine if this is a Post Like or a Comment Like
             post = None
@@ -285,7 +285,7 @@ class InboxList(APIView):
                 post = get_object_or_404(Post, id=object.split("posts/")[-1])
             
             # save the like object to the db
-            like = Like.objects.create(author=author, context=context, object=object, post=post, comment=comment)
+            like = Like.objects.create(author=author_id, context=context, object=object, post=post, comment=comment)
 
         # save an inbox version of the 'like', 'follow' or 'comment'
         inbox = author.inboxes.create(data=request.data, dataType=type)
