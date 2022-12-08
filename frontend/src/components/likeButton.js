@@ -18,7 +18,6 @@ const theme = createTheme({
 export const LikeButton = (props) => {
 	var like = "Like";
 	var liked = "Liked";
-	// var unlike = "Unlike";
 	const [buttonText, setButtonText] = useState("");
 	const userId = props.userId;
 	const author = props.author;
@@ -58,15 +57,6 @@ export const LikeButton = (props) => {
 			}
 			return;
 		}
-
-		// UNLIKE DISABLED
-		// remove userId as a liker of post
-		// var response = await axios.delete(`${authorId}/inbox/`, { id: userId, type: "like" });
-		// if (response.status === 200) {
-		// 	setButtonText("Like");
-		// } else {
-		// 	NotificationBar.getInstance().addNotification(response.err, NotificationBar.NT_ERROR);
-		// }
 	}
 
 	return !buttonText ? (
