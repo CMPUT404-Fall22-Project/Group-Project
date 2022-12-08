@@ -18,6 +18,7 @@ import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import NotificationBar from "../../global/centralNotificationBar";
 import { tryStringifyObject } from "../../utils/stringify";
 import { LikeButton } from "../likeButton";
+import { LikesMenuItem } from "../viewLike";
 
 export default class PostViewComponent extends Component {
 	constructor(props) {
@@ -147,6 +148,13 @@ export class EditablePostContainer extends Component {
 			return (
 				<div>
 					{comp}
+					<LikesMenuItem
+						// key="likes"
+						// variant="outlined"
+						authorId={this.props.data.getBaseData().author.id}
+						userId={Authentication.getInstance().getUser().getId()}
+						postId={this.props.data.getBaseData().id}
+					></LikesMenuItem>
 					<LikeButton
 						author={this.props.data.getBaseData().author}
 						userId={Authentication.getInstance().getUser().getId()}
@@ -175,6 +183,13 @@ export class EditablePostContainer extends Component {
 				<IconButton aria-label="Delete" title="Delete above post" onClick={this.tryDeletePost.bind(this)}>
 					<DeleteOutlineOutlinedIcon />
 				</IconButton>
+				<LikesMenuItem
+					// key="likes"
+					// variant="outlined"
+					authorId={this.props.data.getBaseData().author.id}
+					userId={Authentication.getInstance().getUser().getId()}
+					postId={this.props.data.getBaseData().id}
+				></LikesMenuItem>
 				<LikeButton
 					author={this.props.data.getBaseData().author}
 					userId={Authentication.getInstance().getUser().getId()}
