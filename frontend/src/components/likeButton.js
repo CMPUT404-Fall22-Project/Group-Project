@@ -62,12 +62,12 @@ export const LikeButton = (props) => {
 	return !buttonText ? (
 		<Loader />
 	) : (
-		<div>
+		<span>
 			<ThemeProvider theme={theme}>
-				<Button size="medium" variant="contained" onClick={handleButtonClick} disabled={buttonText === liked}>
+				<Button size="small" variant="contained" onClick={handleButtonClick} disabled={buttonText === liked}>
 					{buttonText}
 				</Button>
 			</ThemeProvider>
-		</div>
+		</span>
 	);
 };
