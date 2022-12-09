@@ -1,50 +1,76 @@
-# 404 Project
-This project was made for the 2022 Fall semester CMPUT 404 required class project.  [<ins>Rubric Link</ins>](https://github.com/abramhindle/CMPUT404-project-socialdistribution/blob/master/project.org)    
+# Getting Started with Create React App
 
-This project was made by **Team 16**:
-* Aaron Skiba
-* Marcus Der
-* Mateo Paez
-* William Wong
-* Amrit Aujla
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-Teams we collaberated with:   
-Team 1:  https://github.com/CMPUT404-Social-Distribution-Project/mondaylab-cmput404-project  
-Team 15: https://github.com/CMPUT404FALL2022/CMPUT404-GroupProject  
-Team 19: https://github.com/CMPUT404Project/social-distribution
+## Available Scripts
 
-<br/>
+In the project directory, you can run:
 
-# Public Deployment
-Frontend: https://team-sixteen-social-scene.herokuapp.com  
-Backend: https://team-sixteen.herokuapp.com  
+### `yarn start`
 
-Backend django administration login:  
-Username: team16  
-Password: 12345
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-<br/>
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-# Local Installation Instructions
+### `yarn test`
 
-### 1. Clone the repo
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### 2. Install PostgreSQL and create a new database with the following details:
-	i.   Name     = project_404 
-	ii.  User     = postgres
-	iii. Password = password
-	iv.  Host     = localhost
-	v.   Port     = 5432
+### `yarn build`
 
-### 3. In Group-Project/backend/
-	i.    Run: ‘virtualenv venv --python=python3.10’
-	ii.   Run: (For Windows) venv\Scripts\activate.bat	(For Mac) source venv/bin/activate
-	iii.  Run: ‘pip install -r requirements.txt’
-	iv.   Run: ‘python manage.py migrate’    (or possibly  ‘python3 manage.py migrate’ )
-	v.    Run: ‘python manage.py runserver’  (or possibly ‘python3 manage.py runserver’)
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-### 5. In Group-Project/frontend/
-	i.  Run:  ‘yarn install’
-	ii. Run:  ‘yarn start’
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-### 6. In your browser, navigate to http://127.0.0.1:3000/ for the frontend and http://127.0.0.1:8000/ for the backend
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `yarn eject`
+
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `yarn build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+source code for like button:
+https://www.upbeatcode.com/react/how-to-implement-a-like-button-in-react/
+
+source code for follow requests list:
+https://mui.com/material-ui/react-list/
