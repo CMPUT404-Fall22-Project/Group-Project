@@ -31,7 +31,7 @@ const SharePostDialog = (props) => {
 		};
 		axios({
 			method: "post",
-			url: author + "/posts/",
+			url: author + "/posts",
 			data: data,
 		})
 			.then((resp) => {

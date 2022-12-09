@@ -171,7 +171,7 @@ export default class NewPost extends Component {
 
 	getUrl(id) {
 		if (!id) {
-			return { url: Authentication.getInstance().getUser().getUrl() + "/posts/", method: "post" };
+			return { url: Authentication.getInstance().getUser().getUrl() + "/posts", method: "post" };
 		}
 		return { url: id, method: "put" };
 	}

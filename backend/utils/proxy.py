@@ -78,7 +78,7 @@ def fetch_author(data):
     # Are we self referrential?
     authorString = data
     if authorString.startswith(get_host()):
-        authorId = authorString[len(get_host() + "authors/"):]
+        authorId = authorString[len(get_host() + "authors/"):] #TODO: What about this one?
         return get_object_or_404(Author, pk=authorId)
 
     # looks like we need to contact another server

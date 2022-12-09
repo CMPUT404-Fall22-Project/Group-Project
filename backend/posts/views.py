@@ -46,7 +46,7 @@ def get_posts_from_remote_nodes():
     nodes = ExternalNode.objects.exclude(host=get_host())
     posts = []
     for node in nodes:
-        posts_url =  node.api + "posts/"
+        posts_url =  node.api + "posts"
         response = requests.get(posts_url, headers={'Authorization': node.authorization})
         if response.status_code >= 300:
             print(f'posts/all -> {posts_url}: HTTP{response.status_code} - {response.text}\n') # print the error
@@ -163,7 +163,7 @@ class PostList(APIView):
         if not "origin" in data:
             data["origin"] = get_host() + "authors/" + authorId + "/posts/" + postId
         if not "comments" in data:
-            data["comments"] = get_host() + "authors/" + authorId + "/posts/" + postId + "/comments/"
+            data["comments"] = get_host() + "authors/" + authorId + "/posts/" + postId + "/comments"
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -493,5 +493,5 @@ def add_new_comment(request, author_id, post_id):
     author = get_object_or_404(Author, id=id)  # author that made the comment
     comment = Comment(author=author, post=post, contentType=data["contentType"], content=data["content"])
     comment.save()
-    serialized = send_to_user(post_owner.host + "authors/" + post_owner.id+"/inbox/", comment)
+    serialized = send_to_user(post_owner.host + "authors/" + post_owner.id+"/inbox", comment)
     return JsonResponse(serialized, safe=False)
