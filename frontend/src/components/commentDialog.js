@@ -9,6 +9,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import AddCommentIcon from "@mui/icons-material/AddComment";
 import axios from "axios";
+import NotificationBar from "../global/centralNotificationBar";
 
 const CommentDialog = (props) => {
 	const { postID, authorID, baseURL } = props;
@@ -31,7 +32,13 @@ const CommentDialog = (props) => {
 			method: "post",
 			url: baseURL + "/comments/new/",
 			data: comment,
-		});
+		})
+			.then((res) => {
+				NotificationBar.getInstance().addNotification("Comment added successfully!", NotificationBar.NT_SUCCESS);
+			})
+			.catch((err) =>
+				NotificationBar.getInstance().addNotification(JSON.stringify(err.response.data), NotificationBar.NT_ERROR)
+			);
 
 		handleClose();
 	};
