@@ -42,5 +42,5 @@ urlpatterns = [
     path('', include("authors.urls"), name='authors'),
     path('', include("posts.urls"), name='posts'),
     path('', include("inbox.urls"), name='inbox'),
-    path('proxy/', proxy_request, name="handle_follow_request")
+    path('proxy/', proxy_request, name="proxy")
 ]

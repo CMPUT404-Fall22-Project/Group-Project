@@ -332,6 +332,9 @@ class InboxList(APIView):
             content = request.data["content"]
 
             comment=Comment.objects.create(author=author,post=post,content=content)
+        else:
+            author.inboxes.create(data=request.data, dataType=type)
+
 
         # save an inbox version of the 'like', 'follow' or 'comment'
         # try:
