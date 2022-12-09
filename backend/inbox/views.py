@@ -191,6 +191,8 @@ def handle_like(request):
 
     # send a POST request to Inbox of the receiver Author
     url = receiver_author["url"] + "/inbox" # TODO: Handle depending on whether team appends slash
+    if not url.startswith("https://social-distribution-404.herokuapp.com/"):
+        url+="/"
     auth = get_authorization_from_url(receiver_author["url"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
     # response = requests.post(url, json=data)
