@@ -1,10 +1,31 @@
-# Group-Project
+# 404 Project
+This project was made for the 2022 Fall semester CMPUT 404 required class project.  [<ins>Rubric Link</ins>](https://github.com/abramhindle/CMPUT404-project-socialdistribution/blob/master/project.org)    
 
-[<ins>Rubric Link</ins>](https://github.com/abramhindle/CMPUT404-project-socialdistribution)
+This project was made by **Team 16**:
+* Aaron Skiba
+* Marcus Der
+* Mateo Paez
+* William Wong
+* Amrit Aujla
 
+Teams we collaberated with:   
+Team 1:  https://github.com/CMPUT404-Social-Distribution-Project/mondaylab-cmput404-project  
+Team 15: https://github.com/CMPUT404FALL2022/CMPUT404-GroupProject  
+Team 19: https://github.com/CMPUT404Project/social-distribution
 
+<br/>
 
-# Installation Instructions
+# Public Deployment
+Frontend: https://team-sixteen-social-scene.herokuapp.com  
+Backend: https://team-sixteen.herokuapp.com  
+
+Backend django administration login:  
+Username: team16  
+Password: 12345
+
+<br/>
+
+# Local Installation Instructions
 
 ### 1. Clone the repo
 
@@ -26,4 +47,4 @@
 	i.  Run:  ‘yarn install’
 	ii. Run:  ‘yarn start’
 
-### 6. In your browser, navigate to http://127.0.0.1:3000/
+### 6. In your browser, navigate to http://127.0.0.1:3000/ for the frontend and http://127.0.0.1:8000/ for the backend
