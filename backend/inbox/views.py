@@ -67,7 +67,7 @@ def send_to_all_followers(author: Author, data):
         url = followerUrl + "/inbox"
         if not followerUrl.startswith("https://social-distribution-404.herokuapp.com/"):
             url+="/"
-        result = requests.post(url, serialized, headers={'Authorization': get_authorization_from_url(url)})
+        result = requests.post(url, json=serialized, headers={'Authorization': get_authorization_from_url(url)})
         if result.status_code >= 300:
             raise HTTPError(f"POST to server at {url} failed! msg={result.text}")
 
