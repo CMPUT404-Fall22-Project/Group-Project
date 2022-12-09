@@ -30,7 +30,7 @@ export const FollowRequestButton = (props) => {
 
 	async function handleButtonText() {
 		// Check if user is already following this author
-		var response = await proxiedAxios({ url: `${authorId}/followers/`, method: "get" });
+		var response = await proxiedAxios({ url: `${authorId}/followers`, method: "get" });
 		for (let author of response.data.items) {
 			if (author.id === userId) {
 				setButtonText(following);

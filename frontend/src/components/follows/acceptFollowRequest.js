@@ -75,12 +75,12 @@ export function FollowRequests() {
 
 	const handleFollowRequests = async () => {
 		// Get all followers
-		response = await axios.get(`${userId}/followers/`);
+		response = await axios.get(`${userId}/followers`);
 		const followerIds = response.data.items.map((x) => x.id);
 		setFollowerIds(followerIds);
 
 		// Get all follow requests
-		var response = await axios.get(`${userId}/inbox/`);
+		var response = await axios.get(`${userId}/inbox`);
 		const followRequests = response.data.items.filter((x) => x.type.toLowerCase() === "follow");
 		setFollowRequests(followRequests);
 		setIsLoaded(true);

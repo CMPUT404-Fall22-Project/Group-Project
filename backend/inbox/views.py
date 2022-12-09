@@ -64,7 +64,7 @@ def send_to_all_followers(author: Author, data):
         author=author).values_list("follower", flat=True)
 
     for followerUrl in followerUrls:
-        url = followerUrl + "/inbox/"  # id is the full URL because it's remote
+        url = followerUrl + "/inbox"  # id is the full URL because it's remote
         result = requests.post(url, serialized, headers={'Authorization': get_authorization_from_url(url)})
         if result.status_code >= 300:
             raise HTTPError(f"POST to server at {url} failed! msg={result.text}")
@@ -147,7 +147,7 @@ def handle_follow_request(request):
     data["object"] = object
 
     # send a POST request to Inbox of the receiver Author
-    url = object["id"] + "/inbox/"
+    url = object["id"] + "/inbox"
     auth = get_authorization_from_url(object["id"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
     if response.status_code > 202:
@@ -186,7 +186,7 @@ def handle_like(request):
     data["object"] = request.data["object"] # this is the post or comment url
 
     # send a POST request to Inbox of the receiver Author
-    url = receiver_author["url"] + "/inbox/"
+    url = receiver_author["url"] + "/inbox"
     auth = get_authorization_from_url(receiver_author["url"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
     # response = requests.post(url, json=data)
