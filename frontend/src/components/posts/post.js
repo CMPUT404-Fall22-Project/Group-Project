@@ -162,7 +162,7 @@ export class EditablePostContainer extends Component {
 					<LikeButton
 						author={this.props.data.getBaseData().author}
 						userId={Authentication.getInstance().getUser().getId()}
-						postId={this.props.data.getBaseData().id}
+						sourceId={this.props.data.getBaseData().id}
 					/>
 					<CommentDialog
 						postID={this.props.data.getBaseData().id}
@@ -201,7 +201,7 @@ export class EditablePostContainer extends Component {
 				<LikeButton
 					author={this.props.data.getBaseData().author}
 					userId={Authentication.getInstance().getUser().getId()}
-					postId={this.props.data.getBaseData().id}
+					sourceId={this.props.data.getBaseData().id}
 				/>
 				<CommentDialog
 					postID={this.props.data.getBaseData().id}
