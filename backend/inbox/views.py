@@ -25,6 +25,10 @@ from authentication.models import ExternalNode
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.exceptions import ValidationError
 from utils.auth import authenticated
+from django.utils import timezone
+from utils.model_utils import generate_random_string
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 # Inbox
 # The inbox is all the new posts from who you follow
@@ -155,7 +159,6 @@ def handle_follow_request(request):
     auth = get_authorization_from_url(object["id"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
     if response.status_code > 202:
-
         return Response(response.text, status=response.status_code)
     return Response(status=response.status_code)
 
@@ -201,6 +204,35 @@ def handle_like(request):
     # add the object to the Author's likes
     Like.objects.create(author=author["id"], context=data["@context"], object=data["object"])
     return Response(status=response.status_code)
+
+
+@api_view(["POST"])
+@authenticated
+def handle_comment(request):
+
+    comment = {}
+    comment["type"] = "comment"
+    # sender is a local author
+    sender_id = request.data["senderAuthorURL"].split("/authors/")[1]
+    author = get_object_or_404(Author, id=sender_id, isAuthorized=True) # author is the sender
+    comment["author"] = AuthorSerializer(author).data
+    comment["content"] = request.data["comment"]
+    comment["contentType"] = "text/plain"
+    comment["published"] = json.dumps(timezone.now(), cls=DjangoJSONEncoder)
+    comment["id"] = request.data["postId"] + "/comments/" + str(generate_random_string())
+
+    # send a POST request to Inbox of the receiver Author
+    receiver_author_url = request.data["receiverAuthorURL"]
+    url = receiver_author_url + "/inbox" # TODO: Handle depending on whether team appends slash
+    if not url.startswith("https://social-distribution-404.herokuapp.com/"):
+        url+="/"
+    auth = get_authorization_from_url(receiver_author_url)
+    response = requests.post(url, json=comment, headers={'Authorization': auth})
+    if response.status_code > 202:
+        return Response(response.text, status=response.status_code)
+
+    return Response(status=status.HTTP_200_OK)
+
 
 
 
@@ -275,8 +307,7 @@ class InboxList(APIView):
             return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
 
 
-        if type.lower() == "like":
-
+        elif type.lower() == "like":
             context = request.data["@context"]
             object = request.data["object"]
             author_id = request.data["author"]["id"]
@@ -291,15 +322,24 @@ class InboxList(APIView):
                 post = get_object_or_404(Post, id=object.split("posts/")[-1])
             
             # save the like object to the db
-            like = Like.objects.create(author=author_id, context=context, object=object, post=post, comment=comment)
+            Like.objects.create(author=author_id, context=context, object=object, post=post, comment=comment)
+        
+        elif type.lower() == "comment":
+            post_url = request.data["id"].split("/comments")[0]
+            post_id = post_url.split("posts/")[1]
+            post = get_object_or_404(Post,id=post_id)
+            author = request.data["author"]
+            content = request.data["content"]
+
+            comment=Comment.objects.create(author=author,post=post,content=content)
 
         # save an inbox version of the 'like', 'follow' or 'comment'
-        try:
-            # avoid duplicate entries
-            Inbox.objects.get(author=author, data=request.data, dataType=type)
-        except Inbox.DoesNotExist:
-            inbox = author.inboxes.create(data=request.data, dataType=type)
-            return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
+        # try:
+        #     # avoid duplicate entries
+        #     Inbox.objects.get(author=author, data=request.data, dataType=type)
+        # except Inbox.DoesNotExist:
+        #     inbox = author.inboxes.create(data=request.data, dataType=type)
+        #     return Response({"id": inbox.id}, status=status.HTTP_201_CREATED)
         # if object already exists
         return Response(status=status.HTTP_200_OK)
 
