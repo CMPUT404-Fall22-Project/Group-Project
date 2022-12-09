@@ -21,7 +21,7 @@ export const LikeButton = (props) => {
 	const [buttonText, setButtonText] = useState("");
 	const userId = props.userId;
 	const author = props.author;
-	const postId = props.postId;
+	const sourceId = props.sourceId;
 
 	useEffect(() => {
 		handleButtonText();
@@ -33,7 +33,7 @@ export const LikeButton = (props) => {
 		if (response.status == 200) {
 			var likedArray = response.data.items;
 			// if this post is in the user's list of liked objects
-			if (likedArray.find((e) => e.object === postId)) {
+			if (likedArray.find((e) => e.object === sourceId)) {
 				setButtonText(liked);
 				return;
 			}
@@ -46,8 +46,8 @@ export const LikeButton = (props) => {
 		if (buttonText === like) {
 			var handleLikeResponse = await axios.post(process.env.REACT_APP_HOST + "handle-like/", {
 				senderAuthorURL: userId,
-				receiverAuthor: { url: author.getId(), displayName: author.getUsername() },
-				object: postId,
+				receiverAuthor: { url: getAuthorId(), displayName: getAuthorDisplayName() },
+				object: sourceId,
 			});
 			if (handleLikeResponse.status <= 201) {
 				NotificationBar.getInstance().addNotification("Liked!", NotificationBar.NT_SUCCESS);
@@ -56,6 +56,21 @@ export const LikeButton = (props) => {
 				NotificationBar.getInstance().addNotification(handleLikeResponse.err, NotificationBar.NT_ERROR);
 			}
 			return;
+		}
+	}
+
+	function getAuthorId() {
+		try {
+			return author.getId();
+		} catch (err) {
+			return author.id;
+		}
+	}
+	function getAuthorDisplayName() {
+		try {
+			author.getUsername();
+		} catch (err) {
+			return author.displayName;
 		}
 	}
 
