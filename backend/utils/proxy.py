@@ -61,8 +61,8 @@ def get_authorization_from_url(url):
         rootUrl = get_host_from_url(url)
         node = ExternalNode.objects.get(pk=rootUrl)
         return node.authorization
-    except:
-        raise BadRequest("Unable to find authorization details to contact external server")
+    except Exception as e:
+        raise BadRequest("Unable to find authorization details to contact external server "+str(e))
 
 
 def fetch_author(data):
