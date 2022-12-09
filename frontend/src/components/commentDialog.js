@@ -12,7 +12,7 @@ import axios from "axios";
 import NotificationBar from "../global/centralNotificationBar";
 
 const CommentDialog = (props) => {
-	const { postID, authorID, baseURL } = props;
+	const { userId, authorId, postId } = props;
 
 	const [open, setOpen] = React.useState(false);
 
@@ -27,10 +27,10 @@ const CommentDialog = (props) => {
 	};
 
 	const addComment = () => {
-		var comment = { authorId: authorID, content: commentText, contentType: "text/plain" };
+		var comment = { senderAuthorURL: userId, receiverAuthorURL: authorId, postId: postId, comment: commentText };
 		axios({
 			method: "post",
-			url: baseURL + "/comments/new/",
+			url: process.env.REACT_APP_HOST + "handle-comment/",
 			data: comment,
 		})
 			.then((res) => {

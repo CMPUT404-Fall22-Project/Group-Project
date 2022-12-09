@@ -10,9 +10,9 @@ def process_comments(comments):
     data = []
     parsed = CommentSerializer(comments, many=True).data
     for comment in parsed:
-        comment["id"] = get_host(
-        ) + f"authors/{comment['author']}/posts/{comment['post']}/comments/{comment['id']}"
-        comment["author"] = AuthorSerializer(fetch_author(comment["author"])).data
+        author_id = comment["author"]["url"]
+        post_id = author_id + "/posts/" + comment["post"]
+        comment["id"] = post_id + "/comments/" + comment["id"]
         del comment["post"]
         comment["comment"] = comment["content"]
         del comment["content"]
