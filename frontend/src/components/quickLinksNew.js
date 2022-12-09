@@ -27,10 +27,9 @@ export default function ViewPostTypes() {
 			history.push({ pathname: "/inbox/" });
 		} else if (index === 2) {
 			history.push({ pathname: "/posts/all/" });
+		} else if (index === 3) {
+			history.push({ pathname: "/github/" });
 		}
-		// else if (index === 3) {
-		// 	history.push({ pathname: "/github/" });
-		// }
 	};
 
 	const handleClose = () => {
