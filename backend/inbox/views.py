@@ -64,7 +64,9 @@ def send_to_all_followers(author: Author, data):
         author=author).values_list("follower", flat=True)
 
     for followerUrl in followerUrls:
-        url = followerUrl + "/inbox"  # TODO: Handle depending on whether team appends slash
+        url = followerUrl + "/inbox"
+        if not followerUrl.startswith("https://social-distribution-404.herokuapp.com/"):
+            url+="/"
         result = requests.post(url, serialized, headers={'Authorization': get_authorization_from_url(url)})
         if result.status_code >= 300:
             raise HTTPError(f"POST to server at {url} failed! msg={result.text}")
@@ -148,6 +150,8 @@ def handle_follow_request(request):
 
     # send a POST request to Inbox of the receiver Author
     url = object["id"] + "/inbox" # TODO: Handle depending on whether team appends slash
+    if not url.startswith("https://social-distribution-404.herokuapp.com/"):
+        url+="/"
     auth = get_authorization_from_url(object["id"])
     response = requests.post(url, json=data, headers={'Authorization': auth})
     if response.status_code > 202:
