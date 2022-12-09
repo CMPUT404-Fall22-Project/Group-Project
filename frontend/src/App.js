@@ -61,6 +61,10 @@ class App extends Component {
 							render={(props) => <GenericURLFeedView {...props} url={process.env.REACT_APP_HOST + "posts/all/"} />}
 						/>
 						<Route
+							path="/github/"
+							render={(props) => <GenericURLFeedView {...props} url={process.env.REACT_APP_HOST + "github/"} />}
+						/>
+						<Route
 							path="/authors/:id"
 							render={(props) => {
 								if (!props.location.state) {
