@@ -8,7 +8,7 @@ import history from "../history";
 
 // https://mui.com/material-ui/react-menu/
 // https://stackoverflow.com/a/69910433
-const options = ["My Posts", "My Inbox", "Public Posts"];
+const options = ["My Posts", "My Inbox", "Public Posts", "My Github"];
 
 export default function ViewPostTypes() {
 	const [anchorEl, setAnchorEl] = React.useState(null);
@@ -27,6 +27,8 @@ export default function ViewPostTypes() {
 			history.push({ pathname: "/inbox/" });
 		} else if (index === 2) {
 			history.push({ pathname: "/posts/all/" });
+		} else if (index === 3) {
+			history.push({ pathname: "/github/" });
 		}
 	};
 
