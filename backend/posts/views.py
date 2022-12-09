@@ -163,7 +163,7 @@ class PostList(APIView):
         if not "origin" in data:
             data["origin"] = get_host() + "authors/" + authorId + "/posts/" + postId
         if not "comments" in data:
-            data["comments"] = get_host() + "authors/" + authorId + "/posts/" + postId + "/comments"
+            data["comments"] = get_host() + "authors/" + authorId + "/posts/" + postId + "/comments/"
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
