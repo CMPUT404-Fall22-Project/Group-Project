@@ -69,14 +69,18 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
     'http://localhost:3000',
     'https://team-sixteen-social-scene.herokuapp.com',
-    'https://social-distribution-404.herokuapp.com'
+    'https://social-distribution-404.herokuapp.com',
+    'http://fallsocialuahank.herokuapp.com',
+    'https://cs404-project.herokuapp.com'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:3000',
     'http://localhost:3000',
     'https://team-sixteen-social-scene.herokuapp.com',
-    'https://social-distribution-404.herokuapp.com'
+    'https://social-distribution-404.herokuapp.com',
+    'http://fallsocialuahank.herokuapp.com',
+    'https://cs404-project.herokuapp.com'
 ]
 
 REST_FRAMEWORK = {
