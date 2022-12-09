@@ -41,7 +41,7 @@ class AllAuthorList(APIView):
             nodes = ExternalNode.objects.exclude(host=get_host())
             authors = []
             for node in nodes:
-                authors_url =  node.api + "authors/"
+                authors_url =  node.api + "authors"
                 response = requests.get(authors_url, headers={'Authorization': node.authorization})
                 if response.status_code >= 300:
                     print(f'authors/all -> {authors_url}: HTTP{response.status_code} - {response.text}\n') # print the error
