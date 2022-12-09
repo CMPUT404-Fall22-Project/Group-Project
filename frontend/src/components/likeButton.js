@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import cn from "classnames";
 import NotificationBar from "../global/centralNotificationBar";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import Loader from "../components/loader";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Button } from "@mui/material";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import { IconButton } from "@mui/material";
 
 const theme = createTheme({
 	palette: {
@@ -79,9 +79,15 @@ export const LikeButton = (props) => {
 	) : (
 		<span>
 			<ThemeProvider theme={theme}>
-				<Button size="small" variant="contained" onClick={handleButtonClick} disabled={buttonText === liked}>
-					{buttonText}
-				</Button>
+				<IconButton
+					aria-label="Like"
+					title="Like above post"
+					type="button"
+					onClick={handleButtonClick}
+					disabled={buttonText === liked}
+				>
+					<ThumbUpIcon />
+				</IconButton>
 			</ThemeProvider>
 		</span>
 	);
