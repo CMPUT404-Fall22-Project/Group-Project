@@ -1,4 +1,4 @@
-import { Backdrop, Button, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import React, { Component } from "react";
 import Post from "../data/containers/post";
 import PaginatedProvider, { GenericElementProvider } from "../data/paginatedProvider";
@@ -11,6 +11,10 @@ import { FollowRequestButton } from "./follows/sendFollowRequest";
 // import { LikesMenuItem } from "./viewLike";
 // import { LikeButton } from "./likeButton";
 import Loader from "./loader";
+import axios from "axios";
+import GithubEvent from "../data/containers/githubEvent";
+import { tryStringifyObject } from "../utils/stringify";
+import GithubEventComponent from "./githubEvents/githubEvent";
 
 export class GenericURLFeedComponenet extends Component {
 	constructor(props) {
@@ -57,6 +61,9 @@ export class GenericURLFeedComponenet extends Component {
 	}
 
 	morePostsButton() {
+		if (this.props.noLoad) {
+			return null;
+		}
 		var text = "Load more posts...";
 		if (this.state.hasAllPosts) {
 			text = "All posts loaded!";
@@ -105,6 +112,50 @@ export class GenericURLFeedComponenet extends Component {
 					</div>
 				))}
 				{this.morePostsButton()}
+			</div>
+		);
+	}
+}
+
+export class GithubFeedComponent extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			events: [],
+			loading: true,
+		};
+	}
+
+	componentDidMount() {
+		return axios({
+			method: "get",
+			url: this.props.url,
+			headers: {
+				Authorization: undefined,
+			},
+		})
+			.then((res) => {
+				this.setState({ events: res.data.map((x) => GithubEvent.parseDatabase(x)), loading: false });
+			})
+			.catch((err) => {
+				NotificationBar.getInstance().addNotification(tryStringifyObject(err), NotificationBar.NT_ERROR, 15_000);
+			});
+	}
+
+	render() {
+		if (this.state.loading) {
+			return (
+				<div>
+					<i>Loading...</i>
+					<Loader></Loader>
+				</div>
+			);
+		}
+		return (
+			<div>
+				{this.state.events.map((x, idx) => (
+					<GithubEventComponent data={x} key={"Post#" + String(idx)}></GithubEventComponent>
+				))}
 			</div>
 		);
 	}

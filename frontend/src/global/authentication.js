@@ -96,8 +96,9 @@ export default class Authentication {
 	_setLoginData(author, token) {
 		cookies.set(Authentication.ID_COOKIE_AUTHOR, author);
 		this._userData = Author.parseDatabase(author);
-
-		cookies.set(Authentication.ID_COOKIE_TOKEN, token);
+		if (token) {
+			cookies.set(Authentication.ID_COOKIE_TOKEN, token);
+		}
 
 		this._notifyAuthChangedListeners(true);
 	}

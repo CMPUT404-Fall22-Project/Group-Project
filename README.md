@@ -15,6 +15,11 @@ Team 19: https://github.com/CMPUT404Project/social-distribution
 
 <br/>
 
+# Demo Video
+[![Demo Video Link](https://img.youtube.com/vi/fbk5VAsZHrk/maxresdefault.jpg)](https://www.youtube.com/watch?v=fbk5VAsZHrk)
+
+<br/>
+
 # Public Deployment
 Frontend: https://team-sixteen-social-scene.herokuapp.com  
 Backend: https://team-sixteen.herokuapp.com  

@@ -12,7 +12,7 @@ urlpatterns = [
     path("authors/<author_id>/posts/<post_id>", PostDetail.as_view(), name="post_detail"),
     # comments
     path("authors/<author_id>/posts/<post_id>/comments/", CommentList.as_view(), name="comment_list"),
-    path("authors/<author_id>/posts/<post_id>/comments/new/", add_new_comment, name="comment_list"),
+    path("authors/<author_id>/posts/<post_id>/comments/new/", add_new_comment, name="comment_list1"),
     # likes
     path("authors/<author_id>/liked/", LikedList.as_view(), name="liked_list"),
     path("authors/<author_id>/posts/<post_id>/likes/", PostLikeList.as_view(), name="post_like_list"),
