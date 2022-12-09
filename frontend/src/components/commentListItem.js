@@ -4,6 +4,8 @@ import Typography from "@mui/material/Typography";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItem from "@mui/material/ListItem";
+import { LikeButton } from "./likeButton";
+import Authentication from "../global/authentication";
 
 // https://levelup.gitconnected.com/fetch-api-data-with-axios-and-display-it-in-a-react-app-with-hooks-3f9c8fa89e7b
 
@@ -29,6 +31,11 @@ export default function CommentListItem(props) {
 								</React.Fragment>
 							}
 						/>
+						<LikeButton
+							author={comment.author}
+							userId={Authentication.getInstance().getUser().getId()}
+							sourceId={comment.id}
+						></LikeButton>
 					</ListItem>
 				);
 			});
