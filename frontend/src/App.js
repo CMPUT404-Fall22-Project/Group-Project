@@ -12,6 +12,7 @@ import Authentication from "./global/authentication";
 import MainFeed, { GenericURLFeedView } from "./pages/feeds";
 import EditProfile from "./components/editProfile";
 import ModalSystem from "./global/modalSystem";
+import GithubEvents from "./components/githubEvents";
 
 class App extends Component {
 	static _ERROR_DATA = [];
@@ -60,10 +61,10 @@ class App extends Component {
 							path="/posts/all/"
 							render={(props) => <GenericURLFeedView {...props} url={process.env.REACT_APP_HOST + "posts/all/"} />}
 						/>
-						<Route
+						{/* <Route
 							path="/github/"
-							render={(props) => <GenericURLFeedView {...props} url={process.env.REACT_APP_HOST + "github/"} />}
-						/>
+							render={(props) => <GithubEvents {...props} url={process.env.REACT_APP_HOST + "github/"} />}
+						/> */}
 						<Route
 							path="/authors/:id"
 							render={(props) => {
