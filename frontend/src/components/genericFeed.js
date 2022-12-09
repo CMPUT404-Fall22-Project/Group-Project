@@ -124,7 +124,7 @@ export default class FeedComponent extends GenericURLFeedComponenet {
 			loading: true,
 			loadingMorePosts: false,
 		};
-		this.postSupplier = new PaginatedProvider(new GenericElementProvider(`${this.props.authorId}/posts/`));
+		this.postSupplier = new PaginatedProvider(new GenericElementProvider(`${this.props.authorId}/posts`));
 		this.postSupplier.listen((success, data) => {
 			if (success) {
 				const formatted = data.map((x) => Post.parseDatabase(x));
