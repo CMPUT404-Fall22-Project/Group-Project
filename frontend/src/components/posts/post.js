@@ -10,11 +10,17 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import Authentication from "../../global/authentication";
 import ModalTemplates from "../modals/genericModalTemplates";
 import axios from "axios";
+import CommentDialog from "./../commentDialog";
+import ScrollDialog from "../commentViewDialog";
 import { CommentList } from "../comments/comment";
 import { renderPublishDate } from "../../utils/renderHelpers";
 import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import NotificationBar from "../../global/centralNotificationBar";
 import { tryStringifyObject } from "../../utils/stringify";
+import { LikeButton } from "../likeButton";
+import { LikesMenuItem } from "../viewLike";
+import ShareIcon from "@mui/icons-material/Share";
+import SharePostDialog from "../sharePostDialog";
 
 export default class PostViewComponent extends Component {
 	constructor(props) {
@@ -116,11 +122,13 @@ export class EditablePostContainer extends Component {
 	}
 
 	tryDeletePost() {
-		ModalTemplates.confirm("Delete Post?", "Are you sure you want to delete this post?").then(() => {
-			axios({
-				method: "delete",
-				url: this.props.data.getBaseData().origin,
-			}).then(() => window.location.reload());
+		ModalTemplates.confirm("Delete Post?", "Are you sure you want to delete this post?").then((result) => {
+			if (result === ModalTemplates.RESULT_SUCCESS) {
+				axios({
+					method: "delete",
+					url: this.props.data.getBaseData().origin,
+				}).then(() => window.location.reload());
+			}
 		});
 	}
 
@@ -137,15 +145,37 @@ export class EditablePostContainer extends Component {
 				></PostEditor>
 			);
 		} else {
-			comp = (
-				<PostViewComponent data={this.props.data}>
-					<CommentList post={this.props.data}></CommentList>
-				</PostViewComponent>
-			);
+			comp = <PostViewComponent data={this.props.data}></PostViewComponent>;
 		}
 
 		if (!this.isEditable()) {
-			return comp;
+			return (
+				<div>
+					{comp}
+					<LikesMenuItem
+						// key="likes"
+						// variant="outlined"
+						authorId={this.props.data.getBaseData().author.id}
+						userId={Authentication.getInstance().getUser().getId()}
+						postId={this.props.data.getBaseData().id}
+					></LikesMenuItem>
+					<LikeButton
+						author={this.props.data.getBaseData().author}
+						userId={Authentication.getInstance().getUser().getId()}
+						sourceId={this.props.data.getBaseData().id}
+					/>
+					<CommentDialog
+						postID={this.props.data.getBaseData().id}
+						authorID={Authentication.getInstance().getUser().getId()}
+						baseURL={this.props.data.getBaseData().origin}
+					/>
+					<ScrollDialog baseURL={this.props.data.getBaseData().origin} comments={this.props.data.getComments()} />
+					<SharePostDialog
+						post={this.props.data.getBaseData()}
+						author={Authentication.getInstance().getUser().getId()}
+					/>
+				</div>
+			);
 		}
 
 		return (
@@ -158,9 +188,28 @@ export class EditablePostContainer extends Component {
 				>
 					<ModeEditOutlineOutlinedIcon />
 				</IconButton>
-				<IconButton aria-label="Follow" title="Delete above post" onClick={this.tryDeletePost.bind(this)}>
+				<IconButton aria-label="Delete" title="Delete above post" onClick={this.tryDeletePost.bind(this)}>
 					<DeleteOutlineOutlinedIcon />
 				</IconButton>
+				<LikesMenuItem
+					// key="likes"
+					// variant="outlined"
+					authorId={this.props.data.getBaseData().author.id}
+					userId={Authentication.getInstance().getUser().getId()}
+					postId={this.props.data.getBaseData().id}
+				></LikesMenuItem>
+				<LikeButton
+					author={this.props.data.getBaseData().author}
+					userId={Authentication.getInstance().getUser().getId()}
+					sourceId={this.props.data.getBaseData().id}
+				/>
+				<CommentDialog
+					postID={this.props.data.getBaseData().id}
+					authorID={Authentication.getInstance().getUser().getId()}
+					baseURL={this.props.data.getBaseData().origin}
+				/>
+				<ScrollDialog baseURL={this.props.data.getBaseData().origin} comments={this.props.data.getComments()} />
+				<SharePostDialog post={this.props.data.getBaseData()} author={Authentication.getInstance().getUser().getId()} />
 			</React.Fragment>
 		);
 	}

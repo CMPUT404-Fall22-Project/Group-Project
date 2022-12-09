@@ -8,7 +8,7 @@ import NotificationBar from "../global/centralNotificationBar";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import history from "../history";
-
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 // Enables user to navigate another Author's page via search
 // Select component is auto-filled with the names of all authorized authors
 
@@ -85,11 +85,14 @@ export default function AuthorSearch() {
 								...params.InputProps,
 								type: "search",
 							}}
+							sx={{
+								paddingLeft: "0.25em",
+							}}
 						/>
 					)}
 				/>
 				<IconButton aria-label="Options" title="See Options" disabled={!authorId} onClick={handleButtonClick}>
-					<MoreVertOutlinedIcon />
+					<ExpandMoreIcon style={{ color: "white" }} />
 				</IconButton>
 				<Menu
 					id="long-menu"
