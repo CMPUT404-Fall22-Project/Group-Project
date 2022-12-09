@@ -17,7 +17,7 @@ export default function CommentsListDialog(props) {
 	const axiosGetComments = () => {
 		axios({
 			method: "get",
-			url: baseURL + "/comments",
+			url: baseURL + "/comments/",
 		}).then(function (response) {
 			const allComments = response.data.items;
 			getComments(allComments);
