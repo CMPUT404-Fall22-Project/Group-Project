@@ -165,9 +165,9 @@ export class EditablePostContainer extends Component {
 						sourceId={this.props.data.getBaseData().id}
 					/>
 					<CommentDialog
-						postID={this.props.data.getBaseData().id}
-						authorID={Authentication.getInstance().getUser().getId()}
-						baseURL={this.props.data.getBaseData().origin}
+						userId={Authentication.getInstance().getUser().getId()}
+						authorId={this.props.data.getBaseData().author.getId()}
+						postId={this.props.data.getBaseData().id}
 					/>
 					<ScrollDialog baseURL={this.props.data.getBaseData().origin} comments={this.props.data.getComments()} />
 					<SharePostDialog
@@ -204,9 +204,9 @@ export class EditablePostContainer extends Component {
 					sourceId={this.props.data.getBaseData().id}
 				/>
 				<CommentDialog
-					postID={this.props.data.getBaseData().id}
-					authorID={Authentication.getInstance().getUser().getId()}
-					baseURL={this.props.data.getBaseData().origin}
+					userId={Authentication.getInstance().getUser().getId()}
+					authorId={this.props.data.getBaseData().author.getId()}
+					postId={this.props.data.getBaseData().id}
 				/>
 				<ScrollDialog baseURL={this.props.data.getBaseData().origin} comments={this.props.data.getComments()} />
 				<SharePostDialog post={this.props.data.getBaseData()} author={Authentication.getInstance().getUser().getId()} />
